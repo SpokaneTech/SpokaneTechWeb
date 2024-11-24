@@ -1,0 +1,13 @@
+on: [push]
+
+jobs:
+  black:
+    runs-on: ubuntu-latest
+    name: "black"
+    steps:
+      - uses: davidslusser/actions_python_black@v1.0.1
+        with:
+          src: "src/django_project"
+          options: "--check"
+          pip_install_command: "pip install .[dev]"
+          python_version: "3.11"

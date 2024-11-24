@@ -1,0 +1,12 @@
+on: [push]
+
+jobs:
+  isort:
+    runs-on: ubuntu-latest
+    name: "isort"
+    steps:
+      - uses: davidslusser/actions_python_isort@v1.0.1
+        with:
+          src: "src/django_project"
+          options: "--check --diff"
+          python_version: "3.11"

@@ -1,0 +1,13 @@
+on: [push]
+
+jobs:
+  ruff:
+    runs-on: ubuntu-latest
+    name: "ruff"
+    steps:
+      - name: actions_python_ruff
+        uses: davidslusser/actions_python_ruff@v1.0.1
+        with:
+            src: "src/django_project"
+            options: "-v"
+            python_version: "3.11"

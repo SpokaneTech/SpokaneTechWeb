@@ -1,0 +1,29 @@
+#!/bin/bash
+
+printf "INFO: Starting pre-commit checks\n"
+
+RETURN_CODE=0
+
+for ((i=0; i<80; i++)); do
+    repeated_string="${repeated_string}."
+done
+
+function run_checks {
+    "$@" &> /dev/null
+    local status=$?
+    if [ "$status" -eq 0 ]; then
+        printf "%s %s [\033[0;32mPASS\033[0m]\n" $1 "${repeated_string:${#1}}"
+    else
+        printf "%s %s [\033[0;31mFAIL\033[0m]\n" $1 "${repeated_string:${#1}}"
+        RETURN_CODE=1
+    fi
+}
+
+# add pre-commit commands here
+run_checks bandit src -c pyproject.toml -r
+run_checks black src
+run_checks isort src
+run_checks mypy src
+run_checks ruff src
+
+exit $RETURN_CODE 
