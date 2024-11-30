@@ -24,6 +24,6 @@ run_checks bandit src -c pyproject.toml -r
 run_checks black src
 run_checks isort src
 run_checks mypy src
-run_checks ruff src
+run_checks ruff check src
 
 exit $RETURN_CODE 

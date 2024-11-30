@@ -1,0 +1,28 @@
+<section class="detail fade-in-blur" style="--fade-duration: .3s;">
+    <h1>{{ object.icon|safe }}</h1>
+    <h1>{{ object.name }}</h1>
+</section>
+
+<section class="fade-in-blur" style="--fade-duration: .5s;">
+    <div class="homepage">
+        {% if object.homepage %}
+        <a href="{{ object.homepage }}">{{ object.homepage }}</a>
+        {% endif %}
+    </div>
+</section>
+
+<section class="fade-in-blur" style="--fade-duration: .75s;">
+    <div class="tag-container mb-4">
+        {% for tag in object.tags.all %}
+        <span class="tag">{{ tag.value }}</span>
+        {% endfor %}
+    </div>
+    <div class="description">
+        {% if object.description %}
+        {{ object.description }}
+        {% else %}
+        <i>No description</i>
+        {% endif %}        
+    </div>
+</section>
+    

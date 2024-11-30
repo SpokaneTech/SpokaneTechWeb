@@ -1,0 +1,9 @@
+{% for row in queryset %}
+<div class="itemLeft card"
+    hx-get="{% url 'web:techgroup_modal' row.pk %}"
+    hx-target="#modal_wrapper"
+    data-bs-toggle="modal"
+    data-bs-target="#modal_wrapper"
+>{{ row.name }}</div>
+
+{% endfor %}

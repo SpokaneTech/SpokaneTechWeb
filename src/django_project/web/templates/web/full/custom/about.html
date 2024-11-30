@@ -1,0 +1,6 @@
+{% extends BASE_TEMPLATE|default:"base.htm" %}
+
+{% block main_content %}
+    <main id="body_main" hx-get="{% url 'web:about' %}" hx-push-url="{% url 'web:about' %}" hx-trigger="load"> 
+    </main>
+{% endblock main_content %}

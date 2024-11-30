@@ -1,28 +1,19 @@
 [project]
 dependencies = [
     "django",
-    "django-auditlog==2.2.0",
     "django-braces",
-    "django-debug-toolbar",
     "django-environ",
     "django-extensions",
     "django-filter",
     "django-handyhelpers",
-    "django-hostutils",
-    "django-userextensions",
-    "django-pygwalker",
-    "django-signalcontrol",
-    "djangorestframework",
-    "djangorestframework-filters==1.0.0.dev0",
-    "drf-flex-fields",
-    "drf-spectacular",
-    "drf-renderer-xlsx",
+    "requests>=2.26.0",
+    "pillow",
 ]
-description = "django project created from djangoaddicts django_project_template"
+description = "Inland Northwest Tech Community"
 dynamic = ["version"]
 keywords = ["django"]
 license = {file = "LICENSE"}
-name = "my_django_project"
+name = "SpokaneTech"
 readme = "README.md"
 requires-python = ">=3.8"
 
@@ -32,6 +23,8 @@ dev = [
     "bandit",
     "black",
     "coveralls",
+    "django-debug-toolbar",
+    "faker",
     "isort",
     "model-bakery",
     "mypy",
@@ -48,7 +41,12 @@ dev = [
 
 
 [tool.bandit]
-exclude_dirs = ["venv", "django_project/tests", "django_project/*/management/commands"]
+exclude_dirs = [
+    "venv", 
+    "src/django_project/tests", 
+    "src/django_project/*/management/commands",
+    "src/django_project/*/scripts/*"
+    ]
 
 
 [tool.black]
@@ -76,7 +74,11 @@ profile = "black"
 
 
 [tool.mypy]
-exclude = ["venv/*", "^django_project/*/migrations/*"]
+exclude = [
+    "venv/*", 
+    "src/django_project/.*/migrations/.*",
+    "src/django_project/.*/scripts/.*"
+    ]
 ignore_missing_imports = true
 
 

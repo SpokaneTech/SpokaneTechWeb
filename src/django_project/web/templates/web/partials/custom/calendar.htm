@@ -1,0 +1,134 @@
+<section class="about">
+    <h1 class="fade-in-blur mb-2" style="--fade-duration: 0.3s;">{{ title }}</h1>
+    <h4 class="text-primary fade-in-blur" style="--fade-duration: 0.4s;">{{ month_name }} {{ year }}</h1>
+</section>    
+
+<div id="calendar-wrapper" class="calendar-container">
+    <style>
+        .calendar-table {
+            box-shadow: 0rem 0.25rem 1rem -0.25rem var(--accent-color);
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed; 
+        }
+        .calendar-table th,
+        .calendar-table td {
+        border: 1px solid var(--accent-color); /* Adds a thin, light gray border around each cell */
+        padding: .5rem; /* Optional: Adds some padding inside the cells for better spacing */
+        }
+
+        /* Optional: Adds a slight hover effect to table rows */
+        /* .calendar-table tr:hover {
+        background-color: var(--accent-color);
+        } */
+
+        .calendar-table thead {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        .calendar-table thead tr {
+            height: 3rem;
+        }
+        .calendar-table tbody {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .calendar-table tbody tr {
+            height: 4rem;
+        }
+        .calendar-table tbody tr td {
+            vertical-align: top;
+        }
+        .today {
+            color: var(--accent-color);
+            font-weight: bold;
+            text-decoration: underline;
+        }
+        .cursor-pointer {
+            cursor: pointer;
+        }
+        .event {
+            border: 1px solid var(--accent-color);
+            margin: .75rem;
+            border-radius: .25rem;
+            background-color: rgba(255, 255, 255, 0.3);
+            transition: transform 0.3s ease; /* Smooth transition effect for the transform */
+        }
+        .event:hover {
+            transform: scale(1.1); /* Scales the element to 1.1 times its original size */
+        }
+        .nav-links {
+            margin-bottom: .5rem;
+        }
+    </style>  
+
+    <div class="container-fluid fade-in-blur" style="--fade-duration: .5s;">
+        <div class="text-end nav-links">
+            <a 
+            {% if use_htmx %}
+            hx-get="{{ today_url }}" hx-target="#body_main"
+            {% else %}
+            href="{{ today_url }}" 
+            {% endif %}
+            class="me-3" style="text-decoration: none">
+                today
+            </a>
+            <a 
+            {% if use_htmx %}
+            hx-get="{{ prev_month_url }}" hx-target="#body_main"
+            {% else %}
+            href="{{ prev_month_url }}"
+            {% endif %}
+            class="me-2" title="previous month">
+                <i class="fa-solid fa-angle-left"></i>
+            </a>
+            <a 
+            {% if use_htmx %}
+            hx-get="{{ next_month_url }}" hx-target="#body_main"
+            {% else %}
+            href="{{ next_month_url }}"
+            {% endif %}
+            class="ms-2" title="next month">
+                <i class="fa-solid fa-angle-right"></i>
+            </a>
+        </div>
+        <table class="calendar-table">
+            <thead>
+                <tr class="">
+                    <th class="calendar-table-header" scope="col">Mon</th>
+                    <th class="calendar-table-header" scope="col">Tue</th>
+                    <th class="" scope="col">Wed</th>
+                    <th class="" scope="col">Thu</th>
+                    <th class="" scope="col">Fri</th>
+                    <th class="" scope="col">Sat</th>
+                    <th class="" scope="col">Sun</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for week in cal_data %}
+                    <tr>
+                    {% for day in week %}
+                        <td {% if day == today.day and month == today.month and year == today.year %}class="today"{% endif %}>
+                            {% if day %}
+                            <div class="text-end {% if day == today.day and month == today.month and year == today.year %}fw-bold{% endif %}">{{ day }}</div>
+                            {%endif%}
+                            {% for event in event_list %}
+                                {% if event.date_time.day == day and event.date_time.month == month and event.date_time.year == year %}   
+                                    {% if event_detail_url %}
+                                <div class="event hvr-grow d-block cursor-pointer"
+                                hx-get="{% url event_detail_url event.pk %}"
+                                hx-target="#modal_wrapper"
+                                data-bs-toggle="modal"
+                                data-bs-target="#modal_wrapper">{{ event }}
+                                </div>
+                                    {% else %}
+                                    <div class="event">{{ event }}</div>
+                                    {% endif %}
+                                {% endif %}
+                            {% endfor %}
+                        </td>
+                    {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

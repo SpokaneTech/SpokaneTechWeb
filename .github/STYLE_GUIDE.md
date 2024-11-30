@@ -1,29 +1,15 @@
-# Project Style Guide
+# Style Guide
 
 This Python style guide provides conventions and best practices for writing clean and maintainable Python code. Adhering to these guidelines will help ensure consistency across projects and enhance the clarity, maintainability, 
 and readability of the code.
-
-## Table of Contents
-- [PEP 8](#pep-8)
-- [Line Length](#line-length)
-- [Naming Conventions](#naming-conventions)
-- [Docstrings](#docstrings)
-- [Typing](#typing)
-- [Virtual Environments](#virtual-environments)
-
-<br/>
 
 ## PEP 8
 
 Adhere to the PEP 8 style guide, which is the style guide for Python code. Please make sure to familiarize yourself with PEP 8 guidelines: [PEP 8 -- Style Guide for Python Code](https://www.python.org/dev/peps/pep-0008/).
 
-<br/>
-
 ## Line Length
 
 The maximum line length for code and comments is set to 120 characters. This allows for better readability without excessively long lines.
-
-<br/>
 
 ## Naming Conventions
 
@@ -31,36 +17,32 @@ The maximum line length for code and comments is set to 120 characters. This all
 - Class names should follow the CamelCase convention.
 - Class names should be descriptive and represent a clear concept or object.
 
-    Example:
+```python linenums="1" hl_lines="1"
+class Calculator:
+    def __init__(self):
+        # Constructor implementation
 
-    ```python
-    class Calculator:
-        def __init__(self):
-            # Constructor implementation
-
-        def add(self, x, y):
-            # Method implementation
-    ```
+    def add(self, x, y):
+        # Method implementation
+```
 
 ### Functions
 - Function names should be lowercase, with words separated by underscores.
 - Function names should begin with a verb to indicate the action or operation they perform.
 
-    Examples: 
+```python linenums="1" hl_lines="1 5 9"
+def calculate_sum(numbers):
+    """Calculate the sum of a list of numbers."""
+    # Function implementation
 
-    ```python
-    def calculate_sum(numbers):
-        """Calculate the sum of a list of numbers."""
-        # Function implementation
+def validate_input(user_input):
+    """Validate user input and return True if valid, False otherwise."""
+    # Function implementation
 
-    def validate_input(user_input):
-        """Validate user input and return True if valid, False otherwise."""
-        # Function implementation
-
-    def process_data(data):
-        """Process the given data and return the result."""
-        # Function implementation
-    ```
+def process_data(data):
+    """Process the given data and return the result."""
+    # Function implementation
+```
 
 ### Variables
 Choosing meaningful and consistent variable names is essential for code readability. Follow these conventions:
@@ -68,54 +50,44 @@ Choosing meaningful and consistent variable names is essential for code readabil
 - Use lowercase letters with underscores for variable names (snake_case).
 - Be descriptive and use meaningful names to indicate the purpose of the variable.
 
-    Examples:
+```python linenums="1"
+# Good variable names
+user_name = "John"
+num_items = 5
+total_amount = 100.50
 
-    ```python
-    # Good variable names
-    user_name = "John"
-    num_items = 5
-    total_amount = 100.50
-
-    # Avoid ambiguous or single-letter names
-    a = "John"  # Not recommended
-    n = 5       # Not recommended
-    ```
+# Avoid ambiguous or single-letter names
+a = "John"  # Not recommended
+n = 5       # Not recommended
+```
 
 
 - Constants should be in uppercase with underscores.
 
-    Examples:
-
-    ```python
-    MAX_RETRIES = 3
-    PI = 3.14159
-    ```
+```python linenums="1"
+MAX_RETRIES = 3
+PI = 3.14159
+```
 
 - Avoid using names that shadow built-in functions or keywords.
 
-    Example:
+```python linenums="1"
+# Bad: Don't use 'list' as a variable name
+list = [1, 2, 3]
 
-    ```python
-    # Bad: Don't use 'list' as a variable name
-    list = [1, 2, 3]
-
-    # Good: Choose a different name
-    my_list = [1, 2, 3]
-    ```
+# Good: Choose a different name
+my_list = [1, 2, 3]
+```
 
 - Use meaningful prefixes and suffixes for variable names where applicable.
 
-    Example:
+```python linenums="1"
+# Prefix 'is_' for boolean variables
+is_valid = True
 
-    ```python
-    # Prefix 'is_' for boolean variables
-    is_valid = True
-
-    # Suffix iterators with type (such as '_list')
-    name_list = ["John", "Mary", "Robert", "Sue"]
-    ```
-
-<br/>
+# Suffix iterators with type (such as '_list')
+name_list = ["John", "Mary", "Robert", "Sue"]
+```
 
 ## Docstrings
 
@@ -125,192 +97,161 @@ Documenting your code is crucial for understanding its functionality and usage. 
 - Include a module-level docstring at the beginning of each Python file.
 - Use triple double-quotes for multi-line docstrings.
 
-    Example:
+```python linenums="1" hl_lines="1-4"
+"""Module-level docstring.
 
-    ```python
-    """Module-level docstring.
+This module provides utility functions for handling calculations.
+"""
 
-    This module provides utility functions for handling calculations.
-    """
-
-    # Rest of the module code
-    ```
+# Rest of the module code
+```
 
 ### Class Docstring
 - Include a class-level docstring immediately below the class definition.
 - Briefly describe the purpose and usage of the class.
 
-    Example:
+```python linenums="1" hl_lines="2-5"
+class Calculator:
+    """A simple calculator class.
 
-    ```python
-    class Calculator:
-        """A simple calculator class.
+    This class provides basic arithmetic operations such as addition and subtraction.
+    """
 
-        This class provides basic arithmetic operations such as addition and subtraction.
-        """
-
-        def __init__(self):
-            # Constructor implementation
-    ```
+    def __init__(self):
+        # Constructor implementation
+```
 
 ### Function Docstring
 - Include a function-level docstring immediately below the function definition.
 - Provide a clear description of the function's purpose, parameters, and return values.
 
-    Example:
+```python linenums="1" hl_lines="2-9"
+def calculate_sum(numbers):
+    """Calculate the sum of a list of numbers.
 
-    ```python
-    def calculate_sum(numbers):
-        """Calculate the sum of a list of numbers.
+    Args:
+        numbers (list): A list of numerical values.
 
-        Args:
-            numbers (list): A list of numerical values.
+    Returns:
+        float: The sum of the input numbers.
+    """
+    # Function implementation
 
-        Returns:
-            float: The sum of the input numbers.
-        """
-        # Function implementation
-
-    ```
-
-<br/>
+```
 
 ## Typing
 Python's optional type hints, introduced in PEP 484 and expanded in subsequent PEPs, provide a way to statically indicate the type of variables and function parameters. Proper use of typing can enhance code readability, maintainability, and catch certain types of errors early in the development process.
 
 ### General Guidelines
-1. **Use Type Hints:**
 
-    Type hints should be used consistently to indicate the expected types of variables and function parameters.
+#### 1. Use Type Hints
 
-    Example:
-    
-    ```python
-    def add_numbers(a: int, b: int) -> int:
-        return a + b
-    ```
+Type hints should be used consistently to indicate the expected types of variables and function parameters.
 
-2. **Avoid Redundant Type Hints:**
+```python linenums="1" hl_lines="1"
+def add_numbers(a: int, b: int) -> int: # (1)!
+    return a + b
+```
 
-    Avoid providing type hints when the type is obvious from the variable name or the context.
+1.  There is a function parameter type hint: `: int` and a function return type type hint: `-> int`.
 
-    Example:
-    
-    ```python
-    # Good
-    name: str = "John"
+#### 2. Avoid Redundant Type Hints:
 
-    # Avoid unnecessary type hint
-    age = 30  # Type is clear without specifying it
-    ```
+Avoid providing type hints when the type is obvious from the variable name or the context.
 
-3. **Use Expressive Variable Names:**
+```python linenums="1"
+# Bad
+name: str = "John"
 
-    Choose variable names that convey meaning and make type hints redundant.
+# Good
+age = 30  # Type is clear without specifying it
+```
 
-    Example:
+#### 3. Use Expressive Variable Names
 
-    ```python
-    def calculate_area(length: float, width: float) -> float:
-        return length * width
-    ```
+Choose variable names that convey meaning and make type hints redundant.
 
-4. **Be Consistent with Typing Styles:**
+```python linenums="1"
+def calculate_area(length: float, width: float) -> float:
+    return length * width
+```
 
-    Choose a consistent style for type hints, either using the ```:``` notation or the ```->``` notation for function return types.
+#### 4. Be Consistent with Typing Styles
 
-    Example:
+Choose a consistent style for type hints, either using the ```:``` notation or the ```->``` notation for function return types.
 
-    ```python
-    # Consistent style with `:`
-    def greet(name: str):
-        print(f"Hello, {name}!")
+```python linenums="1"
+# Consistent style with `:`
+def greet(name: str):
+    print(f"Hello, {name}!")
 
-    # Consistent style with `->`
-    def multiply(a: int, b: int) -> int:
-        return a * b
-    ```
+# Consistent style with `->`
+def multiply(a: int, b: int) -> int:
+    return a * b
+```
 
 ### Specific Typing Practices
 
-1. **Type Annotations for Variables:**
+#### 1. Type Annotations for Variables
 
-    Use type annotations for variables, especially in cases where the type might not be immediately obvious.
+Use type annotations for variables, especially in cases where the type might not be immediately obvious.
 
-    Example:
+```python linenums="1"
+count: int = 0
+```
 
-    ```python
-    count: int = 0
-    ```
+#### 2. Type Annotations for Function Parameters and Return Types
 
-2. **Type Annotations for Function Parameters and Return Types:**
+Clearly annotate the types of function parameters and return types.
 
-    Clearly annotate the types of function parameters and return types.
+```python linenums="1"
+def calculate_total(items: List[float]) -> float:
+    return sum(items)
+```
 
-    Example:
+#### 3. Type Aliases
 
-    ```python
-    def calculate_total(items: List[float]) -> float:
-        return sum(items)
-    ```
+Create readable and self-documenting type aliases for complex types.
 
-3. **Type Aliases:**
+```python linenums="1" hl_lines="1-2"
+Coordinates = tuple[float, float]
+PointList = list[Coordinates]
 
-    Use typing module aliases to create readable and self-documenting type aliases for complex types.
+def plot_points(points: PointList) -> None:
+    # Plotting logic here
+```
 
-    Example:
+#### 4. Union Types
 
-    ```python
-    from typing import List, Tuple
+Use [Union](https://docs.python.org/3/library/typing.html#typing.Union) types when a variable or parameter can have multiple types.
 
-    Coordinates = Tuple[float, float]
-    PointList = List[Coordinates]
+```python linenums="1" hl_lines="3"
+from typing import Union
 
-    def plot_points(points: PointList) -> None:
-        # Plotting logic here
-    ```
+def display_value(value: Union[int, float, str]) -> None:
+    print(value)
+```
 
-4. **Union Types:**
+#### 5. Type Hinting in Generics
 
-    Use Union types when a variable or parameter can have multiple types.
-    
-    Example:
+Use generic types when working with containers or collections.
 
-    ```python
-    from typing import Union
+```python linenums="1"
+def process_data(data: list[tuple[str, int]]) -> None:
+    # Processing logic here
+```
 
-    def display_value(value: Union[int, float, str]) -> None:
-        print(value)
-    ```
+#### 6. Callable Types
 
-5. **Type Hinting in Generics:**
-
-    Use generic types when working with containers or collections.
-
-    Example:
-
-    ```python
-    from typing import List, Tuple
-
-    def process_data(data: List[Tuple[str, int]]) -> None:
-        # Processing logic here
-    ```
-
-6. **Callable Types:**
-
-    Clearly annotate callable types using Callable from the typing module.
+Clearly annotate callable types using [Callable](https://docs.python.org/3/library/typing.html#typing.Callable) from the typing module.
 
 
-    Example:
+```python linenums="1"
+from typing import Callable
 
-    ```python
-    from typing import Callable
-
-    def apply_function(func: Callable[[int, int], int], a: int, b: int) -> int:
-        return func(a, b)
-    ```
-
-<br/>
+def apply_function(func: Callable[[int, int], int], a: int, b: int) -> int:
+    return func(a, b)
+```
 
 ## Virtual Environments
 
@@ -318,6 +259,7 @@ Python's optional type hints, introduced in PEP 484 and expanded in subsequent P
 
 A virtual environment is a self-contained directory that contains a Python interpreter and allows you to install and manage project-specific dependencies. Use a virtual environment to isolate project dependencies and avoid conflicts with system-wide packages.
 
+Python 3 provides a built-in module for creating virtual environments: [venv](https://docs.python.org/3/library/venv.html).
 
 ### Creating a Virtual Environment
 To create a virtual environment, use the following command at the **root** of the repository:
@@ -327,18 +269,17 @@ python -m venv venv
 ```
 
 ### Activating the Virtual Environment
-Once the virtual environment is created, activate it using the appropriate command for your operating system:
+Once the virtual environment is created, activate it in your terminal using the appropriate command for your operating system:
 
 For Windows:
 
-```shell
+```powershell
 venv\Scripts\activate
 ```
 
-For Mac, Linux, and WSL:
+For Mac and Linux (including WSL):
 
 ```shell
 source venv/bin/activate
 ```
 
-<br/>

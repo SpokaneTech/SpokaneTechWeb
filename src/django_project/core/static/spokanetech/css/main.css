@@ -1,0 +1,46 @@
+li {
+  /* Reset Handy Helpers sidebar.css */
+  list-style-type: disc !important;
+}
+
+.fit-content {
+  width: fit-content;
+}
+
+.max-w-content {
+  max-width: 600px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px
+}
+
+@media screen and (min-width: 600px) {
+  .grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.card-header {
+  flex: 0 1 auto !important;
+}
+
+.card-title {
+  margin-top: var(--bs-card-title-spacer-y);
+}
+
+.link {
+  text-decoration: 2px solid underline;
+}
+
+.container-xs {
+  max-width: 100%;
+}
+
+@media screen and (min-width: 576px) {
+  .container-xs {
+    max-width: 600px;
+  }
+}
