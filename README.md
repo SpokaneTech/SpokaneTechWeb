@@ -1,17 +1,19 @@
 # SpokaneTech.org
+Home of SpokaneTech.org, an online hub for Spokane's tech events and groups. It's not just a website; it's a community-driven, open-source initiative aimed at fostering learning and collaboration among aspiring and seasoned tech enthusiasts.
 
 <br/>
 
 ## Code Quality
 | Workflow | Description             | Status                                                                       |
 |----------|-------------------------|------------------------------------------------------------------------------|
-|Bandit|security checks|![Bandit](https://github.com/SpokaneTech/SpokaneTech_Py/actions/workflows/bandit.yaml/badge.svg)|
-|Black|code formatting|![Black](https://github.com/SpokaneTech/SpokaneTech_Py/actions/workflows/black.yaml/badge.svg)|
-|Isort|python import ordering|![Isort](https://github.com/SpokaneTech/SpokaneTech_Py/actions/workflows/isort.yaml/badge.svg)|
-|Mypy|static type checking|![Mypy](https://github.com/SpokaneTech/SpokaneTech_Py/actions/workflows/mypy.yaml/badge.svg)|
-|Radon|code complexity analysis|![Radon](https://github.com/SpokaneTech/SpokaneTech_Py/actions/workflows/radon.yaml/badge.svg)|
-|Ruff|static code analysis|![Ruff](https://github.com/SpokaneTech/SpokaneTech_Py/actions/workflows/ruff.yaml/badge.svg)|
-|Safety|dependency scanner|![Safety](https://github.com/SpokaneTech/SpokaneTech_Py/actions/workflows/safety.yaml/badge.svg)|
+|Bandit|security checks|![Bandit](https://github.com/SpokaneTech/SpokaneTechWeb/actions/workflows/bandit.yaml/badge.svg)|
+|Black|code formatting|![Black](https://github.com/SpokaneTech/SpokaneTechWeb/actions/workflows/black.yaml/badge.svg)|
+|Isort|python import ordering|![Isort](https://github.com/SpokaneTech/SpokaneTechWeb/actions/workflows/isort.yaml/badge.svg)|
+|Mypy|static type checking|![Mypy](https://github.com/SpokaneTech/SpokaneTechWeb/actions/workflows/mypy.yaml/badge.svg)|
+|Radon|code complexity analysis|![Radon](https://github.com/SpokaneTech/SpokaneTechWeb/actions/workflows/radon.yaml/badge.svg)|
+|Ruff|static code analysis|![Ruff](https://github.com/SpokaneTech/SpokaneTechWeb/actions/workflows/ruff.yaml/badge.svg)|
+|Safety|dependency scanner|![Safety](https://github.com/SpokaneTech/SpokaneTechWeb/actions/workflows/safety.yaml/badge.svg)|
+
 
 <br/>
 
