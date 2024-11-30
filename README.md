@@ -13,7 +13,6 @@
 |Ruff|static code analysis|![Ruff](https://github.com/SpokaneTech/SpokaneTech_Py/actions/workflows/ruff.yaml/badge.svg)|
 |Safety|dependency scanner|![Safety](https://github.com/SpokaneTech/SpokaneTech_Py/actions/workflows/safety.yaml/badge.svg)|
 
-
 <br/>
 
 ## Local Development
@@ -30,6 +29,13 @@ To enable pre-commit code quaility checks, update the location of git hooks with
 ```shell
 git config core.hooksPath .github/hooks
 ```
+
+Note: to make a commit with the precommit hooks temporarily disabled, run the following:
+
+```
+git commit --no-verify
+```
+
 
 
 ### setup steps (in a terminal)
