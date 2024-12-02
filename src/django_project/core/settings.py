@@ -240,37 +240,7 @@ LOGGING = {
 }
 
 
-# drf configuration
-REST_FRAMEWORK = {
-    "DEFAULT_FILTER_BACKENDS": ("django_filters.rest_framework.DjangoFilterBackend",),
-    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticatedOrReadOnly",),
-    "DEFAULT_AUTHENTICATION_CLASSES": (
-        ("rest_framework.authentication.TokenAuthentication", "rest_framework.authentication.SessionAuthentication")
-        if DEBUG
-        else ("rest_framework.authentication.TokenAuthentication",)
-    ),
-    "DEFAULT_RENDERER_CLASSES": (
-        "rest_framework.renderers.JSONRenderer",
-        "rest_framework.renderers.BrowsableAPIRenderer",
-        "drf_excel.renderers.XLSXRenderer",
-    ),
-    "TEST_REQUEST_DEFAULT_FORMAT": "json",
-    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
-    "PAGE_SIZE": env.int("DRF_PAGE_SIZE", 100),
-    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-}
-
-SPECTACULAR_SETTINGS = {
-    "TITLE": "spokanetech APIs",
-    "DESCRIPTION": "RESTful APIs for spokanetech",
-    "VERSION": "1.0.0",
-}
-
 PROJECT_NAME = "spokanetech"
-PROJECT_DESCRIPTION = (
-    """spokanetech is a super awesome project powered, in part, by amazing code provided by DjangoAddicts."""
-)
+PROJECT_DESCRIPTION = """Home of the Spokane tech community."""
 PROJECT_VERSION = env.str("PROJECT_VERSION", "")
-PROJECT_SOURCE = "https://github.com/djangoaddicts"
-
-PYGWALKER_THEME = "light"
+PROJECT_SOURCE = "https://github.com/SpokaneTech/SpokaneTechWeb"

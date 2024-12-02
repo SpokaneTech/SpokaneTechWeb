@@ -8,7 +8,7 @@ dependencies = [
     "django-handyhelpers",
     "requests>=2.26.0",
     "pillow",
-]
+    ]
 description = "Inland Northwest Tech Community"
 dynamic = ["version"]
 keywords = ["django"]
@@ -37,7 +37,7 @@ dev = [
     "safety",
     "types-python-dateutil",
     "typing_extensions",
-]
+    ]
 
 
 [tool.bandit]
@@ -55,18 +55,18 @@ line-length = 120
 
 [tool.coverage.report]
 show_missing = true
+omit = [
+    "src/django_project/manage.py", 
+    "src/django_project/core/asgi.py",
+    "src/django_project/core/wsgi.py", 
+    "src/django_project/*/scripts/*",
+    "src/django_project/tests/*", 
+    ]
 
 
 [tool.coverage.run]
 branch = true
-source = ["django_project"]
-omit = [
-    "django_project/manage.py", 
-    "django_project/core/asgi.py",
-    "django_project/core/wsgi.py", 
-    "django_project/*/scripts/*",
-    "django_project/tests/*", 
-    ]
+source = ["src/django_project"]
 
 
 [tool.isort]
@@ -84,20 +84,26 @@ ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 addopts = "-s -v -x --strict-markers -m 'not extra'"
-testpaths = ["django_project"]
+testpaths = ["src/django_project"]
 filterwarnings = [
     "ignore::DeprecationWarning",
     "ignore::UserWarning",
-]
+    ]
 
 
 [tool.ruff]
 line-length = 120
-exclude = ["django_project/manage.py", "django_project/tests", "django_project/*/migrations", "django_project/*/scripts", "django_project/*/local_test"]
+exclude = [
+    "src/django_project/manage.py", 
+    "src/django_project/tests", 
+    "src/django_project/*/migrations", 
+    "src/django_project/*/scripts", 
+    "src/django_project/*/local_test"
+    ]
 
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["django_project"]
+include = ["src/django_project"]
 exclude = []
 namespaces = false
