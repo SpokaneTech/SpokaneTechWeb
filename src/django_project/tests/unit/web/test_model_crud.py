@@ -1,8 +1,8 @@
-import django
 import os
 import random
 from pathlib import Path
 
+import django
 from django.apps import apps
 from django.test import TestCase
 
