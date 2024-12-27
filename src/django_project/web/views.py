@@ -48,7 +48,7 @@ class GetTechEvents(HtmxOptionMultiFilterView):
     template_name = "web/full/list/events.html"
     htmx_template_name = "web/partials/marquee/events.htm"
     htmx_list_template_name = "web/partials/list/events.htm"
-    queryset = Event.objects.filter(date_time__gte=timezone.now())
+    queryset = Event.objects.filter(start_datetime__gte=timezone.now())
     htmx_list_wrapper_template_name = "web/partials/list/wrapper_list.htm"
 
 

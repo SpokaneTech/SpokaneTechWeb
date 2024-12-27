@@ -19,7 +19,7 @@
     </div>
     <div class="description">
         {% if object.description %}
-        {{ object.description }}
+        {{ object.description|safe }}
         {% else %}
         <i>No description</i>
         {% endif %}        
