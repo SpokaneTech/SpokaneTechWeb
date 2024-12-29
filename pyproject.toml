@@ -1,11 +1,14 @@
 [project]
 dependencies = [
+    "celery",
     "django",
+    "django-celery-beat",
     "django-braces",
     "django-environ",
     "django-extensions",
     "django-filter",
     "django-handyhelpers",
+    "redis",
     "requests>=2.26.0",
     "pillow",
     ]
@@ -36,6 +39,7 @@ dev = [
     "radon",
     "safety",
     "types-python-dateutil",
+    "types-requests",
     "typing_extensions",
     ]
 
@@ -43,6 +47,7 @@ dev = [
 [tool.bandit]
 exclude_dirs = [
     "venv", 
+    "src/django_project/local_test", 
     "src/django_project/tests", 
     "src/django_project/*/management/commands",
     "src/django_project/*/scripts/*"
@@ -59,6 +64,7 @@ omit = [
     "src/django_project/manage.py", 
     "src/django_project/core/asgi.py",
     "src/django_project/core/wsgi.py", 
+    "src/django_project/*/migrations/*",
     "src/django_project/*/scripts/*",
     "src/django_project/tests/*", 
     ]
@@ -76,6 +82,7 @@ profile = "black"
 [tool.mypy]
 exclude = [
     "venv/*", 
+    "src/django_project/local_test",
     "src/django_project/.*/migrations/.*",
     "src/django_project/.*/scripts/.*"
     ]

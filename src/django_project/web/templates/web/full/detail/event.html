@@ -1,6 +1,6 @@
 {% extends BASE_TEMPLATE|default:"base.htm" %}
 
 {% block main_content %}
-    <main id="body_main" hx-get="{% url 'web:get_event' object.pk %}" hx-trigger="load"> 
+    <main id="body_main" hx-get="{% url 'web:get_event' object.pk %}" hx-push-url="{% url 'web:get_techgroup' object.pk %}" hx-trigger="load"> 
     </main>
 {% endblock main_content %}

@@ -4,16 +4,24 @@
 <div class="list-card-container blur-group-container fade-in-blur" style="--fade-duration: 0.5s;">
     {% for row in queryset %}
     <div class="list-card" hx-get="{% url 'web:get_event' row.pk %}" hx-target="#body_main" hx-push-url="{% url 'web:get_event' row.pk %}">
-        <div class="description">{{ row.name }}</div>
+        <div class="fw-bold h4">{{ row.name }}</div>
+        <div class="small">
+            {% if row.end_datetime %}
+            {{ row.start_datetime }} &nbsp; - &nbsp; {{ row.end_datetime }}
+            {% else %}
+            {{ row.start_datetime }}
+            {% endif %}
+        </div>
+        {% if row.group %}<div class="my-2 accent">{{ row.group }}</div>{% endif %}
         <div class="tag-container">
             {% for tag in row.tags.all %}
             <small><span class="tag">{{ tag }}</span></small>
             {% endfor %}
         </div>
-        <div class="split-footer">
+        <!-- <div class="split-footer">
             <div class="footer-left">{% if row.group %}{{ row.group.name }}{% endif %}</div>
             <div class="footer-right">{% if row.date_time %}{{ row.date_time }}{% endif %}</div>
-        </div>
+        </div> -->
     </div>
     {% endfor %}
 </div>

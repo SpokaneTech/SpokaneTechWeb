@@ -1,6 +1,6 @@
 <section class="detail fade-in-blur" style="--fade-duration: .3s;">
-    <h1>{{ object.icon|safe }}</h1>
-    <h1>{{ object.name }}</h1>
+    <div class="h1 fw-bold">{{ object.icon|safe }}</div>
+    <div class="h1 fw-bold">{{ object.name }}</div>
 </section>
 
 <section class="fade-in-blur" style="--fade-duration: .5s;">
@@ -19,7 +19,7 @@
     </div>
     <div class="description">
         {% if object.description %}
-        {{ object.description }}
+        {{ object.description|safe }}
         {% else %}
         <i>No description</i>
         {% endif %}        

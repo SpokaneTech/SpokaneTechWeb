@@ -5,7 +5,16 @@
     hx-target="#modal_wrapper"
     data-bs-toggle="modal"
     data-bs-target="#modal_wrapper"
->{{ row.name }}</div>
+>
+<div>
+{{ row.name }}
+</div>
+<div class="small">
+    {% if row.end_datetime %}
+    {{ row.start_datetime }}
+    {% endif %}
+</div>
+</div>
 {% endfor %}
 {% else %}
 <div class="empty-queryset">

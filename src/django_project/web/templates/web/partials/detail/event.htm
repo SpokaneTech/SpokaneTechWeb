@@ -16,13 +16,30 @@
 </section>
 
 <section class="fade-in-blur" style="--fade-duration: .75s;">
-    <div class="description">
+    <div class="m-3">
         {% if object.description %}
-        {{ object.description }}
+        {{ object.description|safe }}
         {% else %}
         <i>No description</i>
-        {% endif %}        
+        {% endif %}
     </div>
+    <div class="mt-2 mb-3">
+        {% if object.end_datetime %}
+        {{ object.start_datetime }} &nbsp; - &nbsp; {{ object.end_datetime }}
+        {% else %}
+        {{ object.start_datetime }}
+        {% endif %}
+    </div>
+    <div class="mt-3 mb-2"><b>{{ object.location_name }}</b></div>
+    <div class="my-2">{{ object.location_address }}</div>
+    
+    {% if object.map_link %}
+    <div class="my-2">
+        <a href="{{ object.map_link }}" title="google map" target="_blank">
+            <i class="fa-solid fa-location-dot"></i>
+        </a>
+    </div>
+    {% endif %}
 </section>
 
 <section class="fade-in-blur" style="--fade-duration: 1s;">

@@ -111,7 +111,7 @@
                             <div class="text-end {% if day == today.day and month == today.month and year == today.year %}fw-bold{% endif %}">{{ day }}</div>
                             {%endif%}
                             {% for event in event_list %}
-                                {% if event.date_time.day == day and event.date_time.month == month and event.date_time.year == year %}   
+                                {% if event.start_datetime.day == day and event.start_datetime.month == month and event.start_datetime.year == year %}   
                                     {% if event_detail_url %}
                                 <div class="event hvr-grow d-block cursor-pointer"
                                 hx-get="{% url event_detail_url event.pk %}"

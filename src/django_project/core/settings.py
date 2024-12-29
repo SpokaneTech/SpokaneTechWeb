@@ -27,7 +27,7 @@ if os.path.exists(ENV_PATH):
     print(f"loading ENV vars from {ENV_PATH}")
     environ.Env.read_env(ENV_PATH)
 else:
-    print("NO ENV_PATH found!")
+    print("NO ENV_PATH found!")  # pragma: no cover
 
 
 # Quick-start development settings - unsuitable for production
@@ -68,6 +68,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "core.middleware.PstTimezoneMiddleware",
     "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
 
@@ -184,8 +185,8 @@ REQUIRED_LOGIN_IGNORE_PATHS = [
 LOG_PATH = env.str("LOG_PATH", os.path.join(BASE_DIR, "django_logs"))
 DEFAULT_LOG_LEVEL = env.str("DEFAULT_LOG_LEVEL", "INFO")
 if not os.path.exists(LOG_PATH):
-    os.makedirs(LOG_PATH, exist_ok=True)
-    print(f"INFO: created log path: {LOG_PATH}")
+    os.makedirs(LOG_PATH, exist_ok=True)  # pragma: no cover
+    print(f"INFO: created log path: {LOG_PATH}")  # pragma: no cover
 else:
     print(f"INFO: using log path: {LOG_PATH}")
 
@@ -244,3 +245,15 @@ PROJECT_NAME = "spokanetech"
 PROJECT_DESCRIPTION = """Home of the Spokane tech community."""
 PROJECT_VERSION = env.str("PROJECT_VERSION", "")
 PROJECT_SOURCE = "https://github.com/SpokaneTech/SpokaneTechWeb"
+
+
+# celery settings
+broker_url = env.str("CELERY_BROKER_URL", None)
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_BEAT_SCHEDULER = env.str("BEAT_SCHEDULER", "django_celery_beat.schedulers:DatabaseScheduler")
+CELERY_BROKER_URL = env.str("CELERY_BROKER_URL", None)
+CELERY_RESULT_BACKEND = env.str("CELERY_RESULT_BACKEND", None)
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TASK_RESULT_EXPIRES = 3600
+CELERY_TASK_SERIALIZER = "json"
+CELERY_USE_SSL = env.bool("CELERY_USE_SSL", True)

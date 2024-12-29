@@ -75,15 +75,35 @@ class EventTests(TestCase):
         self.assertEqual(getattr(row, "group"), updated_value)
         self.assertNotEqual(getattr(row, "group"), original_value)
 
-    def test_update_location(self):
-        """verify location (CharField) can be updated"""
+    def test_update_location_address(self):
+        """verify location_address (CharField) can be updated"""
         row = self.bake()
-        original_value = row.location
-        updated_value = baker.prepare(self.to_bake, _fill_optional=["location"]).location
-        setattr(row, "location", updated_value)
+        original_value = row.location_address
+        updated_value = baker.prepare(self.to_bake, _fill_optional=["location_address"]).location_address
+        setattr(row, "location_address", updated_value)
         row.save()
-        self.assertEqual(getattr(row, "location"), updated_value)
-        self.assertNotEqual(getattr(row, "location"), original_value)
+        self.assertEqual(getattr(row, "location_address"), updated_value)
+        self.assertNotEqual(getattr(row, "location_address"), original_value)
+
+    def test_update_location_name(self):
+        """verify location_name (CharField) can be updated"""
+        row = self.bake()
+        original_value = row.location_name
+        updated_value = baker.prepare(self.to_bake, _fill_optional=["location_name"]).location_name
+        setattr(row, "location_name", updated_value)
+        row.save()
+        self.assertEqual(getattr(row, "location_name"), updated_value)
+        self.assertNotEqual(getattr(row, "location_name"), original_value)
+
+    def test_update_map_link(self):
+        """verify map_link (CharField) can be updated"""
+        row = self.bake()
+        original_value = row.map_link
+        updated_value = baker.prepare(self.to_bake, _fill_optional=["map_link"]).map_link
+        setattr(row, "map_link", updated_value)
+        row.save()
+        self.assertEqual(getattr(row, "map_link"), updated_value)
+        self.assertNotEqual(getattr(row, "map_link"), original_value)
 
     def test_update_name(self):
         """verify name (CharField) can be updated"""
