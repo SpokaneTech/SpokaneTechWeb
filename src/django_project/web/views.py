@@ -9,14 +9,7 @@ from handyhelpers.views.htmx import (
 from web.models import Event, TechGroup
 
 
-class GetIndexContent(HtmxOptionView):
-    """Render the index page"""
-
-    htmx_template_name = "web/partials/custom/index.htm"
-    template_name = "web/full/custom/index.html"
-
-
-class GetAboutContent(HtmxOptionView):
+class AboutContentView(HtmxOptionView):
     """Render the 'about' page"""
 
     htmx_template_name = "web/partials/custom/about.htm"
@@ -24,36 +17,43 @@ class GetAboutContent(HtmxOptionView):
 
 
 class EventCalendarView(HtmxCalendarView):
-    """Render a monthly calendar view of events"""
+    """Render a monthly calendar view of Event instances"""
 
-    title = "Spokane Tech Event Calendar"
-    event_model = Event
-    event_model_date_field = "date_time"
     event_detail_url = "web:techevent_modal"
+    event_model = Event
+    event_model_date_field = "start_datetime"
     htmx_template_name = "web/partials/custom/calendar.htm"
     template_name = "web/full/custom/calendar.html"
+    title = "Spokane Tech Event Calendar"
 
 
-class GetTechEvent(HtmxOptionDetailView):
-    """Get details of an Event instance"""
+class IndexContentView(HtmxOptionView):
+    """Render the index page"""
+
+    htmx_template_name = "web/partials/custom/index.htm"
+    template_name = "web/full/custom/index.html"
+
+
+class TechEventView(HtmxOptionDetailView):
+    """Render detail page for an Event instance"""
 
     model = Event
     htmx_template_name = "web/partials/detail/event.htm"
     template_name = "web/full/detail/event.html"
 
 
-class GetTechEvents(HtmxOptionMultiFilterView):
-    """Get a list of Event entries"""
+class TechEventsView(HtmxOptionMultiFilterView):
+    """Render a list of Event instances"""
 
-    template_name = "web/full/list/events.html"
-    htmx_template_name = "web/partials/marquee/events.htm"
     htmx_list_template_name = "web/partials/list/events.htm"
-    queryset = Event.objects.filter(start_datetime__gte=timezone.now())
     htmx_list_wrapper_template_name = "web/partials/list/wrapper_list.htm"
+    htmx_template_name = "web/partials/marquee/events.htm"
+    queryset = Event.objects.filter(start_datetime__gte=timezone.now())
+    template_name = "web/full/list/events.html"
 
 
-class GetTechEventModal(ModelDetailBootstrapModalView):
-    """Get details of an Event instance and display in a modal"""
+class TechEventModalView(ModelDetailBootstrapModalView):
+    """Render Bootstrap 5 modal displaying details of an Event instance"""
 
     modal_button_submit = None
     modal_size = "modal-lg"
@@ -62,26 +62,26 @@ class GetTechEventModal(ModelDetailBootstrapModalView):
     model = Event
 
 
-class GetTechGroup(HtmxOptionDetailView):
-    """Get details of a TechGroup instance"""
+class TechGroupView(HtmxOptionDetailView):
+    """Render detail page for a TechGroup instance"""
 
     model = TechGroup
     htmx_template_name = "web/partials/detail/group.htm"
     template_name = "web/full/detail/group.html"
 
 
-class GetTechGroups(HtmxOptionMultiFilterView):
-    """Get a list of TechGroup entries"""
+class TechGroupsView(HtmxOptionMultiFilterView):
+    """Render a list of TechGroup instances"""
 
-    template_name = "web/full/list/groups.html"
-    htmx_template_name = "web/partials/marquee/groups.htm"
     htmx_list_template_name = "web/partials/list/groups.htm"
-    queryset = TechGroup.objects.filter(enabled=True)
     htmx_list_wrapper_template_name = "web/partials/list/wrapper_list.htm"
+    htmx_template_name = "web/partials/marquee/groups.htm"
+    queryset = TechGroup.objects.filter(enabled=True)
+    template_name = "web/full/list/groups.html"
 
 
-class GetTechGroupModal(ModelDetailBootstrapModalView):
-    """get details of a TechGroup instance and display in a modal"""
+class TechGroupModalView(ModelDetailBootstrapModalView):
+    """Render Bootstrap 5 modal displaying get details of a TechGroup instance"""
 
     modal_button_submit = None
     modal_template = "web/partials/modal/group_information.htm"

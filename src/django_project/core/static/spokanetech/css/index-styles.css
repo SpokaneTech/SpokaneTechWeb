@@ -390,6 +390,9 @@ footer .copyright {
 .list-card:hover .split-footer {
     color: var(--accent, hsla(169, 59%, 45%, 1));
 }
+.list-card:hover .accent {
+    color: var(--accent, hsla(169, 59%, 45%, 1));
+}
 
 
 .detail h1 {
@@ -412,7 +415,7 @@ footer .copyright {
     color: var(--light);
 }
 .description {
-    margin: 3rem;
+    margin: 1rem;
 }
 
 
@@ -468,3 +471,7 @@ footer .copyright {
     gap: 3rem;
     padding: 3rem;
   }
+
+.accent:hover {
+    color: var(--accent, hsla(169, 59%, 45%, 1));
+}

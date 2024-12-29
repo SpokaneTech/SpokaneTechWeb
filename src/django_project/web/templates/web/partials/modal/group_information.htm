@@ -6,29 +6,12 @@
     </div>
     {% endif %}
     {% if object.description %}
-    <div class="row my-3">
-        <div class="col-4 fw-bold text-primary">Description:</div>
-        <div class="col-8 text-secondary">{{ object.description|truncatewords_html:30|safe }}</div>
+    <div class="row text-center my-3">
+        {{ object.description|truncatewords_html:50|safe }}
     </div>
     {% endif %}
-    {% if object.date_time %}
-    <div class="row my-3">
-        <div class="col-4 fw-bold text-primary">Date/Time:</div>
-        <div class="col-8 text-secondary">
 
-        </div>
-    </div>
-    {% endif %}
-    {% if object.location %}
-    <div class="row my-3">
-        <div class="col-4 fw-bold text-primary">Location:</div>
-        <div class="col-8 text-secondary">{{ object.location }}</div>
-    </div>
-    {% endif %}
-    <div class="row my-3">
-        <div class="col-4 fw-bold text-primary"></div>
-        <div class="col-8 text-secondary">
-            <a href="" hx-get="{% url 'web:get_techgroup' object.pk %}" hx-target="#body_main" hx-push-url="true" data-bs-dismiss="modal">full details</a>
-        </div>
+    <div class="row text-center my-3">
+        <a href="" hx-get="{% url 'web:get_techgroup' object.pk %}" hx-target="#body_main" hx-push-url="true" data-bs-dismiss="modal">full details</a>
     </div>
 </div>

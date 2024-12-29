@@ -1,7 +1,7 @@
 {% extends BASE_TEMPLATE|default:"base.htm" %}
 
 {% block main_content %}
-    <main id="body_main" hx-get="{% url 'web:get_techgroups' display='list' %}" hx-trigger="load"> 
+    <main id="body_main" hx-get="{% url 'web:get_techgroups' display='list' %}" hx-push-url="{% url 'web:get_techgroups' display='list' %}" hx-trigger="load"> 
     </main>  
 {% endblock main_content %}
 

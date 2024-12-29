@@ -20,7 +20,6 @@ def test_task():
 
 @shared_task(time_limit=900, max_retries=0, name="web.ingest_meetup_group_details", queue="normal")
 def ingest_meetup_group_details(group_pk, url: str):
-    print(f"ingest meetup details for from {url}")
     group = TechGroup.objects.get(pk=group_pk)
     group.description = get_group_description(url)
     group.save()
@@ -33,6 +32,7 @@ def ingest_future_meetup_events(group_pk):
         event_links = get_event_links(f"{link.url}?type=upcoming")
         for event_link in event_links:
             event_info = get_event_information(event_link)
+            event_info["group"] = group
             if event_info:
                 Event.objects.update_or_create(**event_info, defaults=event_info)
 
@@ -50,7 +50,6 @@ def launch_group_detail_ingestion():
 @shared_task(time_limit=900, max_retries=0, name="web.launch_event_ingestion", queue="normal")
 def launch_event_ingestion():
     """parent task for ingesting future events for all tech groups"""
-    print("launch_event_ingestion")
     tech_group_list = TechGroup.objects.filter(enabled=True, platform__name="Meetup")
     for group in tech_group_list:
         job = ingest_future_meetup_events.s(group.pk)

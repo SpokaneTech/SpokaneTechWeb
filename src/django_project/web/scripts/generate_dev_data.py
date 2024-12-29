@@ -1,7 +1,7 @@
 import datetime
 import random
-import re
 
+import faker
 from django.utils import timezone
 from web.models import Event, Link, SocialPlatform, TechGroup
 from web.utilities.scrapers.meetup import (
@@ -166,7 +166,6 @@ def create_social_platforms() -> None:
         },
         {
             "name": "Other",
-            # "base_url": None,
         },
     ]
     for data in data_list:
@@ -184,28 +183,24 @@ def ingest_meetup_data():
             group.save()
 
             # get upcoming events from meetup
-            # event_links = get_event_links(f"{link.url}?type=upcoming")
             print(f"INFO: ingest Meetup.com events for {group.name}")
             event_links = get_event_links(f"{link.url}events/?type=upcoming")
-            # print(event_links)
             for event_link in event_links:
                 event_info = get_event_information(event_link)
+                event_info["group"] = group
                 if event_info:
-                    Event.objects.update_or_create(**event_info, defaults=event_info)
+                    print(f"INFO: \tsaving {event_info['name']} - {event_info['start_datetime']}")
+                    if event_info["social_platform_id"]:
+                        Event.objects.update_or_create(
+                            social_platform_id=event_info["social_platform_id"], defaults=event_info
+                        )
+                    else:
+                        Event.objects.update_or_create(
+                            name=event_info["name"], start_datetime=event_info["start_datetime"], defaults=event_info
+                        )
 
 
 def run():
     create_social_platforms()
     create_groups()
-    # # create_events(qty=10)
     ingest_meetup_data()
-    # url = "https://www.meetup.com/python-spokane/events/?type=past"
-    # event_url = "https://www.meetup.com/python-spokane/events/305044389/?eventOrigin=group_events_list"
-    # e = get_event_information(event_url)
-    # print(e)
-    # event_links = get_event_links(url)
-    # print(event_links)
-    # h = get_event_information(event_links[0])
-    # print(h)
-    # c = get_group_description("https://www.meetup.com/python-spokane/")
-    # print(c)
