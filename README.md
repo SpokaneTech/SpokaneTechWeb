@@ -26,7 +26,7 @@ Home of SpokaneTech.org, an online hub for Spokane's tech events and groups. It'
 
 
 ### git config (optional)
-To enable pre-commit code quaility checks, update the location of git hooks with the following command:
+To enable pre-commit code quality checks, update the location of git hooks with the following command:
 
 ```shell
 git config core.hooksPath .github/hooks
@@ -57,7 +57,7 @@ git commit --no-verify
     python -m venv venv
     ```
 
-4. activate the python virutal environment
+4. activate the python virtual environment
     
     for linux, mac, or wsl:
     ```
@@ -69,7 +69,7 @@ git commit --no-verify
     venv\Scripts\activate
     ```
 
-5. install the python dependancies
+5. install the python dependencies
     ```
     pip install .[dev]
     ```
@@ -94,7 +94,7 @@ git commit --no-verify
     ./manage.py add_superuser --group admin
     ```
 
-10. generate some locat test data
+10. generate some local test data
     ```
     ./manage.py runscript generate_dev_data
     ```
