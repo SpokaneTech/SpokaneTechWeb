@@ -27,12 +27,12 @@ This project and everyone participating in it are governed by the [Code of Condu
 
 ### Reporting Bugs
 
-- Before creating bug reports, please check the [existing issues](https://github.com/djangoaddicts/django-pygwalker/issues) as you might find that the issue has already been reported.
+- Before creating bug reports, please check the [existing issues](https://github.com/SpokaneTech/SpokaneTechWeb/issues) as you might find that the issue has already been reported.
 - When creating a bug report, please include a clear and concise description of the problem and steps to reproduce it.
 
 ### Suggesting Enhancements
 
-- Before creating enhancement suggestions, please check the [list of open issues](https://github.com/djangoaddicts/django-pygwalker/issues) as you might find that the suggestion has already been made.
+- Before creating enhancement suggestions, please check the [list of open issues](https://github.com/SpokaneTech/SpokaneTechWeb/issues) as you might find that the suggestion has already been made.
 - When creating an enhancement suggestion, please provide a detailed description and, if possible, an implementation proposal.
 
 ### Pull Requests
@@ -51,7 +51,7 @@ This project and everyone participating in it are governed by the [Code of Condu
 You can contribute to this project forking it from GitHub and sending pull requests.
 
 First [fork](https://help.github.com/en/articles/fork-a-repo) the
-[repository](https://github.com/djangoaddicts/django-pygwalker) and then clone it:
+[repository](https://github.com/SpokaneTech/SpokaneTechWeb) and then clone it:
 
 ```shell
 git clone git@github.com:<you>/django-pygwalker.git
@@ -60,13 +60,13 @@ git clone git@github.com:<you>/django-pygwalker.git
 Create a virtual environment and install dependancies:
 
 ```shell
-cd django-pygwalker
+cd SpokaneTechWeb
 python -m venv venv
 source venv/bin/activate
 pip install .[dev]
 ```
 
-Unit tests are located under the tests directory and can be executed via pytest:
+Unit tests are located under the src/django_project/tests directory and can be executed via pytest:
 
 ```shell
 pytest
