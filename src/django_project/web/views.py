@@ -84,6 +84,7 @@ class TechGroupModalView(ModelDetailBootstrapModalView):
     """Render Bootstrap 5 modal displaying get details of a TechGroup instance"""
 
     modal_button_submit = None
+    modal_size = "modal-lg"
     modal_template = "web/partials/modal/group_information.htm"
     modal_title = "Group Info"
     model = TechGroup
