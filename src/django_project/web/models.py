@@ -79,7 +79,7 @@ class SocialPlatform(HandyHelperBaseModel):
 
 
 class Tag(HandyHelperBaseModel):
-    """A Tag that describes attributes of a Event"""
+    """A tag that describes attributes of a Event or a TechGroup"""
 
     value = models.CharField(max_length=64, unique=True, null=False)
 
