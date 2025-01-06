@@ -6,7 +6,7 @@ from web.utilities.html_utils import fetch_content, fetch_content_with_playwrigh
 
 
 def get_end_datetime(datetime_string: str, time_string: str) -> datetime:
-    """create a datetime object with timezone information from infromation parsed from a meetup.com event page
+    """create a datetime object with timezone information from information parsed from a meetup.com event page
 
     Args:
         datetime_string (str): string representation of a datetime; example: '2025-01-06T07:00:00-08:00'
@@ -47,7 +47,7 @@ def get_event_information(url: str) -> dict:
         Exception:
 
     Returns:
-        dict: dictionary of information about the event as availble on meetup.com
+        dict: dictionary of information about the event as available on meetup.com
     """
     try:
         page_content = fetch_content_with_playwright(url)
@@ -98,7 +98,7 @@ def get_event_links(url: str) -> list:
         Exception:
 
     Returns:
-        list: list of urls for upcoming events as availble on the group page on meetup.com
+        list: list of urls for upcoming events as available on the group page on meetup.com
     """
     page_content = fetch_content_with_playwright(url)
     soup = BeautifulSoup(page_content, "html.parser")
@@ -118,7 +118,7 @@ def get_group_description(url: str) -> str:
         Exception:
 
     Returns:
-        str: html from the description of the group as availble on meetup.com
+        str: html from the description of the group as available on meetup.com
     """
     page_content = fetch_content(url)
     soup = BeautifulSoup(page_content, "html.parser")

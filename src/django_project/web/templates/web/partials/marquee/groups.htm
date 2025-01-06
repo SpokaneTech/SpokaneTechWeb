@@ -4,6 +4,9 @@
     hx-target="#modal_wrapper"
     data-bs-toggle="modal"
     data-bs-target="#modal_wrapper"
->{{ row.name }}</div>
+>
+    <div class="h3">{{ row.icon|safe }}</div>
+    <div>{{ row.name }}</div>
+</div>
 
 {% endfor %}

@@ -5,23 +5,23 @@ from web.models import Event, Link, SocialPlatform, Tag, TechGroup
 
 
 class TagAdmin(admin.ModelAdmin):
-    list_display = ["id", "created_at", "updated_at", "value"]
+    list_display = ["id", "value", "created_at", "updated_at"]
     search_fields = ["id", "value"]
 
 
 class LinkAdmin(admin.ModelAdmin):
-    list_display = ["id", "created_at", "updated_at", "name", "description", "url"]
+    list_display = ["id", "name", "description", "url", "created_at", "updated_at"]
     search_fields = ["id", "name", "description", "url"]
 
 
 class SocialPlatformAdmin(admin.ModelAdmin):
-    list_display = ["id", "created_at", "updated_at", "name", "enabled", "base_url"]
+    list_display = ["id", "name", "enabled", "base_url", "created_at", "updated_at"]
     search_fields = ["id", "name", "base_url"]
     list_filter = ["enabled"]
 
 
 class TechGroupAdmin(admin.ModelAdmin):
-    list_display = ["id", "created_at", "updated_at", "name", "description", "enabled", "platform", "icon", "image"]
+    list_display = ["id", "name", "description", "enabled", "platform", "icon", "image", "created_at", "updated_at"]
     search_fields = ["id", "name", "description", "icon", "image"]
     list_filter = ["enabled", "platform"]
 
