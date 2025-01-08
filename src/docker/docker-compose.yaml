@@ -1,0 +1,82 @@
+version: '3.9'
+
+services:
+  django:
+    image: spokanetech-django:latest
+    container_name: django
+    env_file:
+      - .env.compose
+    build:
+      context: ../..
+      dockerfile: src/docker/Dockerfile 
+    command: ./entrypoint.sh
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+
+  db:
+    image: postgres:17
+    container_name: postgres_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    env_file:
+      - .env.compose
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+
+  celery_worker:
+    image: spokanetech-django:latest
+    container_name: worker
+    env_file:
+      - .env.compose
+    build:
+      context: ../..
+      dockerfile: src/docker/Dockerfile 
+    command: celery -A core worker -l info -Q normal
+    depends_on:
+      - redis
+      - db
+
+  celery_beat:
+    image: spokanetech-django:latest
+    container_name: beat
+    env_file:
+      - .env.compose
+    build:
+      context: ../..
+      dockerfile: src/docker/Dockerfile 
+    command: celery -A core beat -l info
+    depends_on:
+      - redis
+      - db
+
+  # flower:
+  #   image: spokanetech-celery-flower
+  #   container_name: celery_flower
+  #   build:
+  #     context: ../..
+  #     dockerfile: src/docker/Dockerfile 
+  #   command: celery -A core flower --loglevel=info
+  #   volumes:
+  #     - .:/app
+  #   env_file:
+  #     - .env.compose
+  #   depends_on:
+  #     - redis
+  #     - db
+  #   networks:
+  #     - app_network
+
+
+volumes:
+  postgres_data:
+  static_volume:
+

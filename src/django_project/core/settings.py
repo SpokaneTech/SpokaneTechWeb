@@ -38,6 +38,7 @@ SECRET_KEY = env.str("SECRET_KEY", "default_key-this_is_insecure_and_should_be_c
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool("DEBUG", True)
+DEPLOYMENT_ENV = env.str("DEPLOYMENT_ENV", "local")
 
 ALLOWED_HOSTS = env.str("ALLOWED_HOSTS", "127.0.0.1").split(",")
 INTERNAL_IPS = env.str("INTERNAL_IPS", "127.0.0.1").split(",")
@@ -52,7 +53,6 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     # third party apps
-    "debug_toolbar",
     "django_extensions",
     "django_filters",
     "handyhelpers",
@@ -60,8 +60,10 @@ INSTALLED_APPS = [
     "web",
 ]
 
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -69,8 +71,16 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "core.middleware.PstTimezoneMiddleware",
-    "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
+
+if DEPLOYMENT_ENV in ["local", "dev"]:
+    INSTALLED_APPS += [
+        "debug_toolbar",
+    ]
+    MIDDLEWARE += [
+        "debug_toolbar.middleware.DebugToolbarMiddleware",
+    ]
+
 
 ROOT_URLCONF = "core.urls"
 
@@ -256,4 +266,4 @@ CELERY_RESULT_BACKEND = env.str("CELERY_RESULT_BACKEND", None)
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TASK_RESULT_EXPIRES = 3600
 CELERY_TASK_SERIALIZER = "json"
-CELERY_USE_SSL = env.bool("CELERY_USE_SSL", True)
+CELERY_USE_SSL = env.bool("CELERY_USE_SSL", False)

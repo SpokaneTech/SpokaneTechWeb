@@ -27,7 +27,7 @@ def fetch_content(url, timeout=30) -> bytes | Any:
         raise Exception(f"Failed to fetch content from {url}: {response.status_code}")
 
 
-def fetch_content_with_playwright(url) -> str:
+def fetch_content_with_playwright(url, retries=3, timeout=30000):
     """fetch html content from a url using playwright
 
     Args:
@@ -38,17 +38,25 @@ def fetch_content_with_playwright(url) -> str:
 
     <main id="main" class="flex flex-grow flex-col items-center justify-between">
     """
-    try:
-        with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True)
-            page = browser.new_page()
-            page.goto(url, wait_until="networkidle")
-            html_content = page.content()
-            browser.close()
-        return html_content
-    except Exception as e:
-        print(f"Failed to fetch content: {e}")
-        return ""
+    attempt = 0
+    while attempt < retries:
+        try:
+            with sync_playwright() as p:
+                browser = p.chromium.launch(headless=True)
+                page = browser.new_page()
+
+                page.goto(url, wait_until="networkidle", timeout=timeout)
+                html_content = page.content()
+                browser.close()
+
+            return html_content
+        except Exception as e:
+            print(f"Error: {e}. Retrying... ({attempt + 1}/{retries})")
+            attempt += 1
+            if attempt == retries:
+                print("Max retries reached. Could not fetch the content.")
+                return ""
+            time.sleep(2)
 
 
 def find_target(url, parent="ul", classes="flex w-full flex-col space-y-5 px-4 md:px-0", max_retries=3):

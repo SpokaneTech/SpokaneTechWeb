@@ -1,33 +1,4 @@
-import datetime
-import random
-
-import faker
-from django.utils import timezone
-from web.models import Event, Link, SocialPlatform, TechGroup
-from web.utilities.scrapers.meetup import (
-    get_event_information,
-    get_event_links,
-    get_group_description,
-)
-
-
-def create_events(qty: int = 1) -> None:
-    """Create some Event entries"""
-    print("INFO: creating Event entries")
-    f = faker.Faker()
-    current_time = timezone.now()
-
-    for i in range(qty):
-        data = {
-            "name": f.sentence(),
-            "description": f.paragraph(random.randint(10, 50)),
-            "date_time": current_time + datetime.timedelta(days=random.randint(1, 90)),
-            "duration": datetime.timedelta(hours=random.randint(1, 3)),
-            "location": f.address(),
-            "url": f.uri(),
-            "group": TechGroup.objects.get_random_row(),
-        }
-        Event.objects.create(**data)
+from web.models import Link, SocialPlatform, TechGroup
 
 
 def create_groups() -> None:
@@ -121,7 +92,6 @@ def create_groups() -> None:
     ]
     for data in data_list:
         data["platform"], _ = SocialPlatform.objects.get_or_create(name=data["platform"])
-        # data["description"] = f.paragraph()
         platform_page = data.pop("platform page")
         tech_group, _ = TechGroup.objects.update_or_create(name=data["name"], defaults=data)
         if platform_page:
@@ -172,35 +142,6 @@ def create_social_platforms() -> None:
         SocialPlatform.objects.update_or_create(name=data["name"], defaults=data)
 
 
-def ingest_meetup_data():
-    """Ingest data from group meetup pages"""
-    groups = TechGroup.objects.filter(enabled=True, platform__name="Meetup")  # , name="Spokane Tech Community")
-
-    for group in groups:
-        for link in group.links.filter(name=f"""{group.name} {group.platform} page""").distinct():
-            # get group description from meetup
-            group.description = get_group_description(link)
-            group.save()
-
-            # get upcoming events from meetup
-            print(f"INFO: ingest Meetup.com events for {group.name}")
-            event_links = get_event_links(f"{link.url}events/?type=upcoming")
-            for event_link in event_links:
-                event_info = get_event_information(event_link)
-                event_info["group"] = group
-                if event_info:
-                    print(f"INFO: \tsaving {event_info['name']} - {event_info['start_datetime']}")
-                    if event_info["social_platform_id"]:
-                        Event.objects.update_or_create(
-                            social_platform_id=event_info["social_platform_id"], defaults=event_info
-                        )
-                    else:
-                        Event.objects.update_or_create(
-                            name=event_info["name"], start_datetime=event_info["start_datetime"], defaults=event_info
-                        )
-
-
 def run():
     create_social_platforms()
     create_groups()
-    ingest_meetup_data()

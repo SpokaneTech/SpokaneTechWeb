@@ -1,0 +1,11 @@
+# Ignore Python bytecode
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+
+# django_project stuff
+src/django_project/*.sqlite3
+src/django_project/*.log
+src/django_project/local_test
+src/django_project/tests
