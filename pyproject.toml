@@ -1,16 +1,22 @@
 [project]
 dependencies = [
+    "beautifulsoup4",
     "celery",
-    "django",
-    "django-celery-beat",
+    "django==4.2",
     "django-braces",
+    "django-celery-beat",
+    "django-debug-toolbar",
     "django-environ",
     "django-extensions",
     "django-filter",
     "django-handyhelpers",
+    "flower",
+    "psycopg2-binary",
     "redis",
     "requests>=2.26.0",
     "pillow",
+    "playwright",
+    "whitenoise",
     ]
 description = "Inland Northwest Tech Community"
 dynamic = ["version"]
@@ -42,7 +48,9 @@ dev = [
     "types-requests",
     "typing_extensions",
     ]
-
+docker = [
+    "gunicorn",
+]
 
 [tool.bandit]
 exclude_dirs = [

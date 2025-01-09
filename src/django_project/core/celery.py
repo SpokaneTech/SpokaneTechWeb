@@ -10,6 +10,7 @@ if use_ssl:
     )
 else:
     celery_app = Celery("core")
+
 celery_app.config_from_object(settings)
 celery_app.autodiscover_tasks()
 

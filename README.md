@@ -12,7 +12,6 @@ Home of SpokaneTech.org, an online hub for Spokane's tech events and groups. It'
 |Mypy|static type checking|![Mypy](https://github.com/SpokaneTech/SpokaneTechWeb/actions/workflows/mypy.yaml/badge.svg)|
 |Radon|code complexity analysis|![Radon](https://github.com/SpokaneTech/SpokaneTechWeb/actions/workflows/radon.yaml/badge.svg)|
 |Ruff|static code analysis|![Ruff](https://github.com/SpokaneTech/SpokaneTechWeb/actions/workflows/ruff.yaml/badge.svg)|
-|Safety|dependency scanner|![Safety](https://github.com/SpokaneTech/SpokaneTechWeb/actions/workflows/safety.yaml/badge.svg)|
 
 
 <br/>

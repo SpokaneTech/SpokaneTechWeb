@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 from web.utilities.html_utils import fetch_content, fetch_content_with_playwright
 
 
-def get_end_datetime(datetime_string: str, time_string: str) -> datetime:
+def get_end_datetime(datetime_string: str, time_string: str) -> datetime | None:
     """create a datetime object with timezone information from information parsed from a meetup.com event page
 
     Args:
@@ -15,26 +15,29 @@ def get_end_datetime(datetime_string: str, time_string: str) -> datetime:
     Returns:
         datetime: datetime object with timezone information
     """
+    try:
+        # Extract the date part and timezone offset from the first string
+        date_part = datetime_string.split("T")[0]
+        timezone_offset = datetime_string[-6:]  # Extract the offset (-08:00)
 
-    # Extract the date part and timezone offset from the first string
-    date_part = datetime_string.split("T")[0]
-    timezone_offset = datetime_string[-6:]  # Extract the offset (-08:00)
+        # Convert the timezone offset into a timedelta and create a timezone object
+        offset_hours, offset_minutes = map(int, timezone_offset.split(":"))
+        offset = timedelta(hours=offset_hours, minutes=offset_minutes)
+        tz = timezone(offset)
 
-    # Convert the timezone offset into a timedelta and create a timezone object
-    offset_hours, offset_minutes = map(int, timezone_offset.split(":"))
-    offset = timedelta(hours=offset_hours, minutes=offset_minutes)
-    tz = timezone(offset)
+        # Parse the time string
+        time_part = time_string.split("   ")[0].strip()  # Get the time part
+        time_obj = datetime.strptime(time_part.replace("  ", ""), "%I:%M %p")  # Parse 12-hour format
 
-    # Parse the time string
-    time_part = time_string.split("   ")[0].strip()  # Get the time part
-    time_obj = datetime.strptime(time_part, "%I:%M %p")  # Parse 12-hour format
+        # Combine date and time into a new datetime object
+        combined_datetime = datetime.combine(datetime.strptime(date_part, "%Y-%m-%d").date(), time_obj.time())
 
-    # Combine date and time into a new datetime object
-    combined_datetime = datetime.combine(datetime.strptime(date_part, "%Y-%m-%d").date(), time_obj.time())
-
-    # Apply the extracted timezone to the combined datetime
-    combined_datetime_with_tz = combined_datetime.replace(tzinfo=tz)
-    return combined_datetime_with_tz
+        # Apply the extracted timezone to the combined datetime
+        combined_datetime_with_tz = combined_datetime.replace(tzinfo=tz)
+        return combined_datetime_with_tz
+    except Exception as err:
+        print(err)
+        return None
 
 
 def get_event_information(url: str) -> dict:
@@ -51,6 +54,7 @@ def get_event_information(url: str) -> dict:
     """
     try:
         page_content = fetch_content_with_playwright(url)
+        # page_content = fetch_content(url)
         soup = BeautifulSoup(page_content, "html.parser")
 
         event_info: dict = {}
@@ -101,6 +105,7 @@ def get_event_links(url: str) -> list:
         list: list of urls for upcoming events as available on the group page on meetup.com
     """
     page_content = fetch_content_with_playwright(url)
+    # page_content = fetch_content(url)
     soup = BeautifulSoup(page_content, "html.parser")
     event_list = soup.find("ul", class_="flex w-full flex-col space-y-5 px-4 md:px-0")
     if event_list:

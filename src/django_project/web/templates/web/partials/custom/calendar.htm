@@ -115,7 +115,7 @@
                                 hx-get="{% url event_detail_url event.pk %}"
                                 hx-target="#modal_wrapper"
                                 data-bs-toggle="modal"
-                                data-bs-target="#modal_wrapper">{{event.start_datetime|timezone:"America/Los_Angeles"|date:"j"}} {{ event }}
+                                data-bs-target="#modal_wrapper">{{ event }}
                                 </div>
                                     {% else %}
                                     <div class="event">{{ event }}</div>
