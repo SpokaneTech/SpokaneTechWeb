@@ -40,7 +40,7 @@ services:
     build:
       context: ../..
       dockerfile: src/docker/Dockerfile 
-    command: celery -A core worker -l info -Q normal
+    command: celery -A core worker -l info
     depends_on:
       - redis
       - db
