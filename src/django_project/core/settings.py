@@ -259,6 +259,7 @@ PROJECT_SOURCE = "https://github.com/SpokaneTech/SpokaneTechWeb"
 
 # celery settings
 broker_url = env.str("CELERY_BROKER_URL", None)
+broker_connection_retry_on_startup = True
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_BEAT_SCHEDULER = env.str("BEAT_SCHEDULER", "django_celery_beat.schedulers:DatabaseScheduler")
 CELERY_BROKER_URL = env.str("CELERY_BROKER_URL", None)

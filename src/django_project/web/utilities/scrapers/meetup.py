@@ -54,6 +54,7 @@ def get_event_information(url: str) -> dict:
     """
     try:
         page_content = fetch_content_with_playwright(url)
+        # page_content = fetch_content(url)
         soup = BeautifulSoup(page_content, "html.parser")
 
         event_info: dict = {}
@@ -104,6 +105,7 @@ def get_event_links(url: str) -> list:
         list: list of urls for upcoming events as available on the group page on meetup.com
     """
     page_content = fetch_content_with_playwright(url)
+    # page_content = fetch_content(url)
     soup = BeautifulSoup(page_content, "html.parser")
     event_list = soup.find("ul", class_="flex w-full flex-col space-y-5 px-4 md:px-0")
     if event_list:

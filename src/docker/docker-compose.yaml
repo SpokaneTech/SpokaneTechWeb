@@ -32,7 +32,7 @@ services:
     ports:
       - "6379:6379"
 
-  celery_worker:
+  worker:
     image: spokanetech-django:latest
     container_name: worker
     env_file:
@@ -45,7 +45,7 @@ services:
       - redis
       - db
 
-  celery_beat:
+  beat:
     image: spokanetech-django:latest
     container_name: beat
     env_file:
@@ -58,25 +58,21 @@ services:
       - redis
       - db
 
-  # flower:
-  #   image: spokanetech-celery-flower
-  #   container_name: celery_flower
-  #   build:
-  #     context: ../..
-  #     dockerfile: src/docker/Dockerfile 
-  #   command: celery -A core flower --loglevel=info
-  #   volumes:
-  #     - .:/app
-  #   env_file:
-  #     - .env.compose
-  #   depends_on:
-  #     - redis
-  #     - db
-  #   networks:
-  #     - app_network
-
+  flower:
+    image: spokanetech-django:latest
+    container_name: flower
+    env_file:
+      - .env.compose
+    build:
+      context: ../..
+      dockerfile: src/docker/Dockerfile 
+    command: celery -A core flower -l=info --broker=redis://redis:6379
+    ports:
+      - "5555:5555"
+    depends_on:
+      - redis
+      - db
 
 volumes:
   postgres_data:
   static_volume:
-
