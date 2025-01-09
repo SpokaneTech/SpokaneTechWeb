@@ -70,3 +70,4 @@ src/envs/*
 src/logs
 django_project/yarn.lock
 django_project/__version__.py
+src/docker/.env.compose
