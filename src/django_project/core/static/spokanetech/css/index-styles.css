@@ -118,6 +118,12 @@ main {
     font-style: italic;
 }
 
+.hero-title {
+    font-size: 4.5rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
 .hero h1 {
     font-size: 4.5rem;
     font-weight: bold;
