@@ -2,7 +2,13 @@ import logging
 import time
 
 from celery import shared_task
-from web.models import Event, TechGroup
+from web.models import Event, Link, Tag, TechGroup
+from web.utilities.scrapers.eventbrite import (
+    create_google_map_link,
+    get_event_details,
+    get_events_for_organization,
+    get_organization_details,
+)
 from web.utilities.scrapers.meetup import (
     get_event_information,
     get_event_links,
@@ -26,13 +32,37 @@ def ingest_meetup_group_details(group_pk, url: str):
     return f"updated details for {group.name}"
 
 
+@shared_task(time_limit=900, max_retries=3, name="web.ingest_eventbrite_organization_details")
+def ingest_eventbrite_organization_details(group_pk):
+    updated = False
+    group = TechGroup.objects.get(pk=group_pk)
+    link = group.links.filter(name=f"{group.name} {group.platform.name} page").distinct()[0]
+    eb_group_id = link.url.split("-")[-1]
+
+    organization_details = get_organization_details(eb_group_id)
+    description = organization_details["long_description"]["text"]
+    if description:
+        if group.description != description:
+            group.update(description=description)
+            updated = True
+    if organization_details.get("website"):
+        website = organization_details["website"]
+        if website and not group.links.filter(url=website):
+            link = Link.objects.create(url=website, name="website")
+            group.links.add(link)
+            updated = True
+    if updated:
+        return f"updated details for {group.name}"
+    return f"no updates needed for {group.name}"
+
+
 @shared_task(time_limit=900, max_retries=3, name="web.ingest_future_meetup_events")
 def ingest_future_meetup_events(group_pk):
     group = TechGroup.objects.get(pk=group_pk)
     if not group:
         return f"group with pk {group_pk} not found"
     event_count = 0
-    for link in group.links.filter(name=f"""{group.name} {group.platform} page""").distinct():
+    for link in group.links.filter(name=f"{group.name} {group.platform.name} page").distinct():
         event_links = get_event_links(f"{link.url}events/?type=upcoming")
         for event_link in event_links:
             event_info = get_event_information(event_link)
@@ -50,14 +80,53 @@ def ingest_future_meetup_events(group_pk):
     return f"added {event_count}/{len(event_links)} for {group.name}"
 
 
+@shared_task(time_limit=900, max_retries=3, name="web.ingest_future_eventbrite_events")
+def ingest_future_eventbrite_events(group_pk):
+    group = TechGroup.objects.get(pk=group_pk)
+    if not group:
+        return f"group with pk {group_pk} not found"
+    event_count = 0
+    link = group.links.filter(name=f"{group.name} {group.platform.name} page").distinct()
+    eb_group_id = link.url.split("-")[-1]
+    event_list = get_events_for_organization(eb_group_id)
+    for item in event_list:
+        event_details = get_event_details(item["id"])
+        location_data = event_details["primary_venue"]
+        tag_data = event_details["tags"]
+
+        event_data = {
+            "group": group,
+            "name": item["name"]["text"],
+            "description": item["description"]["text"],
+            "url": item["url"],
+            "social_platform_id": item["id"],
+            "start_datetime": item["start"]["utc"],
+            "end_datetime": item["end"]["utc"],
+            "location_name": location_data["name"],
+            "location_address": location_data["address"]["localized_address_display"],
+            "map_link": create_google_map_link(location_data["address"]["localized_address_display"]),
+        }
+
+        event, is_new = Event.objects.update_or_create(group=group, social_platform_id=item["id"], defaults=event_data)
+        if is_new:
+            event_count += 1
+        for tag in tag_data:
+            obj = Tag.objects.get_or_create(value=tag["display_name"], defaults={"value": tag["display_name"]})[0]
+            event.tags.add(obj)
+    return f"added {event_count}/{len(event_list)} for {group.name}"
+
+
 @shared_task(time_limit=900, max_retries=3, name="web.launch_group_detail_ingestion")
 def launch_group_detail_ingestion():
     """parent task for ingesting details for all tech groups"""
-    tech_group_list = TechGroup.objects.filter(enabled=True, platform__name="Meetup")
-    for group in tech_group_list:
+    for group in TechGroup.objects.filter(enabled=True):
         for link in group.links.filter(name=f"""{group.name} {group.platform} page"""):
-            job = ingest_meetup_group_details.s(group.pk, link.url)
-            job.apply_async()
+            if group.platform.name.lower() == "meetup":
+                job = ingest_meetup_group_details.s(group.pk, link.url)
+                job.apply_async()
+            elif group.platform.name.lower() == "eventbrite":
+                job = ingest_eventbrite_organization_details.s(group.pk)
+                job.apply_async()
 
 
 @shared_task(time_limit=900, max_retries=0, name="web.launch_event_ingestion")
