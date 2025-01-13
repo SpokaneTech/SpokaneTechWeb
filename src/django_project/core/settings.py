@@ -76,10 +76,10 @@ MIDDLEWARE = [
 
 if DEPLOYMENT_ENV in ["local", "dev"]:
     INSTALLED_APPS += [
-        "debug_toolbar",
+        "debug_toolbar",  # pragma: no cover
     ]
     MIDDLEWARE += [
-        "debug_toolbar.middleware.DebugToolbarMiddleware",
+        "debug_toolbar.middleware.DebugToolbarMiddleware",  # pragma: no cover
     ]
 
 
