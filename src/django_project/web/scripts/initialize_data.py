@@ -8,8 +8,8 @@ def create_groups() -> None:
         {
             "name": "Business Brew",
             "icon": """<i class="fa-solid fa-mug-saucer"></i>""",
-            "platform": "Eventbright",
-            "platform page": "",
+            "platform": "Eventbrite",
+            "platform page": "https://www.eventbrite.com/o/business-brew-80655815043",
         },
         {
             "name": "Greater Spokane Inc",
@@ -20,20 +20,32 @@ def create_groups() -> None:
         {
             "name": "Ignite Northwest",
             "icon": """<i class="fa-solid fa-fire-flame-curved"></i>""",
-            "platform": "Eventbright",
-            "platform page": "",
+            "platform": "Eventbrite",
+            "platform page": "https://www.eventbrite.com/o/ignite-northwest-26948291755",
         },
         {
             "name": "INCH360",
             "icon": """<i class="fa-solid fa-shield-halved"></i>""",
-            "platform": "Eventbright",
-            "platform page": "",
+            "platform": "Eventbrite",
+            "platform page": "https://www.eventbrite.com/o/inch360-72020528223",
+        },
+        {
+            "name": "LaunchPad INW",
+            "icon": """<i class="fa-solid fa-rocket"></i>""",
+            "platform": "Eventbrite",
+            "platform page": "https://www.eventbrite.com/o/launchpad-inw-637389713",
+        },
+        {
+            "name": "Innovation Collective",
+            "icon": """<i class="fa-regular fa-lightbulb"></i>""",
+            "platform": "Eventbrite",
+            "platform page": "https://www.eventbrite.com/o/innovation-collective-coeur-dalene-id-45018125323",
         },
         {
             "name": "SP3NW",
             "icon": """<i class="fa-solid fa-business-time"></i>""",
-            "platform": "Other",
-            "platform page": "",
+            "platform": "Eventbrite",
+            "platform page": "https://www.eventbrite.com/o/sp3nw-33773699489",
         },
         {
             "name": "Spokane DevOps Meetup",
@@ -119,8 +131,8 @@ def create_social_platforms() -> None:
             "base_url": "www.discord.com",
         },
         {
-            "name": "EventBright",
-            "base_url": "www.eventbright.com",
+            "name": "Eventbrite",
+            "base_url": "www.eventbrite.com",
         },
         {
             "name": "Facebook",

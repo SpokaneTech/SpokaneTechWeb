@@ -15,7 +15,10 @@ django.setup()
 @patch("django.conf.settings", new_callable=lambda: MagicMock(CELERY_USE_SSL=True))
 def test_celery_app_initialization_with_ssl(mock_settings, mock_celery):
     """Test that Celery app initializes with SSL settings if CELERY_USE_SSL is True."""
+    import core.celery
     from core.celery import celery_app
+
+    importlib.reload(core.celery)
 
     # Verify that Celery was called with the expected arguments
     mock_celery.assert_called_once_with(

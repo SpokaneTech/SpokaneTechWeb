@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     # third party apps
+    "django_celery_beat",
     "django_extensions",
     "django_filters",
     "handyhelpers",
@@ -75,10 +76,10 @@ MIDDLEWARE = [
 
 if DEPLOYMENT_ENV in ["local", "dev"]:
     INSTALLED_APPS += [
-        "debug_toolbar",
+        "debug_toolbar",  # pragma: no cover
     ]
     MIDDLEWARE += [
-        "debug_toolbar.middleware.DebugToolbarMiddleware",
+        "debug_toolbar.middleware.DebugToolbarMiddleware",  # pragma: no cover
     ]
 
 
@@ -268,3 +269,7 @@ CELERY_RESULT_SERIALIZER = "json"
 CELERY_TASK_RESULT_EXPIRES = 3600
 CELERY_TASK_SERIALIZER = "json"
 CELERY_USE_SSL = env.bool("CELERY_USE_SSL", False)
+
+
+# third party integrations
+EVENTBRITE_API_KEY = env.str("EVENTBRITE_API_KEY", None)

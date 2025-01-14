@@ -30,5 +30,13 @@ def ingest_meetup_data():
                         )
 
 
+def ingest_eventbright_data():
+    groups = TechGroup.objects.filter(enabled=True, platform__name="EventBright")
+    for group in groups:
+        for link in group.links.filter(name=f"""{group.name} {group.platform} page""").distinct():
+            print(f"INFO: ingest Eventbright.com events for {group.name}")
+
+
 def run():
-    ingest_meetup_data()
+    # ingest_meetup_data()
+    ingest_eventbright_data()
