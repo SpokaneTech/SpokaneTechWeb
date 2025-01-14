@@ -86,7 +86,7 @@ def ingest_future_eventbrite_events(group_pk):
     if not group:
         return f"group with pk {group_pk} not found"
     event_count = 0
-    link = group.links.filter(name=f"{group.name} {group.platform.name} page").distinct()
+    link = group.links.filter(name=f"{group.name} {group.platform.name} page").distinct()[0]
     eb_group_id = link.url.split("-")[-1]
     event_list = get_events_for_organization(eb_group_id)
     for item in event_list:
@@ -113,7 +113,7 @@ def ingest_future_eventbrite_events(group_pk):
         for tag in tag_data:
             obj = Tag.objects.get_or_create(value=tag["display_name"], defaults={"value": tag["display_name"]})[0]
             event.tags.add(obj)
-    return f"added {event_count}/{len(event_list)} for {group.name}"
+    return f"added {event_count} new events for {group.name}"
 
 
 @shared_task(time_limit=900, max_retries=3, name="web.launch_group_detail_ingestion")
@@ -129,10 +129,20 @@ def launch_group_detail_ingestion():
                 job.apply_async()
 
 
-@shared_task(time_limit=900, max_retries=0, name="web.launch_event_ingestion")
-def launch_event_ingestion():
-    """parent task for ingesting future events for all tech groups"""
+@shared_task(time_limit=900, max_retries=0, name="web.launch_meetup_event_ingestion")
+def launch_meetup_event_ingestion():
+    """parent task for ingesting future events for tech groups on Meetup"""
     tech_group_list = TechGroup.objects.filter(enabled=True, platform__name="Meetup")
     for group in tech_group_list:
         job = ingest_future_meetup_events.s(group.pk)
+        job.apply_async()
+
+
+@shared_task(time_limit=900, max_retries=0, name="web.launch_eventbrite_event_ingestion")
+def launch_eventbrite_event_ingestion():
+    """parent task for ingesting future events for tech groups on Eventbrite"""
+
+    tech_group_list = TechGroup.objects.filter(enabled=True, platform__name="Eventbrite")
+    for group in tech_group_list:
+        job = ingest_future_eventbrite_events.s(group.pk)
         job.apply_async()
