@@ -82,6 +82,12 @@ if DEPLOYMENT_ENV in ["local", "dev"]:
         "debug_toolbar.middleware.DebugToolbarMiddleware",  # pragma: no cover
     ]
 
+SECURE_HSTS_SECONDS = 0
+SECURE_SSL_REDIRECT = False
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+CSRF_TRUSTED_ORIGINS = [f"https://{host}" for host in ALLOWED_HOSTS]
+
 
 ROOT_URLCONF = "core.urls"
 
@@ -175,10 +181,10 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 BASE_TEMPLATE = "base.htm"
 LOGIN_URL = "/accounts/login/"
-LOGIN_REDIRECT_URL = "/userextensions/user_login_redirect"
-LOGIN_REDIRECT_URL_DEFAULT = "/"
+# LOGIN_REDIRECT_URL = "/userextensions/user_login_redirect"
+# LOGIN_REDIRECT_URL_DEFAULT = "/"
 SESSION_COOKIE_AGE = env.int("SESSION_COOKIE_AGE", 28800)
-SKIP_FIXED_URL_LIST = ["/userextensions/list_recents/", "/userextensions/user_login_redirect/", "/"]
+# SKIP_FIXED_URL_LIST = ["/userextensions/list_recents/", "/userextensions/user_login_redirect/", "/"]
 REQUIRED_LOGIN_IGNORE_PATHS = [
     "/accounts/login/",
     "/accounts/logout/",
