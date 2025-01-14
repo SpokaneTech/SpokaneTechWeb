@@ -44,7 +44,7 @@ class Event(HandyHelperBaseModel):
     image = models.ImageField(upload_to="tech_events/", blank=True, null=True)
 
     class Meta:
-        ordering = ["-start_datetime"]
+        ordering = ["start_datetime"]
 
     def __str__(self) -> str:
         return self.name

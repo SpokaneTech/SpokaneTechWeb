@@ -326,13 +326,19 @@ footer .copyright {
 }
 .list-card .title {
     font-weight: bold;
-    font-size: 2.5rem;
+    font-size: 1.25rem;
 }
 .list-card .description {
     font-weight: bold;
     font-size: 1.1rem;
     margin-top: 1rem;
     margin-bottom: 1rem;
+}
+.list-card .date {
+    font-size: .75rem;
+}
+.list-card .techgroup {
+    font-size: .75rem;
 }
 
 .tag-container {
