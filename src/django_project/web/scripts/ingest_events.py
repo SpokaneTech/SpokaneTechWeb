@@ -1,4 +1,10 @@
 from web.models import Event, TechGroup
+from web.tasks import (
+    ingest_eventbrite_organization_details,
+    ingest_future_eventbrite_events,
+    ingest_future_meetup_events,
+    ingest_meetup_group_details,
+)
 from web.utilities.scrapers.meetup import (
     get_event_information,
     get_event_links,
@@ -30,13 +36,35 @@ def ingest_meetup_data():
                         )
 
 
-def ingest_eventbright_data():
-    groups = TechGroup.objects.filter(enabled=True, platform__name="Eventbrite")
-    for group in groups:
-        for link in group.links.filter(name=f"""{group.name} {group.platform} page""").distinct():
-            print(f"INFO: ingest Eventbright.com events for {group.name}")
+def get_eventbright_events():
+    tech_group_list = TechGroup.objects.filter(enabled=True, platform__name="Eventbrite")
+    for group in tech_group_list:
+        job = ingest_future_eventbrite_events.s(group.pk)
+        job.apply()
+
+
+def get_meetup_events():
+    tech_group_list = TechGroup.objects.filter(enabled=True, platform__name="Meetup")
+    for group in tech_group_list:
+        job = ingest_future_meetup_events.s(group.pk)
+        job.apply()
+
+
+def get_eventbrite_organization_details():
+    for group in TechGroup.objects.filter(enabled=True, platform__name="Eventbrite"):
+        job = ingest_eventbrite_organization_details.s(group.pk)
+        job.apply()
+
+
+def get_meetup_group_details():
+    for group in TechGroup.objects.filter(enabled=True, platform__name="Meetup"):
+        link = group.links.filter(name=f"{group.name} {group.platform.name} page").distinct()[0]
+        job = ingest_meetup_group_details.s(group.pk, link.url)
+        job.apply()
 
 
 def run():
-    # ingest_meetup_data()
-    ingest_eventbright_data()
+    get_eventbright_events()
+    get_meetup_events()
+    get_eventbrite_organization_details()
+    get_meetup_group_details()

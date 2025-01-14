@@ -26,10 +26,20 @@ def test_task():
 
 @shared_task(time_limit=900, max_retries=3, name="web.ingest_meetup_group_details")
 def ingest_meetup_group_details(group_pk, url: str):
+    updated = False
     group = TechGroup.objects.get(pk=group_pk)
-    group.description = get_group_description(url)
-    group.save()
-    return f"updated details for {group.name}"
+    # group.description = get_group_description(url)
+    # group.save()
+    group = TechGroup.objects.get(pk=group_pk)
+    group_details = get_group_description(url)
+    if group.description != group_details:
+        group.description = group_details
+        group.save()
+        updated = True
+    if updated:
+        return f"updated details for {group.name}"
+    else:
+        return f"no updates needed for {group.name}"
 
 
 @shared_task(time_limit=900, max_retries=3, name="web.ingest_eventbrite_organization_details")
