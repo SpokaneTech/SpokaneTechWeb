@@ -15,6 +15,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Home of the Spokane and Inland Northwest tech community">
+    <meta name="keywords" content="spokane, spokanetech, tech, technology">
+    <meta property="og:title" content="Spokane Tech">
+    <meta property="og:description" content="Home of the Spokane and Inland Northwest tech community">
+    <meta name="robots" content="noindex, nofollow">
 
     <link rel="apple-touch-icon" sizes="180x180" href="{% static 'spokanetech/img/apple-touch-icon.png' %}">
     <link rel="icon" type="image/png" sizes="32x32" href="{% static 'spokanetech/img/favicon-32x32.png' %}">
@@ -36,7 +40,7 @@
                 <li><a href="" hx-get="{% url 'web:get_events' display='list' %}" hx-target="#body_main" hx-push-url="{% url 'web:get_events' display='list' %}" class="tippy-tooltip" data-tippy-content="List upcoming events" aria-label="List upcoming events">
                     <i class="fa-solid fa-list-check"></i></a>
                 </li>
-                <li><a hx-get="{% url 'web:event_calendar' year=0 month=0 %}" hx-target="#body_main" hx-push-url="{% url 'web:event_calendar' year=0 month=0 %}" class="tippy-tooltip" data-tippy-content="Calendar of events"> 
+                <li><a href="" hx-get="{% url 'web:event_calendar' year=0 month=0 %}" hx-target="#body_main" hx-push-url="{% url 'web:event_calendar' year=0 month=0 %}" class="tippy-tooltip" data-tippy-content="Calendar of events"> 
                   <i class="fa-solid fa-calendar-days"></i></a>
                 </li>
                 {% comment %}
