@@ -59,14 +59,11 @@ services:
       - db
 
   flower:
-    image: spokanetech-django:latest
+    image: mher/flower
     container_name: flower
     env_file:
       - .env.compose
-    build:
-      context: ../..
-      dockerfile: src/docker/Dockerfile 
-    command: celery -A core flower -l=info --broker=redis://redis:6379
+    command: ["celery", "flower", "--broker=redis://redis:6379"]
     ports:
       - "5555:5555"
     depends_on:
