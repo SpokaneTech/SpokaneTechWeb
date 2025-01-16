@@ -53,7 +53,7 @@ services:
     build:
       context: ../..
       dockerfile: src/docker/Dockerfile 
-    command: celery -A core beat -l info
+    command: celery -A core beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
     depends_on:
       - redis
       - db
