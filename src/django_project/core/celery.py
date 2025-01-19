@@ -1,7 +1,11 @@
+import os
 import ssl
 
 from celery import Celery
 from django.conf import settings
+
+if "DJANGO_SETTINGS_MODULE" not in os.environ:
+    os.environ["DJANGO_SETTINGS_MODULE"] = "core.settings"
 
 use_ssl = getattr(settings, "CELERY_USE_SSL", True)
 if use_ssl:
