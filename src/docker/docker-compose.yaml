@@ -60,11 +60,11 @@ services:
       - db
 
   flower:
-    image: mher/flower
+    image: spokanetech-django:latest
     container_name: flower
     env_file:
       - .env.compose
-    command: ["celery", "--config=flower_config.py", "flower", "--broker=redis://redis:6379"]
+    command: ["celery", "-A", "core", "--config=flowerconfig.py", "flower"]
     ports:
       - "5555:5555"
     depends_on:
