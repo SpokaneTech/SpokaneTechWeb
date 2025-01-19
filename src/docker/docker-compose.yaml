@@ -29,6 +29,7 @@ services:
   redis:
     image: redis:7.2-alpine
     container_name: redis
+    restart: unless-stopped
     ports:
       - "6379:6379"
 
@@ -63,7 +64,7 @@ services:
     container_name: flower
     env_file:
       - .env.compose
-    command: ["celery", "flower", "--broker=redis://redis:6379"]
+    command: ["celery", "--config=flower_config.py", "flower", "--broker=redis://redis:6379"]
     ports:
       - "5555:5555"
     depends_on:
