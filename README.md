@@ -21,42 +21,44 @@ Home of SpokaneTech.org, an online hub for Spokane's tech events and groups. It'
 ### prerequisites
 1. git installed on system
 2. python installed on system (3.10+ recommended)
-3. access to the [SpokaneTech](https://github.com/SpokaneTech) github organization
 
 
-### git config (optional)
-To enable pre-commit code quality checks, update the location of git hooks with the following command:
-
-```shell
-git config core.hooksPath .github/hooks
-```
-
-Note: to make a commit with the precommit hooks temporarily disabled, run the following:
-
-```
-git commit --no-verify
-```
-
-
-
-### setup steps (in a terminal)
+### local git setup
 1. clone the repo:
 
     ```
     git git@github.com:SpokaneTech/SpokaneTechWeb.git
     ```
 
-2. cd into the repo directory
+2. git config (optional)
+To enable pre-commit code quality checks, update the location of git hooks with the following command:
+
+    ```shell
+    git config core.hooksPath .github/hooks
+    ```
+
+    Note: to make a commit with the precommit hooks temporarily disabled, run the following:
+
+    ```
+    git commit --no-verify
+    ```
+
+<br/>
+
+
+### local environment setup steps
+
+1. cd into the repo directory
     ```
     cd SpokaneTechWeb
     ```
 
-3. create a python virtual environment
+2. create a python virtual environment
     ```
     python -m venv venv
     ```
 
-4. activate the python virtual environment
+3. activate the python virtual environment
     
     for linux, mac, or wsl:
     ```
@@ -68,35 +70,42 @@ git commit --no-verify
     venv\Scripts\activate
     ```
 
-5. install the python dependencies
+4. install the python dependencies
     ```
     pip install .[dev]
     ```
 
-6. (optional) create a custom .env file and update contents as applicable
+5. (optional) create a custom .env file and update contents as applicable
     ```
     cp src/envs/.env.template src/envs/.env.local
     ```
 
-7. cd to the django_project directory
+6. cd to the django_project directory
     ```
     cd src/django_project
     ```
 
-8. create a local database by running django migrations
+7. create a local database by running django migrations
     ```
     ./manage.py migrate
     ```
 
-9. create a local admin user
+8. create a local admin user
     ```
     ./manage.py add_superuser --group admin
     ```
 
-10. generate some local test data
+9. (optional) add platforms and groups to your local database
     ```
-    ./manage.py runscript generate_dev_data
+    ./manage.py runscript init_data
     ```
+
+10. (optional) ingest future events to your local database
+    ```
+    ./manage.py runscript ingest_events
+    ```
+    Note: this requires playwright and its dependencies to be installed on your system. 
+    ```playwright install --with-deps```
 
 11. start the local demo server
     ```

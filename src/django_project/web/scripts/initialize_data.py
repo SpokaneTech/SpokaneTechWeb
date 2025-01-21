@@ -1,4 +1,8 @@
 from web.models import Link, SocialPlatform, TechGroup
+from web.tasks import (
+    ingest_eventbrite_organization_details,
+    ingest_meetup_group_details,
+)
 
 
 def create_groups() -> None:
@@ -154,6 +158,21 @@ def create_social_platforms() -> None:
         SocialPlatform.objects.update_or_create(name=data["name"], defaults=data)
 
 
+def get_eventbrite_organization_details():
+    for group in TechGroup.objects.filter(enabled=True, platform__name="Eventbrite"):
+        job = ingest_eventbrite_organization_details.s(group.pk)
+        job.apply()
+
+
+def get_meetup_group_details():
+    for group in TechGroup.objects.filter(enabled=True, platform__name="Meetup"):
+        link = group.links.filter(name=f"{group.name} {group.platform.name} page").distinct()[0]
+        job = ingest_meetup_group_details.s(group.pk, link.url)
+        job.apply()
+
+
 def run():
     create_social_platforms()
     create_groups()
+    get_eventbrite_organization_details()
+    get_meetup_group_details()
