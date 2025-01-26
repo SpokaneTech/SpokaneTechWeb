@@ -16,6 +16,13 @@ class AboutContentView(HtmxOptionView):
     template_name = "web/full/custom/about.html"
 
 
+class DevelopContentView(HtmxOptionView):
+    """Render the 'development' page"""
+
+    htmx_template_name = "web/partials/custom/develop.htm"
+    template_name = "web/full/custom/develop.html"
+
+
 class EventCalendarView(HtmxCalendarView):
     """Render a monthly calendar view of Event instances"""
 
@@ -32,6 +39,10 @@ class IndexContentView(HtmxOptionView):
 
     htmx_template_name = "web/partials/custom/index.htm"
     template_name = "web/full/custom/index.html"
+    context = {
+        "event_count": Event.objects.filter(start_datetime__gte=timezone.now()).count(),
+        "group_count": TechGroup.objects.filter(enabled=True).count(),
+    }
 
 
 class TechEventView(HtmxOptionDetailView):

@@ -121,7 +121,6 @@ main {
 .hero-title {
     font-size: 4.5rem;
     font-weight: bold;
-    margin-bottom: 1rem;
 }
 
 .hero h1 {
@@ -215,12 +214,25 @@ footer .copyright {
     color: var(--accent-color);
     border-color: var(--accent-color);
 }
+.hero-buttons .btn-light {
+    background-color: transparent;
+    color: var(--light);
+    border-color: var(--light);
+}
+
 
 .hero-buttons .btn-outline:hover {
     background-color: var(--accent-color);
     color: var(--light);
     box-shadow: 0rem 0.25rem 1rem -0.25rem var(--accent-color);
 }
+.hero-buttons .btn-light:hover {
+    background-color: var(--accent-color);
+    color: var(--light);
+    border-color: var(--accent-color);
+    box-shadow: 0rem 0.25rem 1rem -0.25rem var(--accent-color);
+}
+
 
 .empty-queryset {
     color: var(--light);
@@ -299,6 +311,39 @@ footer .copyright {
   .highlight {
     color: var(--accent, hsla(169, 59%, 45%, 1));
   }
+
+.index-card-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 3rem;
+    padding: 3rem;
+}
+.index-card {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 0.5rem;
+    box-shadow: 0rem 0.25rem 1rem -0.25rem var(--light, rgb(255, 255, 255));
+    padding: 20px;
+    width: 18rem; /* Fixed width */
+    height: 8rem; /* Fixed height */
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--light, rgb(255, 255, 255));
+    cursor: pointer;
+}
+.index-card .title {
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+.index-card:hover {
+    box-shadow: 0 4px 8px var(--accent, hsla(169, 59%, 45%, 1));
+}
+.index-card:hover .title {
+    color: var(--accent, hsla(169, 59%, 45%, 1));
+}
 
 
   .list-card-container {
