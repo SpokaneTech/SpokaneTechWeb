@@ -51,6 +51,25 @@ class TestCalendarView(TestCase):
         self.assertTemplateUsed(response, "web/partials/custom/calendar.htm")
 
 
+class TestDevelopView(TestCase):
+    def setUp(self):
+        super(TestDevelopView, self).setUp()
+        self.headers = dict(HTTP_HX_REQUEST="true")
+        self.url = reverse("web:develop")
+
+    def test_get(self):
+        """verify call to DevelopContentView view with a non-htmx call"""
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "web/full/custom/develop.html")
+
+    def test_get_htmx(self):
+        """verify call to DevelopContentView view with a htmx call"""
+        response = self.client.get(self.url, **self.headers)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "web/partials/custom/develop.htm")
+
+
 class TestIndexView(TestCase):
     def setUp(self):
         super(TestIndexView, self).setUp()
