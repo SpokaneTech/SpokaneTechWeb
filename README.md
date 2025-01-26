@@ -1,6 +1,12 @@
 # SpokaneTech.org
 Home of SpokaneTech.org, an online hub for Spokane's tech events and groups. It's not just a website; it's a community-driven, open-source initiative aimed at fostering learning and collaboration among aspiring and seasoned tech enthusiasts.
 
+
+See the live site here:
+https://www.spokanetech.org
+
+Follow development here:
+https://spokanetech.github.io/blog/building-spokane-tech/intro/
 <br/>
 
 ## Code Quality

@@ -1,23 +1,29 @@
 <section class="hero fade-in-blur" style="--fade-duration: .5s;">
-    <div class="hero-content">
-        <div class="hero-title"><strong class="accent highlight">Your</strong> Inland Northwest tech community</div>
+    <div class="container hero-content text-center">
+        <h1><strong class="accent highlight">Your </strong>Inland Northwest Tech Community</h1>
         <div class="hero-buttons">
             <button class="btn btn-outline" hx-get="{% url 'web:about' %}" hx-target="#body_main" hx-push-url="{% url 'web:about' %}">Learn More</button>
+            <button class="btn btn-light" hx-get="{% url 'web:develop' %}" hx-target="#body_main" hx-push-url="{% url 'web:develop' %}">Develop with us</button>
         </div>
     </div>
 </section>
+
 <section class="fade-in-blur" style="--fade-duration: .75s;">
-    <div class="marquee-menu">
-        <ul>
-            <li><a href="#" hx-get="{% url 'web:get_techgroups' display='marquee' %}" hx-target="#marquee">Groups</a></li>
-            <li><a href="#" hx-get="{% url 'web:get_events' display='marquee' %}" hx-target="#marquee">Events</a></li>
-        </ul>
+    <div class="index-card-container blur-group-container">
+        <div class="index-card"
+        hx-get="{% url 'web:get_techgroups' display='list' %}" 
+        hx-target="#body_main" 
+        hx-push-url="{% url 'web:get_techgroups' display='list' %}"   
+        >
+            <div class="title">{{ group_count }} groups strong</div>
+        </div>
+
+        <div class="index-card"
+        hx-get="{% url 'web:get_events' display='list' %}" 
+        hx-target="#body_main" 
+        hx-push-url="{% url 'web:get_events' display='list' %}"
+        >
+            <div class="title">{{ event_count }} upcoming events</div>
+        </div>
     </div>
-    <div class="marquee-wrapper blur-group-container fade-in-blur" id="marquee"
-    style="--fade-duration: 1.5s;
-           --marquee-item-width: 280px; 
-           --marquee-item-height: 150px; 
-           --marquee-duration: 90s"
-    hx-get="{% url 'web:get_techgroups' display='marquee' %}" hx-trigger="load"
-    >
 </section>
