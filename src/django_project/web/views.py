@@ -39,10 +39,13 @@ class IndexContentView(HtmxOptionView):
 
     htmx_template_name = "web/partials/custom/index.htm"
     template_name = "web/full/custom/index.html"
-    context = {
-        "event_count": Event.objects.filter(start_datetime__gte=timezone.now()).count(),
-        "group_count": TechGroup.objects.filter(enabled=True).count(),
-    }
+
+    def get(self, request):
+        self.context = {
+            "event_count": Event.objects.filter(start_datetime__gte=timezone.now()).count(),
+            "group_count": TechGroup.objects.filter(enabled=True).count(),
+        }
+        return super().get(request)
 
 
 class TechEventView(HtmxOptionDetailView):

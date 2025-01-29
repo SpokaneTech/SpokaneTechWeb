@@ -33,7 +33,7 @@ https://spokanetech.github.io/blog/building-spokane-tech/intro/
 1. clone the repo:
 
     ```
-    git git@github.com:SpokaneTech/SpokaneTechWeb.git
+    git clone git@github.com:SpokaneTech/SpokaneTechWeb.git
     ```
 
 2. git config (optional)
