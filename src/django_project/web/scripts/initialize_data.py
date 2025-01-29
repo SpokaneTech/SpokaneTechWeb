@@ -16,10 +16,16 @@ def create_groups() -> None:
             "platform page": "https://www.eventbrite.com/o/business-brew-80655815043",
         },
         {
-            "name": "Greater Spokane Inc",
-            "icon": """<i class="fa-solid fa-city"></i>""",
+            "name": "DC 509",
+            "icon": """<i class="fa-solid fa-book-skull"></i>""",
             "platform": "Other",
             "platform page": "",
+        },
+        {
+            "name": "Greater Spokane Inc",
+            "icon": """<i class="fa-solid fa-city"></i>""",
+            "platform": "Meetup",
+            "platform page": "https://www.meetup.com/dc-509/",
         },
         {
             "name": "Ignite Northwest",
