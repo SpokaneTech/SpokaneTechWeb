@@ -45,7 +45,7 @@ main {
     text-align: center;
     margin-top: 4rem;
     margin-bottom: 2rem;
-    padding: 3rem;    
+    padding: 0 1rem;
 }
 
 /* Navbar styles */
@@ -58,11 +58,11 @@ main {
     color: var(--light);
     position: fixed;
     width: 100%;
+    max-width: 1320px;
     top: 0;
-    left: 0;
+    left: 50%;
     z-index: 1000;
-    padding-left: 3rem;
-    padding-right: 3rem;
+    transform: translateX(-50%);
 }
 
 .navbar .logo {
@@ -84,6 +84,7 @@ main {
     list-style: none;
     display: flex;
     gap: .25rem;
+    margin-bottom: 0;
 }
 .navbar .menu li {
     display: inline;
@@ -107,11 +108,11 @@ main {
     align-items: center;
     text-align: left;
     color: var(--light);
-    margin-bottom: 2rem;
+    margin-bottom: 5rem;
 }
 
 .hero-content {
-    max-width: 90%;
+    padding: 0;
 }
 
 .hero-content .accent {
@@ -124,9 +125,10 @@ main {
 }
 
 .hero h1 {
-    font-size: 4.5rem;
+    font-size: clamp(2.5rem, 10vmin, 4.5rem);
     font-weight: bold;
-    margin-bottom: 1rem;
+    margin: 2.5rem 0;
+    text-wrap: balance;
 }
 
 .hero h2 {
@@ -174,8 +176,10 @@ footer .copyright {
 
 
 .hero-buttons {
-    margin-top: 2.5rem;
-    margin-bottom: 1rem;
+    display: flex;
+    gap: 1rem;
+    flex-flow: row wrap;
+    justify-content: center;
 }
 
 .hero-buttons .btn {
@@ -185,8 +189,6 @@ footer .copyright {
     border: 2px solid transparent;
     cursor: pointer;
     transition: all 0.3s ease;
-    margin-right: 10px; 
-    margin-top: 10px;
     width: 10rem;
 }
 
@@ -318,7 +320,6 @@ footer .copyright {
     flex-wrap: wrap;
     justify-content: center;
     gap: 3rem;
-    padding: 3rem;
 }
 .index-card {
     background-color: rgba(255, 255, 255, 0.2);
