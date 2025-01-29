@@ -103,7 +103,7 @@ To enable pre-commit code quality checks, update the location of git hooks with 
 
 9. (optional) add platforms and groups to your local database
     ```
-    ./manage.py runscript init_data
+    ./manage.py runscript initialize_data
     ```
 
 10. (optional) ingest future events to your local database
