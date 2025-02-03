@@ -54,14 +54,14 @@ def get_event_information(url: str) -> dict:
     """
     try:
         page_content = fetch_content_with_playwright(url)
-        # page_content = fetch_content(url)
         soup = BeautifulSoup(page_content, "html.parser")
 
         event_info: dict = {}
         event_info["url"] = url
-        event_info["name"] = soup.find(
-            "h1", class_="overflow-hidden overflow-ellipsis text-3xl font-bold leading-snug"
-        ).text
+        event_info["name"] = soup.find("h1", class_="overflow-hidden overflow-ellipsis text-3xl font-bold leading-snug")
+        if event_info["name"]:
+            event_info["name"] = event_info["name"].text
+
         description_div = soup.find("div", class_="break-words")
         event_info["description"] = "".join(str(child) for child in description_div.children)
         start_time_string = soup.find("time")["datetime"]
@@ -105,7 +105,6 @@ def get_event_links(url: str) -> list:
         list: list of urls for upcoming events as available on the group page on meetup.com
     """
     page_content = fetch_content_with_playwright(url)
-    # page_content = fetch_content(url)
     soup = BeautifulSoup(page_content, "html.parser")
     event_list = soup.find("ul", class_="flex w-full flex-col space-y-5 px-4 md:px-0")
     if event_list:
@@ -127,7 +126,6 @@ def get_group_description(url: str) -> str:
     """
     page_content = fetch_content(url)
     soup = BeautifulSoup(page_content, "html.parser")
-
     description_div = soup.find("div", class_="break-words utils_description__BlOCA")
     description = "".join(str(child) for child in description_div.children)
     return description
