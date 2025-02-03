@@ -28,8 +28,6 @@ def test_task():
 def ingest_meetup_group_details(group_pk, url: str):
     updated = False
     group = TechGroup.objects.get(pk=group_pk)
-    # group.description = get_group_description(url)
-    # group.save()
     group = TechGroup.objects.get(pk=group_pk)
     group_details = get_group_description(url)
     if group.description != group_details:

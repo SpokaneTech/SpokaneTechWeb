@@ -533,3 +533,14 @@ footer .copyright {
 .accent:hover {
     color: var(--accent, hsla(169, 59%, 45%, 1));
 }
+
+.cursor {
+    cursor: pointer;
+}
+.hx-link {
+    transition: all 0.3s ease-in-out;
+}
+.hx-link:hover {
+    color: var(--accent, hsla(169, 59%, 45%, 1));
+    cursor: pointer;    
+}
