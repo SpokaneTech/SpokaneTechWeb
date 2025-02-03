@@ -1,29 +1,37 @@
-<section class="hero fade-in-blur" style="--fade-duration: .5s;">
+<section class="hero fade-in-blur" style="--fade-duration: .25s;">
     <div class="container hero-content text-center">
         <h1><strong class="accent highlight">Your </strong>Inland Northwest Tech Community</h1>
-        <div class="hero-buttons">
-            <button class="btn btn-outline" hx-get="{% url 'web:about' %}" hx-target="#body_main" hx-push-url="{% url 'web:about' %}">Learn More</button>
-            <button class="btn btn-light" hx-get="{% url 'web:develop' %}" hx-target="#body_main" hx-push-url="{% url 'web:develop' %}">Develop with us</button>
+    </div>
+</section>
+
+<section class="text-center py-3 fade-in-blur" style="--fade-duration: .35s;">
+    <div class="container">
+        <p class="fs-4 fw-semibold">Find groups, events, and resources to help support your tech career.</p>
+        <div class="row justify-content-center mt-4">
+            <div class="col-12 col-md-5 text-center text-md-end pe-md-3 py-1">
+                <h5 class="fw-semibold hx-link" 
+                hx-get="{% url 'web:get_techgroups' display='list' %}" 
+                hx-target="#body_main" 
+                hx-push-url="{% url 'web:get_techgroups' display='list' %}">
+                    16 groups strong
+                </h5>
+            </div>
+            <div class="col-12 col-md-5 text-center text-md-start ps-md-3 py-1">
+                <h5 class="fw-semibold hx-link"
+                hx-get="{% url 'web:get_events' display='list' %}" 
+                hx-target="#body_main" 
+                hx-push-url="{% url 'web:get_events' display='list' %}"
+                >
+                    12 upcoming events
+                </h5>
+            </div>
         </div>
     </div>
 </section>
 
-<section class="fade-in-blur" style="--fade-duration: .75s;">
-    <div class="index-card-container blur-group-container">
-        <div class="index-card"
-        hx-get="{% url 'web:get_techgroups' display='list' %}" 
-        hx-target="#body_main" 
-        hx-push-url="{% url 'web:get_techgroups' display='list' %}"   
-        >
-            <div class="title">{{ group_count }} groups strong</div>
-        </div>
-
-        <div class="index-card"
-        hx-get="{% url 'web:get_events' display='list' %}" 
-        hx-target="#body_main" 
-        hx-push-url="{% url 'web:get_events' display='list' %}"
-        >
-            <div class="title">{{ event_count }} upcoming events</div>
-        </div>
+<section class="fade-in-blur" style="--fade-duration: .45s;">
+    <div class="hero-buttons">
+        <button class="btn btn-outline" hx-get="{% url 'web:about' %}" hx-target="#body_main" hx-push-url="{% url 'web:about' %}">Learn More</button>
+        <button class="btn btn-light" hx-get="{% url 'web:develop' %}" hx-target="#body_main" hx-push-url="{% url 'web:develop' %}">Develop with us</button>
     </div>
 </section>

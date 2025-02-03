@@ -1,6 +1,6 @@
-# Contributing to django-pygwalker
+# Contributing to SpokaneTech.org
 
-First off, thank you for considering contributing to django-pygwalker!
+First off, thank you for considering contributing to SpokaneTech.org!
 
 The following is a set of guidelines for contributing to this project. These are just guidelines, not rules. Use your best judgment, and feel free to propose changes to this document in a pull request.
 
@@ -39,25 +39,25 @@ This project and everyone participating in it are governed by the [Code of Condu
 
 - Provide a clear and concise description of your pull request.
 - Ensure you have tested your changes thoroughly.
-- Add/update unittests as nessessary.
-- Make sure code quaility tools run successfully. 
+- Add/update unittests as necessary.
+- Make sure code quality tools run successfully. 
 
-    Merging contributions requires passing the checks configured with the CI. This includes running tests, linters, and other code quaility tools successfully on the currently officially supported Python and Django versions.
+    Merging contributions requires passing the checks configured with the CI. This includes running tests, linters, and other code quality tools successfully on the currently officially supported Python and Django versions.
 
 <br/>
 
 ## Development
 
-You can contribute to this project forking it from GitHub and sending pull requests.
+You can contribute to this project by sending pull requests to Github.
 
-First [fork](https://help.github.com/en/articles/fork-a-repo) the
-[repository](https://github.com/SpokaneTech/SpokaneTechWeb) and then clone it:
+First clone the repository
+[repository](https://github.com/SpokaneTech/SpokaneTechWeb):
 
 ```shell
-git clone git@github.com:<you>/django-pygwalker.git
+git clone git@github.com:SpokaneTech/SpokaneTechWeb.git
 ```
 
-Create a virtual environment and install dependancies:
+Create a virtual environment and install dependencies:
 
 ```shell
 cd SpokaneTechWeb
@@ -66,7 +66,7 @@ source venv/bin/activate
 pip install .[dev]
 ```
 
-Unit tests are located under the src/django_project/tests directory and can be executed via pytest:
+Unit tests are located under the src/django_project/tests directory and can be executed from the root directory via pytest:
 
 ```shell
 pytest

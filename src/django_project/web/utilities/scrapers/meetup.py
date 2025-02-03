@@ -52,36 +52,41 @@ def get_event_information(url: str) -> dict:
     Returns:
         dict: dictionary of information about the event as available on meetup.com
     """
+
     try:
         page_content = fetch_content_with_playwright(url)
-        # page_content = fetch_content(url)
         soup = BeautifulSoup(page_content, "html.parser")
 
         event_info: dict = {}
         event_info["url"] = url
-        event_info["name"] = soup.find(
-            "h1", class_="overflow-hidden overflow-ellipsis text-3xl font-bold leading-snug"
-        ).text
+        event_info["name"] = soup.find("h1", class_="overflow-hidden overflow-ellipsis text-3xl font-bold leading-snug")
+        if event_info["name"]:
+            event_info["name"] = event_info["name"].text
         description_div = soup.find("div", class_="break-words")
-        event_info["description"] = "".join(str(child) for child in description_div.children)
-        start_time_string = soup.find("time")["datetime"]
+        if description_div:
+            event_info["description"] = "".join(str(child) for child in description_div.children)
+        start_time_string = None
         time_element = soup.find("time")
         if time_element:
+            start_time_string = time_element.get("datetime")
             time_text = time_element.get_text(separator=" ").strip()
             end_time_string = time_text.split(" to ")[-1]
 
-        event_info["start_datetime"] = datetime.fromisoformat(start_time_string)
-        event_info["end_datetime"] = get_end_datetime(start_time_string, end_time_string)
+        if start_time_string:
+            event_info["start_datetime"] = datetime.fromisoformat(start_time_string)
+            event_info["end_datetime"] = get_end_datetime(start_time_string, end_time_string)
         location_div = soup.find("div", class_="overflow-hidden pl-4 md:pl-4.5 lg:pl-5")
 
-        if "Needs a location" not in location_div.text:
-            location_name = location_div.find("a", {"data-testid": "venue-name-link"}) if location_div else None
-            location_address = location_div.find("div", {"data-testid": "location-info"}) if location_div else None
-            map_link = location_div.find("a", {"data-testid": "venue-name-link"})["href"] if location_div else None
-
-            event_info["location_name"] = location_name.text if location_name else ""
-            event_info["location_address"] = location_address.text if location_address else ""
-            event_info["map_link"] = map_link if map_link else ""
+        if location_div and "Needs a location" not in location_div.text:
+            location_name = location_div.find("a", {"data-testid": "venue-name-link"})
+            location_address = location_div.find("div", {"data-testid": "location-info"})
+            map_link = location_div.find("a", {"data-testid": "venue-name-link"})
+            if location_name:
+                event_info["location_name"] = location_name.text
+            if location_address:
+                event_info["location_address"] = location_address.text
+            if map_link:
+                event_info["map_link"] = map_link["href"]
         pattern = r"/events/([^/]+)/"
         match = re.search(pattern, url)
         if match:
@@ -105,7 +110,6 @@ def get_event_links(url: str) -> list:
         list: list of urls for upcoming events as available on the group page on meetup.com
     """
     page_content = fetch_content_with_playwright(url)
-    # page_content = fetch_content(url)
     soup = BeautifulSoup(page_content, "html.parser")
     event_list = soup.find("ul", class_="flex w-full flex-col space-y-5 px-4 md:px-0")
     if event_list:
@@ -127,7 +131,6 @@ def get_group_description(url: str) -> str:
     """
     page_content = fetch_content(url)
     soup = BeautifulSoup(page_content, "html.parser")
-
     description_div = soup.find("div", class_="break-words utils_description__BlOCA")
     description = "".join(str(child) for child in description_div.children)
     return description

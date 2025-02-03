@@ -24,6 +24,17 @@
     <link rel="icon" type="image/png" sizes="32x32" href="{% static 'spokanetech/img/favicon-32x32.png' %}">
     <link rel="icon" type="image/png" sizes="16x16" href="{% static 'spokanetech/img/favicon-16x16.png' %}">
     <title>Spokane Tech</title>
+
+    <link href="{% static 'node_modules/bootstrap/dist/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'node_modules/@fortawesome/fontawesome-free/css/all.min.css' %}" rel="stylesheet">
+    
+    <link rel="stylesheet" href="{% static 'spokanetech/css/index-styles.css' %}">
+    <link rel="stylesheet" href="{% static 'node_modules/tippy.js/dist/tippy.css' %}">
+    <link rel="stylesheet" href="{% static 'node_modules/fun-effects/src/css/fades.css' %}">
+    <link rel="stylesheet" href="{% static 'node_modules/fun-effects/src/css/marquee.css' %}">
+    <link rel="stylesheet" href="{% static 'node_modules/fun-effects/src/css/blur_group.css' %}">
+    <link rel="stylesheet" href="{% static 'node_modules/fun-effects/src/css/background_icons.css' %}">
+
 </head>
 <body> 
     <header class="fade-in-blur" style="--fade-duration: .25s;">
@@ -66,18 +77,7 @@
     {% include 'handyhelpers/htmx/bs5/generic_modal.htm' %}
     {% endif %}
     {% endblock modals %}
-
-    
-    <link href="{% static 'node_modules/bootstrap/dist/css/bootstrap.min.css' %}" rel="stylesheet">
-    <link href="{% static 'node_modules/@fortawesome/fontawesome-free/css/all.min.css' %}" rel="stylesheet">
-    
-    <link rel="stylesheet" href="{% static 'spokanetech/css/index-styles.css' %}">
-    <link rel="stylesheet" href="{% static 'node_modules/tippy.js/dist/tippy.css' %}">
-    <link rel="stylesheet" href="{% static 'node_modules/fun-effects/src/css/fades.css' %}">
-    <link rel="stylesheet" href="{% static 'node_modules/fun-effects/src/css/marquee.css' %}">
-    <link rel="stylesheet" href="{% static 'node_modules/fun-effects/src/css/blur_group.css' %}">
-    <link rel="stylesheet" href="{% static 'node_modules/fun-effects/src/css/background_icons.css' %}">
-    
+       
     <script type="text/javascript" src="{% static 'node_modules/htmx.org/dist/htmx.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'node_modules/jquery/dist/jquery.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'node_modules/@popperjs/core/dist/umd/popper.min.js' %}"></script>

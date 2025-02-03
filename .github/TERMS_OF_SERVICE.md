@@ -2,7 +2,7 @@ Terms of Service
 
 Last Updated: January 2025
 
-Welcome to spokanetech.org! These Terms of Service ("Terms") govern your access to and use of spokaneTtech.org ("we," "us," or "our"), including any content, functionality, and services offered on or through spokanetech.org (the "Website"). By using the Website, you agree to be bound by these Terms.
+Welcome to spokanetech.org! These Terms of Service ("Terms") govern your access to and use of spokanetech.org ("we," "us," or "our"), including any content, functionality, and services offered on or through spokanetech.org (the "Website"). By using the Website, you agree to be bound by these Terms.
 
 1. Acceptance of Terms
 
