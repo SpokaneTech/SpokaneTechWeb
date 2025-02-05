@@ -111,6 +111,12 @@ def create_groups() -> None:
             "platform": "Meetup",
             "platform page": "https://www.meetup.com/spolug/",
         },
+        {
+            "name": "What is Crypto Currency",
+            "icon": """<i class="fa-brands fa-bitcoin"></i>""",
+            "platform": "Meetup",
+            "platform page": "https://www.meetup.com/what-is-crypto-currency/",
+        },
     ]
     for data in data_list:
         data["platform"], _ = SocialPlatform.objects.get_or_create(name=data["platform"])
