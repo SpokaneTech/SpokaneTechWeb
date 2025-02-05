@@ -13,7 +13,7 @@
                 hx-get="{% url 'web:get_techgroups' display='list' %}" 
                 hx-target="#body_main" 
                 hx-push-url="{% url 'web:get_techgroups' display='list' %}">
-                    16 groups strong
+                    {{ group_count }} groups strong
                 </h5>
             </div>
             <div class="col-12 col-md-5 text-center text-md-start ps-md-3 py-1">
@@ -22,7 +22,7 @@
                 hx-target="#body_main" 
                 hx-push-url="{% url 'web:get_events' display='list' %}"
                 >
-                    12 upcoming events
+                    {{ event_count }} upcoming events
                 </h5>
             </div>
         </div>
