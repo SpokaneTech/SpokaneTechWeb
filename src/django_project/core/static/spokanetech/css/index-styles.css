@@ -108,7 +108,7 @@ main {
     align-items: center;
     text-align: left;
     color: var(--light);
-    margin-bottom: 5rem;
+    /* margin-bottom: 5rem; */
 }
 
 .hero-content {
