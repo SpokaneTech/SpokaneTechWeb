@@ -275,6 +275,10 @@ CELERY_RESULT_SERIALIZER = "json"
 CELERY_TASK_RESULT_EXPIRES = 3600
 CELERY_TASK_SERIALIZER = "json"
 CELERY_USE_SSL = env.bool("CELERY_USE_SSL", False)
+CELERY_BROKER_HEARTBEAT = env.int("CELERY_BROKER_HEARTBEAT", 30)  # Prevent premature disconnects
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = env.bool(
+    "CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP", True
+)  # Retry connection if Redis is down
 
 
 # third party integrations

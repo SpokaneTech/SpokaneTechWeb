@@ -371,6 +371,10 @@ footer .copyright {
     color: var(--light, rgb(255, 255, 255));
     cursor: pointer;
 }
+.list-card .category {
+    font-weight: bold;
+    font-size: 2.5rem;
+}
 .list-card .title {
     font-weight: bold;
     font-size: 1.25rem;

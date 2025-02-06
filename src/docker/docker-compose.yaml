@@ -32,10 +32,19 @@ services:
     restart: unless-stopped
     ports:
       - "6379:6379"
+    deploy:
+      resources:
+        limits:
+          memory: 1G  # Set Redis memory limit to 1GB
+        reservations:
+          memory: 512M  # Ensure at least 512MB is available for Redis
+    command: redis-server --maxmemory 1gb --maxmemory-policy allkeys-lru
+
 
   worker:
     image: spokanetech-django:latest
     container_name: worker
+    restart: unless-stopped
     env_file:
       - .env.compose
     build:
