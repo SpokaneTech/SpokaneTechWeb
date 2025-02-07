@@ -24,5 +24,20 @@
         <i>No description</i>
         {% endif %}        
     </div>
+    <div class="links">
+        {% if object.links.all %}
+        <ul>
+            {% for link in object.links.all %}
+            <li>
+                <strong>{{ link.name }}</strong> -
+                {{ link.description }} -
+                <a href="{{ link.url }}" target="_blank">{{ link.url }}</a>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <i>No links</i>
+        {% endif %}
+    </div>
 </section>
     
