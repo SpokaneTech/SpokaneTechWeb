@@ -117,6 +117,12 @@ def create_groups() -> None:
             "platform": "Meetup",
             "platform page": "https://www.meetup.com/what-is-crypto-currency/",
         },
+        {
+            "name": "Inland NW 3d Printing",
+            "icon": """<i class="fa-solid fa-print"></i>""",
+            "platform": "Meetup",
+            "platform page": "https://www.meetup.com/inland-nw-3d-printing/",
+        },
     ]
     for data in data_list:
         data["platform"], _ = SocialPlatform.objects.get_or_create(name=data["platform"])

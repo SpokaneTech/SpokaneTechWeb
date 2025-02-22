@@ -71,3 +71,4 @@ src/logs
 django_project/yarn.lock
 django_project/__version__.py
 src/docker/.env*
+src/docker/db.yaml

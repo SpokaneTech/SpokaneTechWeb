@@ -54,7 +54,8 @@ def get_event_information(url: str) -> dict:
     """
 
     try:
-        page_content = fetch_content_with_playwright(url)
+        # page_content = fetch_content_with_playwright(url)
+        page_content = fetch_content(url)
         soup = BeautifulSoup(page_content, "html.parser")
 
         event_info: dict = {}
