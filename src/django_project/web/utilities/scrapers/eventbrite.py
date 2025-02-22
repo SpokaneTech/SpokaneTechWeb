@@ -1,3 +1,4 @@
+import time
 from datetime import datetime, timedelta
 
 import requests
@@ -79,7 +80,7 @@ def get_events_for_organization(organization_id: str, age: int = 7) -> list:
     return filter_events_by_date(event_list, age_datetime)
 
 
-def get_event_details(event_id: str) -> dict:
+def get_event_details(event_id: str) -> dict | None:
     """get the details of an Eventbrite event
 
     Args:
@@ -89,6 +90,16 @@ def get_event_details(event_id: str) -> dict:
         dict: event data as available from the Eventbrite API
     """
     url = f"https://www.eventbrite.com/api/v3/destination/events/?event_ids={event_id}&expand=primary_venue"
-    resp = requests.get(url, timeout=15)
-    resp.raise_for_status()
-    return resp.json()["events"][0]
+    attempts = 3
+    for attempt in range(attempts):
+        try:
+            resp = requests.get(url, timeout=15)
+            resp.raise_for_status()
+            return resp.json()["events"][0]
+        except requests.exceptions.RequestException as err:
+            if attempt < attempts - 1:
+                time.sleep(2 * attempt)
+                continue
+            else:
+                raise err
+    return None

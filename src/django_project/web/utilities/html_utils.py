@@ -56,7 +56,7 @@ def fetch_content_with_playwright(url, retries=3, timeout=30000):
             if attempt == retries:
                 print("Max retries reached. Could not fetch the content.")
                 return ""
-            time.sleep(2)
+            time.sleep(2 + attempt)
 
 
 def find_target(url, parent="ul", classes="flex w-full flex-col space-y-5 px-4 md:px-0", max_retries=3):

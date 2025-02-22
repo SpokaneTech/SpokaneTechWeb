@@ -69,23 +69,27 @@ def ingest_future_meetup_events(group_pk):
     group = TechGroup.objects.get(pk=group_pk)
     if not group:
         return f"group with pk {group_pk} not found"
-    event_count = 0
     for link in group.links.filter(name=f"{group.name} {group.platform.name} page").distinct():
+        event_count = 0
         event_links = get_event_links(f"{link.url}events/?type=upcoming")
         for event_link in event_links:
             event_info = get_event_information(event_link)
             event_info["group"] = group
             if event_info:
-                event_count += 1
+                if not event_info.get("name", None):
+                    logging.error(f"error parsing name for event hosted by {group.name}; data = {event_info}")
+                    continue
                 if event_info["social_platform_id"]:
-                    Event.objects.update_or_create(
+                    _, is_new = Event.objects.update_or_create(
                         social_platform_id=event_info["social_platform_id"], defaults=event_info
                     )
                 else:
-                    Event.objects.update_or_create(
+                    _, is_new = Event.objects.update_or_create(
                         name=event_info["name"], start_datetime=event_info["start_datetime"], defaults=event_info
                     )
-    return f"added {event_count}/{len(event_links)} for {group.name}"
+                if is_new:
+                    event_count += 1
+    return f"found {len(event_links)} upcoming events for {group.name}; added {event_count} new events"
 
 
 @shared_task(time_limit=900, max_retries=3, name="web.ingest_future_eventbrite_events")
