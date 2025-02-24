@@ -1,4 +1,5 @@
 import os
+from datetime import timedelta
 from pathlib import Path
 
 import django
@@ -113,7 +114,9 @@ class TestGetTechEventView(TestCase):
 class TestGetTechEventsView(TestCase):
     def setUp(self):
         super(TestGetTechEventsView, self).setUp()
-        self.instance = baker.make("web.Event")
+        now = timezone.now()
+        tomorrow = now + timedelta(days=1)
+        self.instance = baker.make("web.Event", start_datetime=tomorrow)
         self.headers = dict(HTTP_HX_REQUEST="true")
 
     def test_get(self):
