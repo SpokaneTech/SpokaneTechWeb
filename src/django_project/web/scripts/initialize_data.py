@@ -16,7 +16,7 @@ def create_groups() -> None:
             "platform page": "https://www.eventbrite.com/o/business-brew-80655815043",
         },
         {
-            "name": "DC 509",
+            "name": "DC509",
             "icon": """<i class="fa-solid fa-book-skull"></i>""",
             "platform": "Other",
             "platform page": "",

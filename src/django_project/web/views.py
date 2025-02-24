@@ -62,8 +62,11 @@ class TechEventsView(HtmxOptionMultiFilterView):
     htmx_list_template_name = "web/partials/list/events.htm"
     htmx_list_wrapper_template_name = "web/partials/list/wrapper_list.htm"
     htmx_template_name = "web/partials/marquee/events.htm"
-    queryset = Event.objects.filter(start_datetime__gte=timezone.now())
     template_name = "web/full/list/events.html"
+
+    def get(self, request, *args, **kwargs):
+        self.queryset = Event.objects.filter(start_datetime__gte=timezone.now())
+        return super().get(request, *args, **kwargs)
 
 
 class TechEventModalView(ModelDetailBootstrapModalView):

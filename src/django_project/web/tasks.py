@@ -1,4 +1,5 @@
 import logging
+import re
 import time
 
 from celery import shared_task
@@ -72,6 +73,12 @@ def ingest_future_meetup_events(group_pk):
     for link in group.links.filter(name=f"{group.name} {group.platform.name} page").distinct():
         event_count = 0
         event_links = get_event_links(f"{link.url}events/?type=upcoming")
+
+        # filter event links for future recurring events. Meetup uses a numeric event id in the url for upcoming events
+        # and a alphanumeric event id for recurring events. This is causing duplicate events to be added to the database.
+        numeric_event_pattern = re.compile(r"/events/(\d+)/")
+        event_links = [url for url in event_links if numeric_event_pattern.search(url)]
+
         for event_link in event_links:
             event_info = get_event_information(event_link)
             event_info["group"] = group

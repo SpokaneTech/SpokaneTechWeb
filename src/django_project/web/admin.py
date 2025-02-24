@@ -29,8 +29,6 @@ class TechGroupAdmin(admin.ModelAdmin):
 class EventAdmin(admin.ModelAdmin):
     list_display = [
         "id",
-        "created_at",
-        "updated_at",
         "name",
         "description",
         "start_datetime",
@@ -42,6 +40,8 @@ class EventAdmin(admin.ModelAdmin):
         "social_platform_id",
         "group",
         "image",
+        "created_at",
+        "updated_at",
     ]
     search_fields = [
         "id",

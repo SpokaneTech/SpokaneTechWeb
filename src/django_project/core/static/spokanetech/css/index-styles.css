@@ -347,16 +347,15 @@ footer .copyright {
     color: var(--accent, hsla(169, 59%, 45%, 1));
 }
 
-
-  .list-card-container {
+.list-card-container {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     gap: 3rem;
     padding: 3rem;
-  }
+}
 
-  .list-card {
+.list-card {
     background-color: rgba(255, 255, 255, 0.2);
     border-radius: 0.5rem;
     box-shadow: 0rem 0.25rem 1rem -0.25rem var(--light, rgb(255, 255, 255));
@@ -373,27 +372,27 @@ footer .copyright {
 }
 .list-card .category {
     font-weight: bold;
-    font-size: 2.5rem;
+    font-size: clamp(.75rem, 15vmin, 2rem);
 }
 .list-card .title {
     font-weight: bold;
-    font-size: 1.25rem;
+    font-size: clamp(.75rem, 5vmin, 1.75rem);
 }
 .list-card .description {
     font-weight: bold;
-    font-size: 1.1rem;
+    font-size: clamp(.75rem, 5vmin, 1.5rem);
     margin-top: 1rem;
     margin-bottom: 1rem;
 }
 .list-card .date {
-    font-size: .75rem;
+    font-size: clamp(.5rem, 1rem, 1.5rem);
 }
 .list-card .techgroup {
-    font-size: .75rem;
+    font-size: clamp(.5rem, 1rem, 1.5rem);
 }
 
 .tag-container {
-    margin:.75rem;
+    margin: .75rem;
 }
 
 .tag {
@@ -548,4 +547,71 @@ footer .copyright {
 .hx-link:hover {
     color: var(--accent, hsla(169, 59%, 45%, 1));
     cursor: pointer;    
+}
+
+
+.group-card {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 0.5rem;
+    box-shadow: 0rem 0.25rem 1rem -0.25rem var(--light, rgb(255, 255, 255));
+    padding: 20px;
+    width: 400px; /* Fixed width */
+    height: 150px; /* Fixed height */
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--light, rgb(255, 255, 255));
+    cursor: pointer;
+}
+.group-card .category {
+    font-weight: bold;
+    font-size: clamp(.75rem, 15vmin, 2rem);
+}
+.group-card .description {
+    font-weight: bold;
+    font-size: clamp(.75rem, 5vmin, 1.5rem);
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+.group-card:hover .category,
+.group-card:hover .description {
+    color: var(--accent, hsla(169, 59%, 45%, 1));
+}
+.group-card:hover {
+    box-shadow: 0 4px 8px var(--accent, hsla(169, 59%, 45%, 1));
+}
+
+
+.event-card {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 0.5rem;
+    box-shadow: 0rem 0.25rem 1rem -0.25rem var(--light, rgb(255, 255, 255));
+    padding: 20px;
+    width: 400px; /* Fixed width */
+    height: 180px; /* Fixed height */
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--light, rgb(255, 255, 255));
+    cursor: pointer;
+}
+.event-card .title {
+    font-weight: bold;
+    font-size: clamp(1rem, 5vmin, 1.5rem);
+}
+.event-card .date {
+    font-size: clamp(.4rem, .8rem, 1.25rem);
+}
+.event-card .techgroup {
+    font-size: clamp(.5rem, 1rem, 1.5rem);
+}
+.event-card:hover .title {
+    color: var(--accent, hsla(169, 59%, 45%, 1));
+}
+.event-card:hover {
+    box-shadow: 0 4px 8px var(--accent, hsla(169, 59%, 45%, 1));
 }
