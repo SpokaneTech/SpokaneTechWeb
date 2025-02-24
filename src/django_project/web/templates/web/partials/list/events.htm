@@ -3,7 +3,7 @@
 
 <div class="list-card-container blur-group-container fade-in-blur" style="--fade-duration: 0.5s;">
     {% for row in queryset %}
-    <div class="list-card" hx-get="{% url 'web:get_event' row.pk %}" hx-target="#body_main" hx-push-url="{% url 'web:get_event' row.pk %}">
+    <div class="event-card" hx-get="{% url 'web:get_event' row.pk %}" hx-target="#body_main" hx-push-url="{% url 'web:get_event' row.pk %}">
         <div class="title">{{ row.name }}</div>
         <div class="date">
             {% if row.end_datetime %}

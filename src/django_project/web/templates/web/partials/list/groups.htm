@@ -5,14 +5,9 @@
 
 <div class="list-card-container blur-group-container fade-in-blur" style="--fade-duration: 0.5s;">
     {% for row in queryset %}
-    <div class="list-card" hx-get="{% url 'web:get_techgroup' row.pk %}" hx-target="#body_main" hx-push-url="{% url 'web:get_techgroup' row.pk %}">
+    <div class="group-card" hx-get="{% url 'web:get_techgroup' row.pk %}" hx-target="#body_main" hx-push-url="{% url 'web:get_techgroup' row.pk %}">
         <div class="category">{{ row.icon|safe }}</div>
         <div class="description">{{ row.name }}</div>
-        <div class="footer">
-            {% if row.homepage %}
-            <a href="{{ row.homepage }}" target="_blank">{{ row.homepage }}</a>
-            {% endif %}
-        </div>
     </div>
     {% endfor %}
 </div>
