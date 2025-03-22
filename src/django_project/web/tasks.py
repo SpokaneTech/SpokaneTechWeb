@@ -70,6 +70,8 @@ def ingest_future_meetup_events(group_pk):
     group = TechGroup.objects.get(pk=group_pk)
     if not group:
         return f"group with pk {group_pk} not found"
+    event_links = []
+    event_count = 0
     for link in group.links.filter(name=f"{group.name} {group.platform.name} page").distinct():
         event_count = 0
         event_links = get_event_links(f"{link.url}events/?type=upcoming")
