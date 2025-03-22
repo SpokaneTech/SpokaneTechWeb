@@ -33,6 +33,12 @@ class EventCalendarView(HtmxCalendarView):
     template_name = "web/full/custom/calendar.html"
     title = "Spokane Tech Event Calendar"
 
+    def get(self, request, *args, **kwargs):
+        user_agent = request.META.get("HTTP_USER_AGENT", "")
+        if "Mobile" in user_agent:
+            self.htmx_template_name = "web/partials/custom/calendar_mobile.htm"
+        return super().get(request, *args, **kwargs)
+
 
 class IndexContentView(HtmxOptionView):
     """Render the index page"""
@@ -77,6 +83,12 @@ class TechEventModalView(ModelDetailBootstrapModalView):
     modal_template = "web/partials/modal/event_information.htm"
     modal_title = "Event Info"
     model = Event
+
+    def get(self, request, *args, **kwargs):
+        user_agent = request.META.get("HTTP_USER_AGENT", "")
+        if "Mobile" in user_agent:
+            self.modal_template = "web/partials/modal/event_information_modal.htm"
+        return super().get(request, *args, **kwargs)
 
 
 class TechGroupView(HtmxOptionDetailView):

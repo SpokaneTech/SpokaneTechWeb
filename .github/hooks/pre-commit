@@ -21,9 +21,10 @@ function run_checks {
 
 # add pre-commit commands here
 run_checks bandit src -c pyproject.toml -r
-run_checks black src --check
+run_checks ruff check src
+run_checks ruff format src --check
 run_checks isort src --check
 run_checks mypy src
-run_checks ruff check src
+
 
 exit $RETURN_CODE 
