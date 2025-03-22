@@ -9,13 +9,14 @@ def get_eventbright_events():
         job.apply()
 
 
-def get_meetup_events():
-    tech_group_list = TechGroup.objects.filter(enabled=True)
+def get_meetup_events() -> None:
+    tech_group_list = TechGroup.objects.filter(enabled=True, name__icontains="python")
     for group in tech_group_list:
+        print("INFO: getting upcoming events for ", group.name)
         job = ingest_future_meetup_events.s(group.pk)
         job.apply()
 
 
 def run():
-    get_eventbright_events()
+    # get_eventbright_events()
     get_meetup_events()

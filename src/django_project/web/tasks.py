@@ -70,16 +70,24 @@ def ingest_future_meetup_events(group_pk):
     group = TechGroup.objects.get(pk=group_pk)
     if not group:
         return f"group with pk {group_pk} not found"
+    platform_links = group.links.filter(name=f"{group.name} {group.platform.name} page").distinct()
+    if not platform_links:
+        return f"no {group.platform.name} links found for {group.name}"
+
+    event_links: list = []
+    event_count: int = 0
+
+    # filter event links for future recurring events. Meetup uses a numeric event id in the url for upcoming events
+    # and a alphanumeric event id for recurring events. This is causing duplicate events to be added to the database.
+    numeric_event_pattern = re.compile(r"/events/(\d+)/")
+
     for link in group.links.filter(name=f"{group.name} {group.platform.name} page").distinct():
-        event_count = 0
-        event_links = get_event_links(f"{link.url}events/?type=upcoming")
+        ingest_links: list = [
+            url for url in get_event_links(f"{link.url}events/?type=upcoming") if numeric_event_pattern.search(url)
+        ]
+        event_links.extend(ingest_links)
 
-        # filter event links for future recurring events. Meetup uses a numeric event id in the url for upcoming events
-        # and a alphanumeric event id for recurring events. This is causing duplicate events to be added to the database.
-        numeric_event_pattern = re.compile(r"/events/(\d+)/")
-        event_links = [url for url in event_links if numeric_event_pattern.search(url)]
-
-        for event_link in event_links:
+        for event_link in ingest_links:
             event_info = get_event_information(event_link)
             event_info["group"] = group
             if event_info:
