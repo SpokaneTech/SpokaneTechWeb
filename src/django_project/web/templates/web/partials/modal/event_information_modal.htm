@@ -1,0 +1,56 @@
+<style>
+.modal-text-mobile {
+    font-size: .8rem;
+}
+</style>
+
+<div class="container-fluid my-3">
+    {% if object.group %}
+    <div class="row my-3">
+        <div class="col-12 fw-bold text-primary">Group:</div>
+        <div class="col-12 text-secondary modal-text-mobile ms-2">{{ object.group.name }}</div>
+    </div>
+    {% endif %}
+    {% if object.description %}
+    <div class="row my-3">
+        <div class="col-12 fw-bold text-primary">Description:</div>
+        <div class="col-12 text-secondary modal-text-mobile ms-2">{{ object.description|truncatewords_html:30|safe }}</div>
+    </div>
+    {% endif %}
+    {% if object.start_datetime %}
+    <div class="row my-3">
+        <div class="col-12 fw-bold text-primary">Date/Time:</div>
+        <div class="col-12 text-secondary modal-text-mobile ms-2">
+            {% if object.end_datetime %}
+            {{ object.start_datetime }} &nbsp; - &nbsp; {{ object.end_datetime }}
+            {% else %}
+            {{ object.start_datetime }}
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+    {% if object.location_name %}
+    <div class="row my-3">
+        <div class="col-12 fw-bold text-primary">Location:</div>
+        <div class="col-12 text-secondary modal-text-mobile ms-2">
+            <div class="row m-0">
+                {{ object.location_name }}<br/>
+                {% if object.location_address %}
+                {% if object.map_link %}
+                <a href="{{ object.map_link }}" title="google map" target="_blank" class="p-0">
+                    {{ object.location_address }}
+                </a>
+                {% endif %}
+            {% endif %}
+            </div>
+
+        </div>
+    </div>
+    {% endif %}
+    <div class="row mt-5">
+        <div class="col-12 fw-bold text-primary"></div>
+        <div class="col-12 text-secondary modal-text-mobile ms-2">
+            <a href="" hx-get="{% url 'web:get_event' object.pk %}" hx-target="#body_main" hx-push-url="{% url 'web:get_event' object.pk %}" data-bs-dismiss="modal">full details</a>
+        </div>
+    </div>
+</div>

@@ -615,3 +615,7 @@ footer .copyright {
 .event-card:hover {
     box-shadow: 0 4px 8px var(--accent, hsla(169, 59%, 45%, 1));
 }
+
+.modal-text-mobile {
+    font-size: .8rem;
+}
