@@ -35,8 +35,6 @@ def fetch_content_with_playwright(url, retries=3, timeout=30000):
 
     Returns:
         str: response text from the url
-
-    <main id="main" class="flex flex-grow flex-col items-center justify-between">
     """
     attempt = 0
     while attempt < retries:
@@ -45,7 +43,9 @@ def fetch_content_with_playwright(url, retries=3, timeout=30000):
                 browser = p.chromium.launch(headless=True)
                 page = browser.new_page()
 
-                page.goto(url, wait_until="networkidle", timeout=timeout)
+                page.goto(url, wait_until="domcontentloaded", timeout=timeout)
+                # Wait for a specific element or a delay to ensure the page is fully loaded
+                page.wait_for_timeout(2000)  # Wait for 2 seconds
                 html_content = page.content()
                 browser.close()
 
