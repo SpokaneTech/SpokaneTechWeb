@@ -9,22 +9,25 @@ for ((i=0; i<80; i++)); do
 done
 
 function run_checks {
+    local check_name="$1"
+    shift
     "$@" &> /dev/null
     local status=$?
+    local padding_length=$((80 - ${#check_name}))
+    local padding="${repeated_string:0:$padding_length}"
     if [ "$status" -eq 0 ]; then
-        printf "%s %s [\033[0;32mPASS\033[0m]\n" $1 "${repeated_string:${#1}}"
+        printf "%s %s [\033[0;32mPASS\033[0m]\n" "$check_name" "$padding"
     else
-        printf "%s %s [\033[0;31mFAIL\033[0m]\n" $1 "${repeated_string:${#1}}"
+        printf "%s %s [\033[0;31mFAIL\033[0m]\n" "$check_name" "$padding"
         RETURN_CODE=1
     fi
 }
 
 # add pre-commit commands here
-run_checks bandit src -c pyproject.toml -r
-run_checks ruff check src
-run_checks ruff format src --check
-run_checks isort src --check
-run_checks mypy src
+run_checks "bandit" bandit src -c pyproject.toml -r
+run_checks "isort" isort src --check
+run_checks "mypy" mypy src
+run_checks "ruff check" ruff check src
+run_checks "ruff format" ruff format src
 
-
-exit $RETURN_CODE 
+exit $RETURN_CODE
