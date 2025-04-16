@@ -1,17 +1,15 @@
-version: '3.9'
-
 services:
   django:
     image: spokanetech-django:latest
     container_name: django
     env_file:
-      - .env.compose
+      - ../envs/.env.docker-compose
     build:
       context: ../..
       dockerfile: src/docker/Dockerfile 
     command: ./entrypoint.sh
     ports:
-      - "8080:8000"
+      - "8000:8000"
     depends_on:
       - db
       - redis
@@ -20,11 +18,11 @@ services:
     image: postgres:17
     container_name: postgres_db
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - spokanetech_db:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     env_file:
-      - .env.compose
+      - ../envs/.env.docker-compose
 
   redis:
     image: redis:7.2-alpine
@@ -46,7 +44,7 @@ services:
     container_name: worker
     restart: unless-stopped
     env_file:
-      - .env.compose
+      - ../envs/.env.docker-compose
     build:
       context: ../..
       dockerfile: src/docker/Dockerfile 
@@ -59,7 +57,7 @@ services:
     image: spokanetech-django:latest
     container_name: beat
     env_file:
-      - .env.compose
+      - ../envs/.env.docker-compose
     build:
       context: ../..
       dockerfile: src/docker/Dockerfile 
@@ -72,7 +70,7 @@ services:
     image: spokanetech-django:latest
     container_name: flower
     env_file:
-      - .env.compose
+      - ../envs/.env.docker-compose
     command: ["celery", "-A", "core", "--config=flowerconfig.py", "flower"]
     ports:
       - "5555:5555"
@@ -81,5 +79,6 @@ services:
       - db
 
 volumes:
-  postgres_data:
+  spokanetech_db:
+    name: spokanetech_db
   static_volume:
