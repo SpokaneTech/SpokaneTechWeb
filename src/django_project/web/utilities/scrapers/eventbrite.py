@@ -80,7 +80,7 @@ def get_events_for_organization(organization_id: str, age: int = 7) -> list:
     return filter_events_by_date(event_list, age_datetime)
 
 
-def get_event_details(event_id: str) -> dict | None:
+def get_event_details(event_id: str) -> dict:
     """get the details of an Eventbrite event
 
     Args:
@@ -102,4 +102,4 @@ def get_event_details(event_id: str) -> dict | None:
                 continue
             else:
                 raise err
-    return None
+    return {}

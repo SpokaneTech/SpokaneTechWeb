@@ -1,0 +1,6 @@
+<div id="member-interests" class="my-5">
+    <div class="h3 fw-bold">Interests:</div>
+    {% for interest in object.memberinterest_set.all %}
+    <span class="tag">{{ interest.interest }}</span>
+    {% endfor %}
+</div>

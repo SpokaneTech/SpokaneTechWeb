@@ -49,15 +49,22 @@ INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
-    "django.contrib.sessions",
     "django.contrib.messages",
+    "django.contrib.sessions",
+    "django.contrib.sites",
     "django.contrib.staticfiles",
     # third party apps
     "django_celery_beat",
     "django_extensions",
     "django_filters",
     "handyhelpers",
+    # Allauth
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
     # project apps
+    "members",
     "web",
 ]
 
@@ -72,6 +79,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "core.middleware.PstTimezoneMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
 ]
 
 if DEPLOYMENT_ENV in ["local", "dev"]:
@@ -283,3 +291,23 @@ CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = env.bool(
 
 # third party integrations
 EVENTBRITE_API_KEY = env.str("EVENTBRITE_API_KEY", None)
+
+
+AUTH_USER_MODEL = "members.Member"
+
+# allauth settings
+SITE_ID = 1
+AUTHENTICATION_BACKENDS: list[str] = [
+    "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
+]
+
+AUTH_USER_MODEL = "members.Member"
+
+LOGIN_REDIRECT_URL = "/"
+ACCOUNT_LOGOUT_REDIRECT_URL = "/"
+ACCOUNT_LOGIN_METHODS: set[str] = {"email"}
+ACCOUNT_SIGNUP_FIELDS: list[str] = ["email*", "password1*", "password2*"]
+ACCOUNT_USER_MODEL_USERNAME_FIELD = "email"
+
+SOCIALACCOUNT_LOGIN_ON_GET = True

@@ -7,7 +7,15 @@
     --pine-green: hsla(171, 46%, 31%, 1);
     --rich-black: hsla(203, 32%, 8%, 1);
     --accent-color: var(--keppel);
-}
+
+
+    --bs-primary: var(--keppel) !important;
+    --bs-link-color: var(--accent-color) !important;
+    --bs-link-hover-color: var(--accent-color) !important;
+    --bs-pagination-active-bg: var(--accent-color) !important;
+    --bs-pagination-active-bg-hover: var(--accent-color) !important;
+    --bs-pagination-active-border-color: var(--accent-color) !important;
+    --bs-pagination-active-border-color-hover: var(--accent-color) !important;}
 .text-primary {
     color: var(--keppel) !important;
 }
@@ -192,26 +200,6 @@ footer .copyright {
     width: 10rem;
 }
 
-/* .hero-buttons .btn-filled {
-    background-color: #007bff;
-    color: var(--light);
-}
-
-.hero-buttons .btn-filled:hover {
-    background-color: #0056b3;
-} */
-
-/* .hero-buttons .btn-outline {
-    background-color: transparent;
-    color: #007bff;
-    border-color: #007bff;
-}
-
-.hero-buttons .btn-outline:hover {
-    background-color: #007bff;
-    color: var(--light);
-} */
-
 .hero-buttons .btn-outline {
     background-color: transparent;
     color: var(--accent-color);
@@ -222,7 +210,6 @@ footer .copyright {
     color: var(--light);
     border-color: var(--light);
 }
-
 
 .hero-buttons .btn-outline:hover {
     background-color: var(--accent-color);
@@ -618,4 +605,205 @@ footer .copyright {
 
 .modal-text-mobile {
     font-size: .8rem;
+}
+
+
+/* .dropdown-menu {
+    background-color: hsla(197, 36%, 15%, .75);
+    border-radius: 0.375rem;
+    box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+}
+
+.dropdown-item:hover {
+    background-color: hsla(169, 59%, 45%, .5);
+} */
+
+
+.custom-dropdown {
+    position: relative;
+    display: inline-block; /* Fixes layout issues from .menu li display: inline */
+  }
+  
+  
+  .custom-dropdown > a {
+    cursor: pointer;
+  }
+  
+  .custom-dropdown-menu {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background-color: hsla(197, 36%, 15%, 0.95); /* slightly more solid for visibility */
+    border-radius: 0.25rem;
+    min-width: 160px;
+    padding: 0.25rem 0;
+    margin-top: 0.25rem;
+    display: none;
+    list-style: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    z-index: 9999; /* bump up z-index in case of overlays */
+  }
+  
+  
+  .custom-dropdown-menu li a {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 1rem;
+    color: white;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  
+  .custom-dropdown-menu li a:hover {
+    background-color: hsla(169, 59%, 45%, 0.6);
+    color: white;
+  }
+  .custom-dropdown > a {
+  padding: 10px 15px;
+  color: var(--light);
+  opacity: .5;
+  transition: opacity 0.3s ease;
+}
+.custom-dropdown > a:hover {
+  opacity: 1;
+}
+
+
+/* Style for general form control inputs */
+.form-control {
+    background-color: hsla(197, 36%, 15%, .5);
+    color: var(--light);
+}
+
+/* Focus state for inputs */
+.form-control:focus {
+    background-color: hsla(197, 36%, 15%, 0.75);
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 0.2rem rgba(169, 209, 204, 0.25);
+    color: var(--light);
+}
+
+/* Match styling for form-select elements (including multiselect) */
+.form-select {
+    background-color: hsla(197, 36%, 15%, .5);
+    color: var(--light);
+}
+
+.form-select:focus {
+    background-color: hsla(197, 36%, 15%, 0.75);
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 0.2rem rgba(169, 209, 204, 0.25);
+    color: var(--light);
+}
+
+/* Label behavior in floating forms for selects */
+.form-floating > .form-control-plaintext ~ label,
+.form-floating > .form-control:focus ~ label,
+.form-floating > .form-control:not(:placeholder-shown) ~ label,
+.form-floating > .form-select ~ label {
+    color: var(--accent-color);
+    transform: scale(.85) translateY(-.9rem) translateX(.15rem);
+}
+
+/* Label background styling */
+.form-floating > .form-control-plaintext ~ label::after,
+.form-floating > .form-control:focus ~ label::after,
+.form-floating > .form-control:not(:placeholder-shown) ~ label::after,
+.form-floating > .form-select ~ label::after {
+    position: absolute;
+    inset: 1rem 0.375rem;
+    z-index: -1;
+    height: 1.5em;
+    content: "";
+    background-color: transparent;
+    border-radius: var(--bs-border-radius);
+}
+
+.form-floating>.form-control, .form-floating>.form-control-plaintext, .form-floating>.form-select {
+    height: calc(3.5rem + calc(var(--bs-border-width) * 5));
+    min-height: calc(3.5rem + calc(var(--bs-border-width) * 2));
+    line-height: 1.25;
+}
+select[multiple] {
+    height: auto !important;
+}
+
+/* Toast container */
+.toast {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    color: var(--keppel) !important;
+    border: 1px solid var(--keppel);
+    backdrop-filter: blur(5px); /* Optional: adds a frosted glass effect */
+  }
+  
+/* Toast header (title area) */
+.toast-header {
+    background-color: rgba(255, 255, 255, 0.3) !important;
+    color: var(--light) !important;
+    border-bottom: none;
+    font-weight: bold;
+  }
+  
+/* Optional: style close button inside toast header */
+.toast-header .btn-close {
+    filter: invert(1); /* Makes the close icon light-colored */
+  }
+
+
+
+button.btn {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+    color: white;
+}
+
+button.btn:hover {
+    background-color: var(--accent-color);
+    opacity: 0.9;
+}
+
+
+
+/* Container style override if needed */
+.multiselect-checkbox-style select[multiple] {
+    padding-top: 1.5rem; /* Adjust to clear label overlap */
+    background-color: hsla(197, 36%, 15%, .5);
+    color: var(--light);
+    height: auto;
+    overflow-y: auto;
+    border: 1px solid var(--bs-border-color);
+    font-size: 1rem;
+}
+
+/* Option as pseudo-checkboxes */
+.multiselect-checkbox-style option {
+    position: relative;
+    padding-left: 2rem;
+    cursor: pointer;
+}
+
+.multiselect-checkbox-style option::before {
+    content: "☐";
+    position: absolute;
+    left: 0.5rem;
+}
+
+.multiselect-checkbox-style option:checked::before,
+.multiselect-checkbox-style option:focus:checked::before {
+    content: "☑";
+    font-weight: bold;
+}
+.form-check-input:checked {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+}
+.form-label {
+    color: var(--bs-primary);
+    margin-bottom: .5rem;
+    margin-left: .5rem;
+}
+.form-floating-multicheck {
+    border-color: var(--light);
+    border-radius: 5%;
+    border: 1px solid var(--light);
 }

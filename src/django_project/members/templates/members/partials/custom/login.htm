@@ -1,0 +1,66 @@
+{% load socialaccount %}
+
+<style>
+
+.login-card-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 3rem;
+    padding: 3rem;
+}
+.login-card {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 0.5rem;
+    box-shadow: 0rem 0.25rem 1rem -0.25rem var(--light, rgb(255, 255, 255));
+    padding: 20px;
+    width: 400px; /* Fixed width */
+    height: 150px; /* Fixed height */
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--light, rgb(255, 255, 255));
+    cursor: pointer;
+}
+.login-card-icon {
+    font-weight: bold;
+    font-size: clamp(.75rem, 15vmin, 2.5rem);
+}
+.login-card-title {
+    font-weight: bold;
+    font-size: clamp(.75rem, 5vmin, 1.5rem);
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+.login-card:hover .login-card-icon,
+.login-card:hover .login-card-title {
+    color: var(--accent, hsla(169, 59%, 45%, 1));
+}
+.login-card:hover {
+    box-shadow: 0 4px 8px var(--accent, hsla(169, 59%, 45%, 1));
+} 
+
+</style>
+
+<section class="hero fade-in-blur" style="--fade-duration: .25s;">
+    <div class="container hero-content text-center">
+        <h2><strong class="accent highlight">Login </strong>to access additional features</h2>
+    </div>
+</section>
+
+<section class="text-center py-3 fade-in-blur" style="--fade-duration: .35s;">
+    <div class="login-card-container blur-group-container fade-in-blur" style="--fade-duration: 0.5s;">
+        <a href="{% provider_login_url 'google' method='oauth2' %}">
+            <div class="login-card">
+                <div class="login-card-icon"><i class="fa-brands fa-google"></i></div>
+                <div class="login-card-title">Login with Google</div>
+            </div>
+        </a>
+        <div class="login-card">
+            <div class="login-card-icon"><i class="fa-brands fa-github"></i></div>
+            <div class="login-card-title">Login with Github</div>
+        </div>
+    </div>    
+</section>

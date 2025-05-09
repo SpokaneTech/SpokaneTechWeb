@@ -1,0 +1,6 @@
+<div id="member-skills" class="my-5">
+    <div class="h3 fw-bold">Skills:</div>
+    {% for skill in object.memberskill_set.all %}
+    <span class="tag">{{ skill.skill }}</span>
+    {% endfor %}
+</div>

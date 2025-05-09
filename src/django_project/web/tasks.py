@@ -117,9 +117,9 @@ def ingest_future_eventbrite_events(group_pk):
     eb_group_id = link.url.split("-")[-1]
     event_list = get_events_for_organization(eb_group_id)
     for item in event_list:
-        event_details = get_event_details(item["id"])
-        location_data = event_details["primary_venue"]
-        tag_data = event_details["tags"]
+        event_details: dict = get_event_details(item["id"])
+        location_data: dict = event_details["primary_venue"]
+        tag_data: list = event_details["tags"]
 
         event_data = {
             "group": group,

@@ -1,0 +1,39 @@
+<style>
+.btn-outline {
+    background-color: transparent;
+    border: 2px solid var(--accent-color);
+    color: var(--accent-color);
+    transition: background-color 0.3s, color 0.3s;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+.btn-outline:hover {
+    background-color: var(--accent-color);
+    color: white;
+    box-shadow: 0px 2px 3px var(--accent-color);
+}
+</style>
+
+<section class="detail mt-5 fade-in-blur" style="--fade-duration: .1s;">
+    <div class="h1 fw-bold">Member Statistics</div>
+</section>
+
+<section class="m-5 fade-in-blur" style="--fade-duration: .2s;">
+    <div class="container-fluid">
+        <!-- <div style="display: flex; justify-content: space-evenly; width: 100%;"> -->
+        <div>
+            <button class="btn btn-outline mx-2" hx-get="{% url 'members:stats_by_city' %}" hx-target="#member-chart-container" class="mx-2">City</button>
+            <button class="btn btn-outline mx-2" hx-get="{% url 'members:stats_by_zip' %}" hx-target="#member-chart-container" class="mx-2">Zip Code</button>
+            <button class="btn btn-outline mx-2" hx-get="{% url 'members:stats_by_interest' %}" hx-target="#member-chart-container" class="mx-2">Interest</button>
+            <button class="btn btn-outline mx-2" hx-get="{% url 'members:stats_by_skill' %}" hx-target="#member-chart-container" class="mx-2">Skill</button>
+            <button class="btn btn-outline mx-2" hx-get="{% url 'members:stats_by_career_level' %}" hx-target="#member-chart-container" class="mx-2">Career Level</button>
+        </div>
+    </div>
+</section>
+
+<section class="mt-5 fade-in-blur" style="--fade-duration: .3s;">
+    &nbsp;
+    <div class="container-fluid" id="member-chart-container">
+    </div>
+</section>
+    

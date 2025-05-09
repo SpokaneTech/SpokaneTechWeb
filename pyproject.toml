@@ -3,6 +3,7 @@ dependencies = [
     "beautifulsoup4",
     "celery",
     "django~=4.2",
+    "django-allauth",
     "django-braces",
     "django-celery-beat",
     "django-debug-toolbar",
@@ -11,6 +12,7 @@ dependencies = [
     "django-filter==25.1",
     "django-handyhelpers",
     "flower",
+    "PyJWT<3",
     "psycopg2-binary",
     "redis",
     "requests>=2.26.0",
@@ -93,6 +95,7 @@ exclude = [
     "src/django_project/local_test",
     "src/django_project/.*/migrations/.*",
     "src/django_project/.*/scripts/.*",
+    "src/django_project/tests/.*",
     ]
 ignore_missing_imports = true
 

@@ -1,0 +1,64 @@
+<style>
+    .table {
+        box-shadow: 0rem 0.25rem 1rem -0.25rem var(--accent-color);
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed; 
+    }
+    .table th, .table td {
+        border: 1px solid var(--accent-color);
+        color: var(--light);
+        padding: .5rem .75rem;
+        text-align: left;
+    }
+    .table th {
+        background-color: rgba(255, 255, 255, 0.3) !important;
+        font-size: 1.25rem;
+    }
+    .table th.sortable:hover {
+        cursor: pointer;
+    }
+    .table td {
+        color: #eeeeee;
+        font-size: 1rem;
+    }
+    .table tr:nth-child(even) td {
+        background-color: rgba(255, 255, 255, 0.2) !important;
+    }
+    .table tr:nth-child(odd) td {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+    }
+
+
+</style>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th class="sortable">Name <i class="fa fa-sortable fa-sort-up"></i><i class="fa fa-sortable fa-sort-down"></i></th>
+            <th class="sortable">Email <i class="fa fa-sortable fa-sort-up"></i><i class="fa fa-sortable fa-sort-down"></i></th>
+            <th class="sortable">Zip Code <i class="fa fa-sortable fa-sort-up"></i><i class="fa fa-sortable fa-sort-down"></i></th>
+            <th class="sortable">Last Login <i class="fa fa-sortable fa-sort-up"></i><i class="fa fa-sortable fa-sort-down"></i></th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    {% if queryset %}
+    {% for row in queryset %}
+        <tr>
+            <td>{{ row.first_name }} {{ row.last_name }}</td>
+            <td>{{ row.email }}</td>
+            <td>{{ row.zip_code }}</td>
+            <td>{{ row.last_login }}</td>
+            <td>
+                <span class="mx-2"><i class="fa-solid fa-toolbox"></i></span>
+                <span class="mx-2"><i class="fa-solid fa-list-check"></i></span>
+                <span class="mx-2"><i class="fa-solid fa-circle-user"></i></span>
+            </td>
+        </tr>
+    {% endfor %}
+    {% else %}
+        <tr><td colspan="5" class="spanning-row text-center">No matching records found</td></tr>
+    {% endif %}
+    </tbody>
+</table>

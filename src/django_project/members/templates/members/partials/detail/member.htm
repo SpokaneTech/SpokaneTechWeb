@@ -1,0 +1,68 @@
+<style>
+.tag {
+    color: rgb(66, 65, 65);
+    padding: 0.5rem;
+    border-radius: 2rem;
+    margin: 0.25rem;
+    display: inline-block;
+    background-color: var(--accent-color);
+    border: 2px solid var(--gunmetal);
+    font-size: .75rem;
+    padding: .5rem 1rem;
+    font-weight: bold;
+}
+</style>
+
+<section class="detail my-5 fade-in-blur" style="--fade-duration: .1s;">
+    <div class="h1 fw-bold">{{ object.first_name }} {{ object.last_name }}</div>
+    <div class="h3 fw-bold highlight">{{ object.email }}</div>
+</section>
+
+<section class="fade-in-blur" style="--fade-duration: .2s;">
+    <button class="btn btn-primary" type="button" hx-get="{% url 'members:update_member' object.pk %}" hx-target="#modal_wrapper" data-bs-toggle="modal" data-bs-target="#modal_wrapper">
+        Edit Profile
+    </button>
+</section>
+
+<section
+    id="member-skills"
+    hx-get="{% url 'members:skills_partial' object.pk %}"
+    hx-trigger="load"
+    hx-swap="innerHTML"
+    class="fade-in-blur"
+    style="--fade-duration: .3s;"
+>
+</section>
+
+<section
+    id="member-interests"
+    hx-get="{% url 'members:interests_partial' object.pk %}"
+    hx-trigger="load"
+    hx-swap="innerHTML"
+    class="fade-in-blur"
+    style="--fade-duration: .4s;"
+>
+</section>
+
+
+<div id="member-metadata" data-member-id="{{ object.pk }}" hidden></div>
+
+<script>
+ document.addEventListener('htmx:afterRequest', (event) => {
+    const xhr = event.detail.xhr;
+    const updated = xhr.getResponseHeader('X-Member-Updated');
+
+    if (updated === 'true') {
+        const memberId = getMemberId();
+
+        // Refresh each section explicitly
+        htmx.ajax('GET', `/members/skills_partial/${memberId}`, '#member-skills');
+        htmx.ajax('GET', `/members/interests_partial/${memberId}`, '#member-interests');
+
+    }
+});
+
+function getMemberId() {
+    return document.querySelector('#member-metadata')?.dataset.memberId;
+}
+</script>

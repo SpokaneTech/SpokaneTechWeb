@@ -21,13 +21,14 @@ from django.urls import include, path
 
 urlpatterns = [
     # Django provided URLs
-    path("admin/", admin.site.urls),
-    path("accounts/", include("django.contrib.auth.urls")),
+    path("console/", admin.site.urls),
+    path("accounts/", include("allauth.urls")),
     path("robots.txt", robots_txt),
     # 3rd party URLs
     path("handyhelpers/", include("handyhelpers.urls")),
     # app URLs
     path("", include("web.urls", namespace="web")),
+    path("members/", include("members.urls", namespace="members")),
 ]
 
 if settings.DEBUG:
