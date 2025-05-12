@@ -1,4 +1,5 @@
 import json
+import logging
 from collections import Counter
 from typing import Any, Never
 
@@ -17,6 +18,8 @@ from members.forms import UpdateMemberForm
 
 # import models
 from members.models import Member, MemberInterest, MemberSkill
+
+logger = logging.getLogger(__name__)
 
 
 class LogInView(HtmxOptionView):
@@ -147,48 +150,84 @@ class MemberStatsByCareerLevelView(HtmxOnlyView):
 class EditModalView(BuildBootstrapModalView):
     """ """
 
+    field_list: list[str] = []
     form = None  # type: ignore
     form_display: str = "bs5"
+    related_fields_list: list = []
     modal_button_submit: str = "Update"
     modal_title: str | None = None
-    model = Member
     toast_message_fail: str | None = None
     toast_message_success: str | None = None
 
+    def _get_reverse_fk_field_names(self, instance, allowed_models) -> list:
+        return [
+            rel.get_accessor_name()
+            for rel in instance._meta.get_fields()
+            if rel.one_to_many and rel.auto_created and rel.related_model in allowed_models
+        ]
+
     def get(self, request, *args, **kwargs) -> HttpResponse | Any:
-        instance = self.model.objects.get(pk=kwargs["pk"])
+        if self.form:
+            instance: Any = self.form.Meta.model.objects.get(pk=kwargs["pk"])
         if not self.is_htmx():
             return HttpResponse("Invalid request", status=400)
         if not self.form:
             return HttpResponse("Invalid request", status=400)
 
         form_errors: Any = request.session.get(f"{self.form.__name__}__errors")
+        data: Any = request.session.get(f"{self.form.__name__}__data")
+
+        if data and data.get("interests", None):
+            int_pks: list[int] = [int(pk) for pk in data["interests"]]
+            interests_qs = (
+                MemberInterest.objects.filter(interest__pk__in=int_pks)
+                .distinct()
+                .values_list("interest__pk", flat=True)
+            )
+        else:
+            interests_qs = MemberInterest.objects.filter(member=instance).values_list("interest__pk", flat=True)
+
+        if data and data.get("skills", None):
+            int_pks = [int(pk) for pk in data["skills"]]
+            skills_qs = MemberSkill.objects.filter(skill__pk__in=int_pks).distinct().values_list("skill__pk", flat=True)
+        else:
+            skills_qs = MemberSkill.objects.filter(member=instance).values_list("skill__pk", flat=True)
+
         if self.form and form_errors:
-            data: Any = request.session.get(f"{self.form.__name__}__data")
             form: Never = self.form()
             form.data = data
+
+            form = self.form(
+                initial={
+                    "first_name": data.get("first_name", instance.first_name),
+                    "last_name": data.get("last_name", instance.last_name),
+                    "title": data.get("title", getattr(instance, "title", "")),
+                    "zip_code": data.get("zip_code", instance.zip_code),
+                    "skills": list(skills_qs),
+                    "interests": list(interests_qs),
+                }
+            )
+
             for field, error_message in form_errors.items():
                 try:
                     form.add_error(field, error_message)
-                except KeyError:
-                    pass
-        else:
-            # Fetch related TechnicalArea pks for member skills and interests
-            skills_qs = MemberSkill.objects.filter(member=instance).values_list("skill__pk", flat=True)
-            interests_qs = MemberInterest.objects.filter(member=instance).values_list("interest__pk", flat=True)
+                except Exception as e:
+                    # Log the exception for debugging purposes
+                    logger.error(f"Failed to add error to form field '{field}': {e}")
 
+        else:
             form = self.form(
                 initial={
                     "first_name": instance.first_name,
                     "last_name": instance.last_name,
                     "title": getattr(instance, "title", ""),
                     "zip_code": instance.zip_code,
-                    "memberskills": list(skills_qs),
+                    "skills": list(skills_qs),
                     "interests": list(interests_qs),
                 }
             )
 
-        self.form.hx_post = f"/members/{instance.pk}/update/"
+        self.form.hx_post = self.hx_post_url.format(pk=instance.pk)
         context: dict[str, Any] = {
             "modal_title": (
                 self.modal_title if self.modal_title else f"Update {self.form.Meta.model._meta.object_name}"
@@ -209,22 +248,19 @@ class EditModalView(BuildBootstrapModalView):
         form = self.form(request.POST) if self.form else None
         if form:
             if form.is_valid():
-                member = self.model.objects.get(pk=kwargs["pk"])
+                member = self.form.Meta.model.objects.get(pk=kwargs["pk"])
 
                 # Update Member fields
-                for field in ["title", "first_name", "last_name", "zip_code"]:
+                for field in form.Meta.fields:
                     setattr(member, field, form.cleaned_data[field])
                 member.save()
 
-                # Handle MemberSkill relationship
-                member.memberskill_set.all().delete()
-                for skill in form.cleaned_data.get("memberskills", []):
-                    MemberSkill.objects.create(member=member, skill=skill)
-
-                # Handle MemberInterest relationship
-                member.memberinterest_set.all().delete()
-                for interest in form.cleaned_data.get("interests", []):
-                    MemberInterest.objects.create(member=member, interest=interest)
+                for entry in self.related_fields_list:
+                    form_field = entry["form_field"]
+                    model = entry["model"]
+                    model.objects.filter(member=member).delete()
+                    for item in form.cleaned_data.get(form_field, []):
+                        model.objects.create(member=member, **{entry["model_field"]: item})
 
                 response = HttpResponse(status=204)
                 response["X-Toast-Message"] = (
@@ -237,9 +273,22 @@ class EditModalView(BuildBootstrapModalView):
                 return response
 
             # Handle invalid form
-            form_error_dict = {k: str(v[0].messages[0]) for k, v in form.errors.as_data().items()}
+            form_error_dict: dict[Any, str] = {k: str(v[0].messages[0]) for k, v in form.errors.as_data().items()}
+            post_dict = dict(request.POST.lists())
+            session_form_data: dict = {}
+            for field in form.Meta.fields:
+                session_form_data[field] = form.data[field]
+
+            for related_field in self.related_fields_list:
+                field = related_field["form_field"]
+                if field in post_dict:
+                    session_form_data[field] = post_dict[field]
+                else:
+                    session_form_data[field] = []
+
             request.session[f"{self.form.__name__}__errors"] = form_error_dict
-            request.session[f"{self.form.__name__}__data"] = form.data
+            request.session[f"{self.form.__name__}__data"] = session_form_data
+
             response = HttpResponse(status=400)
             response["X-Toast-Message"] = (
                 f"""<span class="text-danger">{self.toast_message_fail}</span>"""
@@ -252,6 +301,20 @@ class UpdateMemberModalView(EditModalView):
     """Update an existing Member entry"""
 
     form = UpdateMemberForm  # type: ignore
+    hx_post_url: str = "/members/{pk}/update/"
+
+    related_fields_list = [
+        {
+            "model": MemberInterest,
+            "model_field": "interest",
+            "form_field": "interests",
+        },
+        {
+            "model": MemberSkill,
+            "model_field": "skill",
+            "form_field": "skills",
+        },
+    ]
     modal_title: str = "Update your profile"
     toast_message_success: str = "Profile updated successfully"
     toast_message_fail: str = "Failed to update profile"

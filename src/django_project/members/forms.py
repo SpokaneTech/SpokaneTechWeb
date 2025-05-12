@@ -67,7 +67,7 @@ class UpdateMemberForm(HtmxForm):
     title = forms.CharField(max_length=64, required=False, label="Title")
     zip_code = forms.CharField(max_length=9, required=True, label="Zip Code")
 
-    memberskills = forms.ModelMultipleChoiceField(
+    skills = forms.ModelMultipleChoiceField(
         queryset=TechnicalArea.objects.all().order_by("name"),
         widget=forms.CheckboxSelectMultiple(attrs={"class": "form-control", "size": "2"}),
         required=False,
