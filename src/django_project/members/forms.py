@@ -4,7 +4,7 @@ from typing import Any
 from django import forms
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from handyhelpers.forms import HtmxForm
-from members.models import Member, TechnicalArea
+from members.models import Member, MemberInterest, MemberSkill, TechnicalArea
 
 
 class MemberCreationForm(forms.ModelForm):
@@ -54,7 +54,21 @@ class MemberChangeForm(forms.ModelForm):
         return self.initial["password"]
 
 
-class UpdateMemberForm(HtmxForm):
+class FormUtilsMixin:
+    def get_non_model_multiple_choice_fields(form_class) -> list:
+        return [
+            name
+            for name, field in form_class.base_fields.items()
+            if not isinstance(field, forms.ModelMultipleChoiceField)
+        ]
+
+    def get_model_multiple_choice_fields(form_class) -> list:
+        return [
+            name for name, field in form_class.base_fields.items() if isinstance(field, forms.ModelMultipleChoiceField)
+        ]
+
+
+class UpdateMemberForm(FormUtilsMixin, HtmxForm):
     hx_target: str = "member-form"
     submit_button_text: str = "update"
 
@@ -80,3 +94,21 @@ class UpdateMemberForm(HtmxForm):
         required=False,
         label="Interests",
     )
+
+    related_fields_list: list = [
+        {
+            "model": MemberInterest,
+            "model_field": "interest",
+            "form_field": "interests",
+        },
+        {
+            "model": MemberSkill,
+            "model_field": "skill",
+            "form_field": "skills",
+        },
+    ]
+
+    # def __init__(self, *args, **kwargs) -> None:
+    #     super().__init__(*args, **kwargs)
+    #     self.fields["interests"].model_field = "interest"
+    #     self.fields["skills"].model_field = "skill"

@@ -147,13 +147,12 @@ class MemberStatsByCareerLevelView(HtmxOnlyView):
         return super().get(request)
 
 
-class EditModalView(BuildBootstrapModalView):
+class UpdateModalView(BuildBootstrapModalView):
     """ """
 
     field_list: list[str] = []
     form = None  # type: ignore
     form_display: str = "bs5"
-    related_fields_list: list = []
     modal_button_submit: str = "Update"
     modal_title: str | None = None
     toast_message_fail: str | None = None
@@ -165,6 +164,24 @@ class EditModalView(BuildBootstrapModalView):
             for rel in instance._meta.get_fields()
             if rel.one_to_many and rel.auto_created and rel.related_model in allowed_models
         ]
+
+    def _get_form_field_dict(self, form) -> dict:
+        return self.form().fields
+
+    def _get_field_queryset(self, field_name: str, model_instance, data) -> Any:
+        pass
+
+    def _build_initial_data(self, form, model_instance, data) -> dict:
+        initial_data: dict = {}
+        for field_name, field in self._get_form_field_dict(form):
+            model_field: Any | None = getattr(field, "model_field", None)
+            if model_field:
+                continue
+            elif field in self.field_list:
+                initial_data[field] = data.get(field_name, model_instance.__dict__.get(field_name, None))
+            else:
+                initial_data[field] = data.get(field, None)
+        return initial_data
 
     def get(self, request, *args, **kwargs) -> HttpResponse | Any:
         if self.form:
@@ -211,9 +228,8 @@ class EditModalView(BuildBootstrapModalView):
             for field, error_message in form_errors.items():
                 try:
                     form.add_error(field, error_message)
-                except Exception as e:
-                    # Log the exception for debugging purposes
-                    logger.error(f"Failed to add error to form field '{field}': {e}")
+                except Exception as err:
+                    logger.error(f"Failed to add error to form field '{field}': {err}")
 
         else:
             form = self.form(
@@ -248,19 +264,19 @@ class EditModalView(BuildBootstrapModalView):
         form = self.form(request.POST) if self.form else None
         if form:
             if form.is_valid():
-                member = self.form.Meta.model.objects.get(pk=kwargs["pk"])
+                instance = self.form.Meta.model.objects.get(pk=kwargs["pk"])
 
-                # Update Member fields
                 for field in form.Meta.fields:
-                    setattr(member, field, form.cleaned_data[field])
-                member.save()
+                    setattr(instance, field, form.cleaned_data[field])
+                instance.save()
 
-                for entry in self.related_fields_list:
-                    form_field = entry["form_field"]
-                    model = entry["model"]
-                    model.objects.filter(member=member).delete()
-                    for item in form.cleaned_data.get(form_field, []):
-                        model.objects.create(member=member, **{entry["model_field"]: item})
+                for entry in self.form.related_fields_list:
+                    entry["model"].objects.filter(**{self.form.Meta.model._meta.model_name: instance}).delete()
+
+                    for item in form.cleaned_data.get(entry["form_field"], []):
+                        entry["model"].objects.create(
+                            **{entry["model_field"]: item, self.form.Meta.model._meta.model_name: instance}
+                        )
 
                 response = HttpResponse(status=204)
                 response["X-Toast-Message"] = (
@@ -279,12 +295,11 @@ class EditModalView(BuildBootstrapModalView):
             for field in form.Meta.fields:
                 session_form_data[field] = form.data[field]
 
-            for related_field in self.related_fields_list:
-                field = related_field["form_field"]
-                if field in post_dict:
-                    session_form_data[field] = post_dict[field]
+            for related_field in self.form.related_fields_list:
+                if related_field["form_field"] in post_dict:
+                    session_form_data[related_field["form_field"]] = post_dict[related_field["form_field"]]
                 else:
-                    session_form_data[field] = []
+                    session_form_data[related_field["form_field"]] = []
 
             request.session[f"{self.form.__name__}__errors"] = form_error_dict
             request.session[f"{self.form.__name__}__data"] = session_form_data
@@ -297,24 +312,11 @@ class EditModalView(BuildBootstrapModalView):
             return response
 
 
-class UpdateMemberModalView(EditModalView):
+class UpdateMemberModalView(UpdateModalView):
     """Update an existing Member entry"""
 
     form = UpdateMemberForm  # type: ignore
     hx_post_url: str = "/members/{pk}/update/"
-
-    related_fields_list = [
-        {
-            "model": MemberInterest,
-            "model_field": "interest",
-            "form_field": "interests",
-        },
-        {
-            "model": MemberSkill,
-            "model_field": "skill",
-            "form_field": "skills",
-        },
-    ]
     modal_title: str = "Update your profile"
     toast_message_success: str = "Profile updated successfully"
     toast_message_fail: str = "Failed to update profile"
