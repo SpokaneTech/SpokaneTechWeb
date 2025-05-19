@@ -58,6 +58,12 @@ def create_groups() -> None:
             "platform page": "https://www.eventbrite.com/o/sp3nw-33773699489",
         },
         {
+            "name": "Spokane Small Business Podcast",
+            "icon": """<i class="fa-solid fa-podcast"></i>""",
+            "platform": "Eventbrite",
+            "platform page": "https://www.eventbrite.com/o/spokane-small-business-podcast-103647763911",
+        },
+        {
             "name": "Spokane DevOps Meetup",
             "icon": """<i class="fa-solid fa-code-pull-request"></i>""",
             "platform": "Meetup",
