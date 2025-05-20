@@ -9,5 +9,5 @@ jobs:
         uses: davidslusser/actions_python_ruff@format
         with:
             src: "src/django_project"
-            options: "-v"
+            command: "ruff format src --check"
             python_version: "3.11"
