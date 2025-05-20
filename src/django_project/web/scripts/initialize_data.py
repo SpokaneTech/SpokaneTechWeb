@@ -16,18 +16,6 @@ def create_groups() -> None:
             "platform page": "https://www.eventbrite.com/o/business-brew-80655815043",
         },
         {
-            "name": "DC509",
-            "icon": """<i class="fa-solid fa-book-skull"></i>""",
-            "platform": "Other",
-            "platform page": "",
-        },
-        {
-            "name": "Greater Spokane Inc",
-            "icon": """<i class="fa-solid fa-city"></i>""",
-            "platform": "Meetup",
-            "platform page": "https://www.meetup.com/dc-509/",
-        },
-        {
             "name": "Ignite Northwest",
             "icon": """<i class="fa-solid fa-fire-flame-curved"></i>""",
             "platform": "Eventbrite",
@@ -62,6 +50,24 @@ def create_groups() -> None:
             "icon": """<i class="fa-solid fa-podcast"></i>""",
             "platform": "Eventbrite",
             "platform page": "https://www.eventbrite.com/o/spokane-small-business-podcast-103647763911",
+        },
+        {
+            "name": "FUEL Coworking",
+            "icon": """<i class="fa-solid fa-gas-pump"></i>""",
+            "platform": "Eventbrite",
+            "platform page": "https://www.eventbrite.com/o/fuel-coworking-110692675491",
+        },
+        {
+            "name": "Greater Spokane Inc",
+            "icon": """<i class="fa-solid fa-city"></i>""",
+            "platform": "Other",
+            "platform page": "",
+        },
+        {
+            "name": "DC509",
+            "icon": """<i class="fa-solid fa-book-skull"></i>""",
+            "platform": "Meetup",
+            "platform page": "https://www.meetup.com/dc-509/",
         },
         {
             "name": "Spokane DevOps Meetup",

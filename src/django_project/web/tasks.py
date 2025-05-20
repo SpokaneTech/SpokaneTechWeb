@@ -1,6 +1,8 @@
 import logging
+import random
 import re
 import time
+from typing import Any
 
 from celery import shared_task
 from web.models import Event, Link, Tag, TechGroup
@@ -18,7 +20,7 @@ from web.utilities.scrapers.meetup import (
 
 
 @shared_task(time_limit=30, max_retries=0, name="web.test_task")
-def test_task():
+def test_task() -> str:
     logging.info("test task starting")
     time.sleep(3)
     logging.info("test task completed")
@@ -26,7 +28,7 @@ def test_task():
 
 
 @shared_task(time_limit=900, max_retries=3, name="web.ingest_meetup_group_details")
-def ingest_meetup_group_details(group_pk, url: str):
+def ingest_meetup_group_details(group_pk, url: str) -> str:
     updated = False
     group = TechGroup.objects.get(pk=group_pk)
     group = TechGroup.objects.get(pk=group_pk)
@@ -42,7 +44,7 @@ def ingest_meetup_group_details(group_pk, url: str):
 
 
 @shared_task(time_limit=900, max_retries=3, name="web.ingest_eventbrite_organization_details")
-def ingest_eventbrite_organization_details(group_pk):
+def ingest_eventbrite_organization_details(group_pk) -> str:
     updated = False
     group = TechGroup.objects.get(pk=group_pk)
     link = group.links.filter(name=f"{group.name} {group.platform.name} page").distinct()[0]
@@ -66,7 +68,7 @@ def ingest_eventbrite_organization_details(group_pk):
 
 
 @shared_task(time_limit=900, max_retries=3, name="web.ingest_future_meetup_events")
-def ingest_future_meetup_events(group_pk):
+def ingest_future_meetup_events(group_pk) -> str:
     group = TechGroup.objects.get(pk=group_pk)
     if not group:
         return f"group with pk {group_pk} not found"
@@ -108,43 +110,52 @@ def ingest_future_meetup_events(group_pk):
 
 
 @shared_task(time_limit=900, max_retries=3, name="web.ingest_future_eventbrite_events")
-def ingest_future_eventbrite_events(group_pk):
+def ingest_future_eventbrite_events(group_pk) -> str:
     group = TechGroup.objects.get(pk=group_pk)
     if not group:
         return f"group with pk {group_pk} not found"
     event_count = 0
     link = group.links.filter(name=f"{group.name} {group.platform.name} page").distinct()[0]
-    eb_group_id = link.url.split("-")[-1]
-    event_list = get_events_for_organization(eb_group_id)
+    eb_group_id: str = link.url.split("-")[-1]
+    event_list: list = get_events_for_organization(eb_group_id)
     for item in event_list:
-        event_details = get_event_details(item["id"])
-        location_data = event_details["primary_venue"]
-        tag_data = event_details["tags"]
+        event_details: dict = get_event_details(item["id"])
+        if event_details:
+            location_data: dict = event_details["primary_venue"]
+            tag_data: list[dict[str, Any]] = event_details["tags"]
 
-        event_data = {
-            "group": group,
-            "name": item["name"]["text"],
-            "description": item["description"]["text"],
-            "url": item["url"],
-            "social_platform_id": item["id"],
-            "start_datetime": item["start"]["utc"],
-            "end_datetime": item["end"]["utc"],
-            "location_name": location_data["name"],
-            "location_address": location_data["address"]["localized_address_display"],
-            "map_link": create_google_map_link(location_data["address"]["localized_address_display"]),
-        }
+            event_data: dict[str, Any] = {
+                "group": group,
+                "name": item["name"].get("text", "") if item.get("name") else "",
+                "description": item["description"].get("text", "") if item.get("description") else "",
+                "url": item.get("url", ""),
+                "social_platform_id": item.get("id", ""),
+                "start_datetime": item["start"].get("utc", "") if item.get("start") else "",
+                "end_datetime": item["end"].get("utc", "") if item.get("end") else "",
+                "location_name": location_data.get("name", "") if location_data else "",
+                "location_address": (
+                    location_data.get("address", {}).get("localized_address_display", "") if location_data else ""
+                ),
+                "map_link": (
+                    create_google_map_link(location_data.get("address", {}).get("localized_address_display", ""))
+                    if location_data
+                    else ""
+                ),
+            }
 
-        event, is_new = Event.objects.update_or_create(group=group, social_platform_id=item["id"], defaults=event_data)
-        if is_new:
-            event_count += 1
-        for tag in tag_data:
-            obj = Tag.objects.get_or_create(value=tag["display_name"], defaults={"value": tag["display_name"]})[0]
-            event.tags.add(obj)
+            event, is_new = Event.objects.update_or_create(
+                group=group, social_platform_id=item["id"], defaults=event_data
+            )
+            if is_new:
+                event_count += 1
+            for tag in tag_data:
+                obj, _ = Tag.objects.get_or_create(value=tag["display_name"], defaults={"value": tag["display_name"]})
+                event.tags.add(obj)
     return f"added {event_count} new events for {group.name}"
 
 
 @shared_task(time_limit=900, max_retries=3, name="web.launch_group_detail_ingestion")
-def launch_group_detail_ingestion():
+def launch_group_detail_ingestion() -> str:
     """parent task for ingesting details for all tech groups"""
     for group in TechGroup.objects.filter(enabled=True):
         for link in group.links.filter(name=f"""{group.name} {group.platform} page"""):
@@ -154,22 +165,26 @@ def launch_group_detail_ingestion():
             elif group.platform.name.lower() == "eventbrite":
                 job = ingest_eventbrite_organization_details.s(group.pk)
                 job.apply_async()
+    return f"ingesting details for {TechGroup.objects.filter(enabled=True).count()} tech groups"
 
 
 @shared_task(time_limit=900, max_retries=0, name="web.launch_meetup_event_ingestion")
-def launch_meetup_event_ingestion():
+def launch_meetup_event_ingestion() -> str:
     """parent task for ingesting future events for tech groups on Meetup"""
     tech_group_list = TechGroup.objects.filter(enabled=True, platform__name="Meetup")
     for group in tech_group_list:
         job = ingest_future_meetup_events.s(group.pk)
         job.apply_async()
+    return f"ingesting future events for {len(tech_group_list)} tech groups on Meetup"
 
 
 @shared_task(time_limit=900, max_retries=0, name="web.launch_eventbrite_event_ingestion")
-def launch_eventbrite_event_ingestion():
+def launch_eventbrite_event_ingestion() -> str:
     """parent task for ingesting future events for tech groups on Eventbrite"""
 
     tech_group_list = TechGroup.objects.filter(enabled=True, platform__name="Eventbrite")
     for group in tech_group_list:
         job = ingest_future_eventbrite_events.s(group.pk)
         job.apply_async()
+        time.sleep(random.randint(1, 3))  # nosec
+    return f"ingesting future events for {len(tech_group_list)} tech groups on Eventbrite"

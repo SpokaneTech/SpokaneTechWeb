@@ -556,18 +556,18 @@ footer .copyright {
     box-shadow: 0rem 0.25rem 1rem -0.25rem var(--light, rgb(255, 255, 255));
     padding: 20px;
     width: 400px; /* Fixed width */
-    height: 150px; /* Fixed height */
+    height: 175px; /* Fixed height */
     text-align: center;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: space-between;
+    justify-content: space-evenly;
     color: var(--light, rgb(255, 255, 255));
     cursor: pointer;
 }
 .group-card .category {
     font-weight: bold;
-    font-size: clamp(.75rem, 15vmin, 2rem);
+    font-size: clamp(.75rem, 15vmin, 2.25rem);
 }
 .group-card .description {
     font-weight: bold;
