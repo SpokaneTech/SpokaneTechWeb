@@ -13,11 +13,11 @@ https://spokanetech.github.io/blog/building-spokane-tech/intro/
 | Workflow | Description             | Status                                                                       |
 |----------|-------------------------|------------------------------------------------------------------------------|
 |Bandit|security checks|![Bandit](https://github.com/SpokaneTech/SpokaneTechWeb/actions/workflows/bandit.yaml/badge.svg)|
-|Black|code formatting|![Black](https://github.com/SpokaneTech/SpokaneTechWeb/actions/workflows/black.yaml/badge.svg)|
 |Isort|python import ordering|![Isort](https://github.com/SpokaneTech/SpokaneTechWeb/actions/workflows/isort.yaml/badge.svg)|
 |Mypy|static type checking|![Mypy](https://github.com/SpokaneTech/SpokaneTechWeb/actions/workflows/mypy.yaml/badge.svg)|
 |Radon|code complexity analysis|![Radon](https://github.com/SpokaneTech/SpokaneTechWeb/actions/workflows/radon.yaml/badge.svg)|
-|Ruff|static code analysis|![Ruff](https://github.com/SpokaneTech/SpokaneTechWeb/actions/workflows/ruff.yaml/badge.svg)|
+|Ruff Format|code formatting|![Format](https://github.com/SpokaneTech/SpokaneTechWeb/actions/workflows/ruff_lint.yaml/badge.svg)|
+|Ruff Lint|static code analysis|![Lint](https://github.com/SpokaneTech/SpokaneTechWeb/actions/workflows/ruff_lint.yaml/badge.svg)|
 
 
 <br/>
@@ -80,6 +80,7 @@ To enable pre-commit code quality checks, update the location of git hooks with 
     ```
     pip install .[dev]
     ```
+     ** mac users may need to use quotes, such as ```pip install ."[dev]"```
 
 5. (optional) create a custom .env file and update contents as applicable
     ```
