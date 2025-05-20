@@ -57,7 +57,7 @@ def get_organization_details(organization_id: str) -> dict:
     return response.json()["organizers"][0]
 
 
-def get_events_for_organization(organization_id: str, age: int = 7) -> list:
+def get_events_for_organization(organization_id: str, age: int = 14) -> list:
     """get a list of events for a given Eventbrite organization
 
     Args:
@@ -67,20 +67,20 @@ def get_events_for_organization(organization_id: str, age: int = 7) -> list:
     Returns:
         list: list of Eventbrite events created in the past <age> days
     """
-    api_token = getattr(settings, "EVENTBRITE_API_KEY", None)
+    api_token: str | None = getattr(settings, "EVENTBRITE_API_KEY", None)
     if not api_token:
         return []
-    url = f"https://www.eventbriteapi.com/v3/organizers/{organization_id}/events/"
-    headers = {"Authorization": f"Bearer {api_token}"}
-    response = requests.get(url, headers=headers, timeout=15)
+    start_date_range_end: str = (timezone.now() + timedelta(days=age)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    start_date_range_start: str = timezone.now().strftime("%Y-%m-%dT%H:%M:%SZ")
+    url: str = f"https://www.eventbriteapi.com/v3/organizers/{organization_id}/events/?start_date.range_start={start_date_range_start}&start_date.range_end={start_date_range_end}"
+    headers: dict[str, str] = {"Authorization": f"Bearer {api_token}"}
+    response: requests.Response = requests.get(url, headers=headers, timeout=15)
     response.raise_for_status()
-    data = response.json()
-    event_list = data["events"]
-    age_datetime = timezone.now() - timedelta(days=age)
-    return filter_events_by_date(event_list, age_datetime)
+    data: dict = response.json()
+    return data["events"]
 
 
-def get_event_details(event_id: str) -> dict | None:
+def get_event_details(event_id: str) -> dict:
     """get the details of an Eventbrite event
 
     Args:
@@ -102,4 +102,4 @@ def get_event_details(event_id: str) -> dict | None:
                 continue
             else:
                 raise err
-    return None
+    return {}
