@@ -1,5 +1,7 @@
 import random
 
+from allauth.socialaccount.models import OAuth2Provider, SocialAccount
+from django.conf import settings
 from django.utils.timezone import make_aware
 from faker import Faker
 from members.models import (
@@ -67,6 +69,29 @@ zip_codes: list[str] = [
     "83869",
     "83876",
 ]
+
+
+def create_oauth2_providers() -> None:
+    """Create some OAuth2Provider entries"""
+    print("INFO: creating OAuth2Provider entries")
+
+    data_list: list[dict[str, str]] = [
+        # {
+        #     "name": "GitHub",
+        #     "client_id": "github_client_id",
+        #     "client_secret": "github_client_secret",
+        #     "redirect_uri": "https://example.com/oauth2/github/callback",
+        # },
+        {
+            "name": "Google",
+            "client_id": "google_client_id",
+            "client_secret": "google_client_secret",
+            "redirect_uri": "https://example.com/oauth2/google/callback",
+        },
+    ]
+    for data in data_list:
+        provider, _ = OAuth2Provider.objects.update_or_create(name=data["name"], defaults=data)
+        SocialAccount.objects.update_or_create(provider=provider, defaults={"provider": provider})
 
 
 def create_career_levels() -> None:
