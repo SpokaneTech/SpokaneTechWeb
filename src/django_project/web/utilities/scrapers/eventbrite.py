@@ -75,9 +75,7 @@ def get_events_for_organization(organization_id: str, age: int = 14) -> list:
         return []
     start_date_range_end: str = (timezone.now() + timedelta(days=age)).strftime("%Y-%m-%dT%H:%M:%SZ")
     start_date_range_start: str = timezone.now().strftime("%Y-%m-%dT%H:%M:%SZ")
-    url: str = (
-        f"https://www.eventbriteapi.com/v3/organizers/{organization_id}/events/?start_date.range_start={start_date_range_start}&start_date.range_end={start_date_range_end}"
-    )
+    url: str = f"https://www.eventbriteapi.com/v3/organizers/{organization_id}/events/?start_date.range_start={start_date_range_start}&start_date.range_end={start_date_range_end}"
     headers: dict[str, str] = {"Authorization": f"Bearer {api_token}"}
     response: requests.Response = requests.get(url, headers=headers, timeout=15)
     response.raise_for_status()
