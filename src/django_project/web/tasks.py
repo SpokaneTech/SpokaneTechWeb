@@ -111,11 +111,11 @@ def ingest_future_meetup_events(group_pk) -> str:
 
 @shared_task(time_limit=900, max_retries=3, name="web.ingest_future_eventbrite_events")
 def ingest_future_eventbrite_events(group_pk) -> str:
-    group = TechGroup.objects.get(pk=group_pk)
+    group: TechGroup = TechGroup.objects.get(pk=group_pk)
     if not group:
         return f"group with pk {group_pk} not found"
     event_count = 0
-    link = group.links.filter(name=f"{group.name} {group.platform.name} page").distinct()[0]
+    link: Any = group.links.filter(name=f"{group.name} {group.platform.name} page").distinct()[0]
     eb_group_id: str = link.url.split("-")[-1]
     event_list: list = get_events_for_organization(eb_group_id)
     for item in event_list:
