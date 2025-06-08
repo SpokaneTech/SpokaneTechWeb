@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     "allauth.account",
     "allauth.socialaccount",
     "allauth.socialaccount.providers.google",
+    "allauth.socialaccount.providers.github",
     # project apps
     "members",
     "web",
@@ -311,3 +312,4 @@ ACCOUNT_SIGNUP_FIELDS: list[str] = ["email*", "password1*", "password2*"]
 ACCOUNT_USER_MODEL_USERNAME_FIELD = "email"
 
 SOCIALACCOUNT_LOGIN_ON_GET = True
+SOCIALACCOUNT_ADAPTER = "members.adapters.CustomSocialAccountAdapter"
