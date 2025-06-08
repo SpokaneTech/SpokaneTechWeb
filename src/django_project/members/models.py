@@ -23,15 +23,6 @@ class MemberManager(BaseUserManager):
         return self.create_user(email, password, **extra_fields)
 
 
-class CareerLevel(HandyHelperBaseModel):
-    name = models.CharField(max_length=16, unique=True)
-    description = models.CharField(max_length=128, blank=True, null=True)
-    enabled = models.BooleanField(default=True)
-
-    def __str__(self) -> str:
-        return self.name
-
-
 class Member(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True)
     career_level = models.ForeignKey("members.CareerLevel", blank=True, null=True, on_delete=models.SET_NULL)
@@ -54,6 +45,15 @@ class Member(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self) -> str:
         return self.email
+
+
+class CareerLevel(HandyHelperBaseModel):
+    name = models.CharField(max_length=16, unique=True)
+    description = models.CharField(max_length=128, blank=True, null=True)
+    enabled = models.BooleanField(default=True)
+
+    def __str__(self) -> str:
+        return self.name
 
 
 class MemberInterest(HandyHelperBaseModel):

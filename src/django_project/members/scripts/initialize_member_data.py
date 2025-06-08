@@ -1,7 +1,8 @@
 import random
 
-from allauth.socialaccount.models import OAuth2Provider, SocialAccount
+from allauth.socialaccount.models import SocialAccount, SocialApp
 from django.conf import settings
+from django.contrib.sites.models import Site
 from django.utils.timezone import make_aware
 from faker import Faker
 from members.models import (
@@ -71,27 +72,41 @@ zip_codes: list[str] = [
 ]
 
 
+def create_site() -> None:
+    """Create a Site entry"""
+    print("INFO: creating Site entry")
+    site, is_new = Site.objects.update_or_create(
+        id=1,
+        defaults={
+            "domain": "www.spokanetech.org",
+            "name": "Spokane Tech",
+        },
+    )
+    settings.SITE_ID = site.id  # Update the SITE_ID in settings
+    if is_new:
+        print(f"INFO: Site created with ID {site.id} and domain {site.domain}")
+    else:
+        print(f"INFO: Site updated with ID {site.id} and domain {site.domain}")
+
+
 def create_oauth2_providers() -> None:
-    """Create some OAuth2Provider entries"""
-    print("INFO: creating OAuth2Provider entries")
+    """Create some SocialApp entries"""
+    print("INFO: creating SocialApp entries")
 
     data_list: list[dict[str, str]] = [
-        # {
-        #     "name": "GitHub",
-        #     "client_id": "github_client_id",
-        #     "client_secret": "github_client_secret",
-        #     "redirect_uri": "https://example.com/oauth2/github/callback",
-        # },
         {
-            "name": "Google",
-            "client_id": "google_client_id",
-            "client_secret": "google_client_secret",
-            "redirect_uri": "https://example.com/oauth2/google/callback",
+            "name": "google",
+            "provider": "google",
+            "client_id": getattr(settings, "GOOGLE_CLIENT_ID", ""),
+            "secret": getattr(settings, "GOOGLE_CLIENT_SECRET", ""),
         },
     ]
+    site: Site = Site.objects.get(pk=1)
+
     for data in data_list:
-        provider, _ = OAuth2Provider.objects.update_or_create(name=data["name"], defaults=data)
-        SocialAccount.objects.update_or_create(provider=provider, defaults={"provider": provider})
+        provider, _ = SocialApp.objects.update_or_create(name=data["name"], defaults=data)
+        provider.sites.add(site)
+        provider.save()
 
 
 def create_career_levels() -> None:
@@ -440,6 +455,10 @@ def create_technical_areas() -> None:
 
 def run() -> None:
     """Run the script"""
+
+    create_site()
+    create_oauth2_providers()
+
     print("INFO: Initializing member data")
     create_skill_levels()
     create_technical_areas()

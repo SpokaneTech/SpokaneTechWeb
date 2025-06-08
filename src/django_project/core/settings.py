@@ -188,7 +188,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 BASE_TEMPLATE = "base.htm"
-LOGIN_URL = "/accounts/login/"
+# LOGIN_URL = "/accounts/login/"
 # LOGIN_REDIRECT_URL = "/userextensions/user_login_redirect"
 # LOGIN_REDIRECT_URL_DEFAULT = "/"
 SESSION_COOKIE_AGE = env.int("SESSION_COOKIE_AGE", 28800)
