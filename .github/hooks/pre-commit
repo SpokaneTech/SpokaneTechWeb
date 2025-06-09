@@ -26,7 +26,7 @@ function run_checks {
 # add pre-commit commands here
 run_checks "bandit" bandit src -c pyproject.toml -r
 run_checks "isort" isort src --check
-# run_checks "mypy" mypy src
+run_checks "mypy" mypy src --check-untyped-defs
 run_checks "ruff check" ruff check src
 run_checks "ruff format" ruff format src
 

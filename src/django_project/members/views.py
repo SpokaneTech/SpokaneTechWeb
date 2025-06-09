@@ -166,7 +166,9 @@ class UpdateModalView(BuildBootstrapModalView):
         ]
 
     def _get_form_field_dict(self, form) -> dict:
-        return self.form().fields
+        if self.form:
+            return self.form().fields
+        return {}
 
     def _get_field_queryset(self, field_name: str, model_instance, data) -> Any:
         pass

@@ -54,21 +54,7 @@ class MemberChangeForm(forms.ModelForm):
         return self.initial["password"]
 
 
-class FormUtilsMixin:
-    def get_non_model_multiple_choice_fields(form_class) -> list:
-        return [
-            name
-            for name, field in form_class.base_fields.items()
-            if not isinstance(field, forms.ModelMultipleChoiceField)
-        ]
-
-    def get_model_multiple_choice_fields(form_class) -> list:
-        return [
-            name for name, field in form_class.base_fields.items() if isinstance(field, forms.ModelMultipleChoiceField)
-        ]
-
-
-class UpdateMemberForm(FormUtilsMixin, HtmxForm):
+class UpdateMemberForm(HtmxForm):
     hx_target: str = "member-form"
     submit_button_text: str = "update"
 
