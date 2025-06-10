@@ -95,7 +95,6 @@
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             {% for message in messages %}
-                console.log("Calling showToast with message:", "{{ message|escapejs }}");
                 showToast("{{ message|escapejs }}");
             {% endfor %}
         });

@@ -64,5 +64,11 @@
                 <div class="login-card-title">Login with Github</div>
             </div>
         </a>
+        <a href="{% provider_login_url 'openid_connect' process='login' provider_id='linkedin' %}">
+            <div class="login-card">
+                <div class="login-card-icon"><i class="fa-brands fa-linkedin"></i></div>
+                <div class="login-card-title">Login with LinkedIn</div>
+            </div>
+        </a>
     </div>    
 </section>

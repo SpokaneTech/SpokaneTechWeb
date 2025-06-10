@@ -28,10 +28,13 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
 
         if current_provider not in existing_providers:
             # Set a toastable message
-            messages.error(
-                request,
-                f"This account is already registered using: <b>{', '.join(existing_providers)}</b>. Please login using that provider.",
-            )
+            if existing_providers:
+                msg: str = (
+                    f"This account is already registered using: <b>{', '.join(existing_providers)}</b>. Please login using that provider."
+                )
+            else:
+                msg = "This account is already registered. Please login using the appropriate provider."
+            messages.error(request, msg)
             raise ImmediateHttpResponse(redirect("/members/login/"))
 
     def populate_user(self, request, sociallogin, data):

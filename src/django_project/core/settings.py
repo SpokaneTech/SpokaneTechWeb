@@ -64,6 +64,8 @@ INSTALLED_APPS = [
     "allauth.socialaccount",
     "allauth.socialaccount.providers.google",
     "allauth.socialaccount.providers.github",
+    # "allauth.socialaccount.providers.linkedin_oauth2",
+    "allauth.socialaccount.providers.openid_connect",
     # project apps
     "members",
     "web",
@@ -313,3 +315,40 @@ ACCOUNT_USER_MODEL_USERNAME_FIELD = "email"
 
 SOCIALACCOUNT_LOGIN_ON_GET = True
 SOCIALACCOUNT_ADAPTER = "members.adapters.CustomSocialAccountAdapter"
+
+
+# --- SOCIALACCOUNT_PROVIDERS updated for LinkedIn OIDC ---
+SOCIALACCOUNT_PROVIDERS = {
+    "openid_connect": {
+        "APPS": [
+            {
+                "provider_id": "linkedin",  # This ID will be part of your redirect URL (/accounts/oidc/linkedin/login/callback/)
+                "name": "LinkedIn",
+                "client_id": env.str("LINKEDIN_CLIENT_ID"),  # Replace with your LinkedIn OIDC Client ID
+                "secret": env.str("LINKEDIN_CLIENT_SECRET"),  # Replace with your LinkedIn OIDC Client Secret
+                "settings": {
+                    "server_url": "https://www.linkedin.com/oauth",  # This is LinkedIn's OIDC server base URL
+                    # Optional: Add PKCE if required by your provider (LinkedIn supports it)
+                    # 'oauth_pkce_enabled': True,
+                },
+                # Scopes for LinkedIn OIDC
+                "scope": [
+                    "openid",
+                    "profile",
+                    "email",
+                ],
+                # Profile fields that might be retrieved (these map to ID Token claims)
+                # OIDC primarily uses claims from the ID Token and UserInfo endpoint.
+                # 'profile' scope typically gives sub, name, given_name, family_name, picture.
+                # 'email' scope gives email, email_verified.
+                "PROFILE_FIELDS": [
+                    # These are standard OIDC claims. allauth maps them to its internal fields.
+                    # You generally don't list them all here like the old OAuth2 provider.
+                    # The 'profile' and 'email' scopes drive what's returned.
+                ],
+            }
+        ],
+        # Global OIDC settings (optional, can be overridden per app)
+        # 'OAUTH_PKCE_ENABLED': True, # If you want to enable PKCE for all OIDC providers
+    }
+}

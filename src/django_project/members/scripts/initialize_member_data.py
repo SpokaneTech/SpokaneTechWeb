@@ -1,6 +1,6 @@
 import random
 
-from allauth.socialaccount.models import SocialAccount, SocialApp
+from allauth.socialaccount.models import SocialApp
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.utils.timezone import make_aware
@@ -94,6 +94,12 @@ def create_oauth2_providers() -> None:
     print("INFO: creating SocialApp entries")
 
     data_list: list[dict[str, str]] = [
+        {
+            "name": "github",
+            "provider": "github",
+            "client_id": getattr(settings, "GITHUB_CLIENT_ID", ""),
+            "secret": getattr(settings, "GITHUB_CLIENT_SECRET", ""),
+        },
         {
             "name": "google",
             "provider": "google",
