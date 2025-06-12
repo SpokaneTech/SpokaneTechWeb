@@ -88,7 +88,6 @@ def ingest_future_meetup_events(group_pk) -> str:
             url for url in get_event_links(f"{link.url}events/?type=upcoming") if numeric_event_pattern.search(url)
         ]
         event_links.extend(ingest_links)
-
         for event_link in ingest_links:
             event_info = get_event_information(event_link)
             event_info["group"] = group

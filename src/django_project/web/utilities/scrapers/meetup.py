@@ -56,8 +56,8 @@ def get_event_information(url: str) -> dict:
     """
 
     try:
-        # page_content = fetch_content_with_playwright(url)
-        page_content: bytes | Any = fetch_content(url)
+        page_content = fetch_content_with_playwright(url)
+        # page_content: bytes | Any = fetch_content(url)
         soup = BeautifulSoup(page_content, "html.parser")
 
         event_info: dict = {}
@@ -66,26 +66,21 @@ def get_event_information(url: str) -> dict:
         if event_info["name"]:
             event_info["name"] = event_info["name"].text
         description_div: PageElement | Tag | NavigableString | None = soup.find("div", class_="break-words")
-        # if description_div:
-        #     event_info["description"] = "".join(str(child) for child in description_div.children)
         if description_div:
             if isinstance(description_div, Tag):  # Type check for Tag
                 event_info["description"] = "".join(str(child) for child in description_div.children)
 
-        # start_time_string = None
         time_element: PageElement | Tag | NavigableString | None = soup.find("time")
-        # if time_element:
-        #     start_time_string = time_element.get("datetime")
         if time_element:
             if isinstance(time_element, Tag):  # Check if time_element is a Tag
                 start_time_string: str | AttributeValueList | None = time_element.get("datetime", None)
                 time_text: str = time_element.get_text(separator=" ").strip()
                 end_time_string: str = time_text.split(" to ")[-1]
 
-        if start_time_string:
-            if isinstance(start_time_string, str):  # Check if start_time_string is a str
-                event_info["start_datetime"] = datetime.fromisoformat(start_time_string)
-                event_info["end_datetime"] = get_end_datetime(start_time_string, end_time_string)
+                if start_time_string:
+                    if isinstance(start_time_string, str):  # Check if start_time_string is a str
+                        event_info["start_datetime"] = datetime.fromisoformat(start_time_string)
+                        event_info["end_datetime"] = get_end_datetime(start_time_string, end_time_string)
         location_div: PageElement | Tag | NavigableString | None = soup.find(
             "div", class_="overflow-hidden pl-4 md:pl-4.5 lg:pl-5"
         )
