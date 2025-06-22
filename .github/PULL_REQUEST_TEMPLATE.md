@@ -16,5 +16,6 @@ Add links to applicable Issues
 
 ### Testing:
 - [ ] Existing tests provided necessary coverage
+- [ ] Manual or ad-hoc testing has been performed
 - [ ] Applicable tests have been added/updated
 - [ ] This change does not require testing
