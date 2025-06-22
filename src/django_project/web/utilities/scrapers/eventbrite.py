@@ -111,15 +111,11 @@ def get_event_details(event_id: str) -> dict:
         try:
             print(f"Attempt {attempt + 1}/{MAX_RETRIES + 1} for event ID {event_id}...")
             resp: requests.Response = requests.get(url, timeout=15)
-            resp.raise_for_status()  # Raises HTTPError for 4xx/5xx responses
 
-            # If successful, return the data
-            return resp.json()["events"][0]
-
-        except HTTPError as e:
-            if e.response.status_code == 429:
+            # Explicitly check for 429 before calling raise_for_status
+            if resp.status_code == 429:
                 print(f"Received 429 Too Many Requests for {url}.")
-                retry_after_header: str | None | Any = e.response.headers.get("Retry-After")
+                retry_after_header: str | None | Any = resp.headers.get("Retry-After")
                 wait_time: float = 0.0
 
                 if retry_after_header:
@@ -145,22 +141,27 @@ def get_event_details(event_id: str) -> dict:
                 if attempt < MAX_RETRIES:
                     time.sleep(wait_time)
                     current_429_backoff_time *= 2  # Double for next potential 429 retry
+                    continue  # Skip the rest of the loop and retry
                 else:
                     print(f"Max retries ({MAX_RETRIES}) for 429 reached. Raising the last error.")
-                    raise e  # Re-raise the 429 error on the last attempt
+                    raise HTTPError("Max retries reached for 429 Too Many Requests.")
+
+            # If not a 429, raise for other status codes
+            resp.raise_for_status()
+
+            # If successful, return the data
+            return resp.json()["events"][0]
+
+        except HTTPError as err:
+            # Handle other HTTP errors (e.g., 400, 401, 404, 500)
+            print(f"HTTP Error {err.response.status_code}: {err.response.reason} for {url}.")
+            if attempt < MAX_RETRIES:
+                sleep_for: float = 3 * attempt  # Keep original backoff for non-429 errors
+                print(f"Waiting {sleep_for} seconds before retrying...")
+                time.sleep(sleep_for)
             else:
-                # Handle other HTTP errors (e.g., 400, 401, 404, 500)
-                print(f"HTTP Error {e.response.status_code}: {e.response.reason} for {url}.")
-                if attempt < MAX_RETRIES:
-                    # For other HTTP errors, a simpler increasing backoff might suffice
-                    # or you might want to raise immediately depending on error type.
-                    # Original code had time.sleep(3 * attempt) for generic errors.
-                    sleep_for: float = 3 * attempt  # Keep original backoff for non-429 errors
-                    print(f"Waiting {sleep_for} seconds before retrying...")
-                    time.sleep(sleep_for)
-                else:
-                    print(f"Max retries ({MAX_RETRIES}) reached for non-429 HTTP error. Raising the last error.")
-                    raise e  # Re-raise the specific HTTP error on the last attempt
+                print(f"Max retries ({MAX_RETRIES}) reached for non-429 HTTP error. Raising the last error.")
+                raise err  # Re-raise the specific HTTP error on the last attempt
 
         except RequestException as err:
             # Catch other request-related errors (e.g., ConnectionError, Timeout)
@@ -178,4 +179,4 @@ def get_event_details(event_id: str) -> dict:
     print(
         f"Function completed without returning data for event_id {event_id}. This should not happen if errors are always re-raised."
     )
-    return {}  # Fallback, though an exception should ideally cover failure
+    return {}  # Fallback, though an exception should ideally cover failure# Initialize backoff time for 429 errors

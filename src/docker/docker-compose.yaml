@@ -18,7 +18,7 @@ services:
     image: postgres:17
     container_name: postgres_db
     volumes:
-      - spokanetech_db:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     env_file:
@@ -37,7 +37,6 @@ services:
         reservations:
           memory: 512M  # Ensure at least 512MB is available for Redis
     command: redis-server --maxmemory 1gb --maxmemory-policy allkeys-lru
-
 
   worker:
     image: spokanetech-django:latest
@@ -79,6 +78,5 @@ services:
       - db
 
 volumes:
-  spokanetech_db:
-    name: spokanetech_db
+  postgres_data:
   static_volume:
