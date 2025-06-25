@@ -99,7 +99,7 @@ def get_event_details(event_id: str) -> dict:
     """
     # --- Configuration for Retry Logic ---
     MAX_RETRIES = 5  # Maximum number of times to retry a failed request
-    INITIAL_BACKOFF_TIME = 1  # Initial wait time in seconds before the first 429 retry
+    INITIAL_BACKOFF_TIME = 5  # Initial wait time in seconds before the first 429 retry
     MAX_BACKOFF_TIME = 60  # Maximum wait time in seconds for 429 retries
 
     url: str = f"https://www.eventbrite.com/api/v3/destination/events/?event_ids={event_id}&expand=primary_venue"
@@ -125,14 +125,14 @@ def get_event_details(event_id: str) -> dict:
                     except ValueError:
                         # Fallback if Retry-After isn't a valid integer
                         wait_time = min(
-                            current_429_backoff_time + random.uniform(0, 0.5 * current_429_backoff_time),  # nosec
+                            current_429_backoff_time + random.uniform(attempt, 0.5 * current_429_backoff_time),  # nosec
                             MAX_BACKOFF_TIME,
                         )
                         print(f"Invalid Retry-After header. Applying exponential backoff for {wait_time:.2f} seconds.")
                 else:
                     # Apply exponential backoff with jitter
                     wait_time = min(
-                        current_429_backoff_time + random.uniform(0, 0.5 * current_429_backoff_time),  # nosec
+                        current_429_backoff_time + random.uniform(attempt, 0.5 * current_429_backoff_time),  # nosec
                         MAX_BACKOFF_TIME,
                     )
                     print(f"No Retry-After header. Applying exponential backoff for {wait_time:.2f} seconds.")
@@ -144,7 +144,7 @@ def get_event_details(event_id: str) -> dict:
                     continue  # Skip the rest of the loop and retry
                 else:
                     print(f"Max retries ({MAX_RETRIES}) for 429 reached. Raising the last error.")
-                    raise HTTPError("Max retries reached for 429 Too Many Requests.")
+                    raise Exception(f"Max retries ({MAX_RETRIES})) reached for 429 Too Many Requests.")
 
             # If not a 429, raise for other status codes
             resp.raise_for_status()
