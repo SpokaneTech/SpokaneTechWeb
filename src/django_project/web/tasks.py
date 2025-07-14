@@ -17,6 +17,7 @@ from web.utilities.scrapers.meetup import (
     get_event_links,
     get_group_description,
 )
+from web.scripts.notify_events import notify_discord
 
 
 @shared_task(time_limit=30, max_retries=0, name="web.test_task")
@@ -187,3 +188,11 @@ def launch_eventbrite_event_ingestion() -> str:
         job.apply_async()
         time.sleep(random.randint(1, 3))  # nosec
     return f"ingesting future events for {len(tech_group_list)} tech groups on Eventbrite"
+
+
+
+@shared_task(time_limit=900, max_retries=0, name="web.notify_discord_weekly_events")
+def notify_discord_weekly_events() -> str:
+    """Notify discord of events for the upcoming week."""
+    notify_discord()
+    return "notified discord of upcoming events."
