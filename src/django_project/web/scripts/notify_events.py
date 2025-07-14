@@ -13,12 +13,13 @@ def get_events():
   return events
 
 
-def get_events_object(event):
+# todo: this template needs cleanup.
+def get_event_object(event):
     return {
         "name": event.name,
-        "description": event.description,
+        "description": event.description, # todo: handle the html content and post to discord accordingly
         "color": 0x00ff00,
-        "fields": [
+        "fields": [ # todo: clean up these start / end fields.
             {
                 "name": "Start Time",
                 "value": event.start_datetime.strftime("%Y-%m-%d %H:%M:%S"),
@@ -32,9 +33,9 @@ def get_events_object(event):
         ]
     }
 
-def get_events_as_json():
+def get_events_as_object():
     events = get_events()
-    return [get_events_object(event) for event in events]
+    return [get_event_object(event) for event in events]
 
 
 def notify_discord():
@@ -44,19 +45,23 @@ def notify_discord():
         print("Discord webhook URL not set")
         return
 
-    embeds = get_events_as_json()
-    if not embeds:
+    events = get_events_as_object()
+    if not events:
         print("No events to notify")
         return
 
     payload = {
         "content": "Upcoming events:",
-        "embeds": embeds
+        "embeds": events
     }
 
+    # send the request
     response = post(discord_url, json=payload)
-    print(response.status_code)
-    print(response.content)
+
+    # Log if the response was unsuccessful
+    if response.status_code > 299:
+        print(f"Failed to notify discord: {response.status_code}")
+        return
 
 
 def run():
