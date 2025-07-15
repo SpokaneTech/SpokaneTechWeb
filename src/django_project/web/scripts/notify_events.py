@@ -46,7 +46,7 @@ def get_event_object(event):
     "fields": [
       {
         "name": "When",
-        "value": f"{local_dt.strftime('%A, %B %d %H:%M %Z')}",
+        "value": f"{local_dt.strftime('%A, %B %d %I:%M %p %Z')}",
         "inline": False
       },
       {
