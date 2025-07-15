@@ -2,6 +2,9 @@ from django.utils import timezone
 from requests import post
 from bs4 import BeautifulSoup
 from zoneinfo import ZoneInfo
+from datetime import (
+  datetime, timedelta
+)
 
 from django.conf import settings
 from web.models import Event
@@ -62,10 +65,19 @@ def get_event_object(event):
   return event_data
 
 
+# Get the range of dates for the week.
+def get_week_date_range():
+  now = datetime.now()
+  wk_start = now - timedelta(days=now.weekday() + 1) # Python uses 0 for Monday ...
+  wk_end = wk_start + timedelta(days=6)
+  return to_display_timezone(wk_start), to_display_timezone(wk_end)
+
+
 # Get all events as an object for the JSON payload (loops them through get_event_object() )
 def get_events_as_object():
   """Get all events as an object for the JSON payload."""
-  events = Event.objects.filter(start_datetime__gte=timezone.now())
+  date_start, date_end = get_week_date_range()
+  events = Event.objects.filter(start_datetime__range=[date_start, date_end])
   return [get_event_object(event) for event in events]
 
 
