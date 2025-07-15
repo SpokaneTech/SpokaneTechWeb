@@ -65,8 +65,9 @@ def get_event_object(event):
   return event_data
 
 
-# Get the range of dates for the week.
+# Get the start and end date for the current week.
 def get_week_date_range():
+  """Get the start and end date for the current week."""
   now = datetime.now()
   wk_start = now - timedelta(days=now.weekday() + 1) # Python uses 0 for Monday ...
   wk_end = wk_start + timedelta(days=6)
