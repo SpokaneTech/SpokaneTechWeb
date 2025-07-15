@@ -25,16 +25,12 @@ def to_display_timezone(dt):
   if dt.tzinfo is None:
     dt = dt.replace(tzinfo=timezone.utc)
 
-  tz_name = getattr(settings, "TIME_ZONE", "UTC")
+  # Note: theoretically this timezone should come from the event itself.
+  #       but for now, since the current discord channel is for users in Spokane, WA
+  #       we will hard-code the American/Los_Angeles timezone.
+  #tz_name = getattr(settings, "TIME_ZONE", "UTC")
+  tz_name = "America/Los_Angeles"
   return dt.astimezone(ZoneInfo(tz_name))
-
-
-# returns an array of events from the database
-def get_events():
-  # retrieve events from the database
-  events = Event.objects.filter(start_datetime__gte=timezone.now())
-
-  return events
 
 
 # Get an event as object data for the JSON payload
@@ -69,9 +65,8 @@ def get_event_object(event):
 # Get all events as an object for the JSON payload (loops them through get_event_object() )
 def get_events_as_object():
   """Get all events as an object for the JSON payload."""
-  events = get_events()
+  events = Event.objects.filter(start_datetime__gte=timezone.now())
   return [get_event_object(event) for event in events]
-
 
 
 # Send an event notification to the discord webhook
@@ -89,7 +84,7 @@ def notify_discord():
 
   payload = {
     "username": "Event Notifier 🤖",
-    "content": "_Here are the upcoming Spokane Tech events for this week and beyond:_\n\n",
+    "content": "_Here are the upcoming Spokane Tech events for this week:_\n\n",
     "embeds": events
   }
 
