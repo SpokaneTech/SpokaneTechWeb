@@ -52,6 +52,58 @@ class Event(HandyHelperBaseModel):
     def get_absolute_url(self) -> str:
         return reverse("web:get_event", kwargs={"pk": self.pk})
 
+    # def get_linkedin_commentary(self) -> str:
+    #     """
+    #     Generates a formatted LinkedIn post commentary for an event.
+    #     The commentary includes:
+    #         - An event alert headline with the event name.
+    #         - The event date and time, formatted for readability.
+    #         - The event location, if available.
+    #         - A truncated event description (up to 500 characters), if provided.
+    #         - Relevant hashtags based on event tags.
+    #     Returns:
+    #         str: The formatted LinkedIn commentary string.
+    #     """
+
+    #     commentary: str = f"🚀 New Event Alert! Join us for: {self.name}\n\n"
+    #     commentary += f"🗓️ When: {self.start_datetime.strftime('%A, %B %d, %Y at %I:%M %p %Z')}\n"
+    #     if self.location_name:
+    #         commentary += f"📍 Where: {self.location_name}\n\n"
+    #     if self.description:
+    #         commentary += f"Details: {self.description[:500]}..."
+    #     if self.tags.exists():
+    #         hashtags: str = " ".join(f"#{tag.value.replace(' ', '')}" for tag in self.tags.all())
+    #         commentary += f"\n\n{hashtags}"
+    #     return commentary
+
+    # def get_linkedin_post_data(self) -> dict[str, Any]:
+    #     """
+    #     Generates a dictionary containing data for creating a LinkedIn post.
+    #     The returned data includes author information, commentary, visibility, distribution settings,
+    #     and lifecycle state. If a URL is present, article content details are added.
+    #     Returns:
+    #         dict[str, Any]: A dictionary with LinkedIn post data formatted for API submission.
+    #     """
+
+    #     organization_urn: str = getattr(settings, "LINKEDIN_ORGANIZATION_URN", "")
+
+    #     data: dict[str, Any] = {
+    #         "author": organization_urn,
+    #         "commentary": self.get_linkedin_commentary(),
+    #         "visibility": "PUBLIC",
+    #         "distribution": {"feedDistribution": "MAIN_FEED", "targetEntities": []},
+    #         "lifecycleState": "PUBLISHED",
+    #     }
+    #     if self.url:
+    #         data["content"] = {
+    #             "article": {
+    #                 "source": self.url,
+    #                 "title": self.name,
+    #                 "description": f"Learn more about {self.name} happening on {self.start_datetime.strftime('%B %d')}.",
+    #             }
+    #         }
+    #     return data
+
 
 class Link(HandyHelperBaseModel):
     """A link to a resource associated with a TechGroup or Event"""

@@ -5,7 +5,9 @@ import time
 from typing import Any
 
 from celery import shared_task
+from django.conf import settings
 from web.models import Event, Link, Tag, TechGroup
+from web.utilities.notifiers.linkedin import LinkedInOrganizationClient
 from web.utilities.scrapers.eventbrite import (
     create_google_map_link,
     get_event_details,
@@ -187,3 +189,31 @@ def launch_eventbrite_event_ingestion() -> str:
         job.apply_async()
         time.sleep(random.randint(1, 3))  # nosec
     return f"ingesting future events for {len(tech_group_list)} tech groups on Eventbrite"
+
+
+@shared_task
+def post_event_to_linkedin(event_pk: int, is_new: bool) -> str:
+    event: Event = Event.objects.get(pk=event_pk)
+    if not event:
+        return f"Event with pk {event_pk} not found."
+
+    # Ensure LinkedIn API credentials are set
+    if not settings.LINKEDIN_ACCESS_TOKEN or not settings.LINKEDIN_ORGANIZATION_URN:
+        return "LinkedIn API credentials not configured in settings. Skipping post."
+
+    # Initialize LinkedIn client
+    linkedin_client = LinkedInOrganizationClient(
+        access_token=settings.LINKEDIN_ACCESS_TOKEN,
+        organization_urn=settings.LINKEDIN_ORGANIZATION_URN,
+    )
+
+    # If the event is new, prepare the LinkedIn post data
+    if is_new:
+        linkedin_client.post_event_created(
+            name=event.name,
+            url=event.url,
+            description=event.description,
+            date_time=event.start_datetime,
+            location_name=event.location_name,
+        )
+    return "Event posted to LinkedIn successfully."
