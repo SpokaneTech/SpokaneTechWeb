@@ -9,7 +9,9 @@ from django.test import TestCase
 BASE_DIR = Path(__file__).parents[4]
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.settings")
 django.setup()
+from django.db.models.signals import post_save
 from model_bakery import baker
+from web.signals import event_post_to_linkedin_signal
 
 
 class EventTests(TestCase):
@@ -18,6 +20,10 @@ class EventTests(TestCase):
     def setUp(self):
         self.model = apps.get_model("web", "event")
         self.to_bake = "web.Event"
+        post_save.disconnect(receiver=event_post_to_linkedin_signal, sender=self.to_bake)
+
+    def tearDown(self):
+        post_save.disconnect(receiver=event_post_to_linkedin_signal, sender=self.to_bake)
 
     def bake(self):
         """add row"""
