@@ -139,9 +139,9 @@ class LinkedInOrganizationClient:
 
     def post_event_reminder(
         self,
-        event_name: str,
-        event_date: datetime,
-        event_url: Optional[str] = None,
+        name: str,
+        date_time: datetime,
+        url: Optional[str] = None,
         location_name: Optional[str] = None,
     ) -> requests.Response:
         """
@@ -153,5 +153,5 @@ class LinkedInOrganizationClient:
         Returns:
             dict: The response from the LinkedIn API after posting the reminder.
         """
-        commentary: str = self.build_event_reminder_commentary(event_name, event_date, location_name)
-        return self.post_organization_post(commentary, article_url=event_url, article_title=event_name)
+        commentary: str = self.build_event_reminder_commentary(name, date_time, location_name)
+        return self.post_organization_post(commentary, article_url=url, article_title=name)
