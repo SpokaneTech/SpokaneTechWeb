@@ -18,12 +18,16 @@ from core.views import robots_txt
 from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path
+from web.admin_views import facebook_post_view
+from web.views import facebook_callback
 
 urlpatterns = [
     # Django provided URLs
+    path("console/facebook/post/", facebook_post_view, name="facebook-post"),
     path("console/", admin.site.urls),
     path("accounts/", include("django.contrib.auth.urls")),
     path("robots.txt", robots_txt),
+    path("facebook/callback/", facebook_callback, name="facebook_callback"),
     # 3rd party URLs
     path("handyhelpers/", include("handyhelpers.urls")),
     # app URLs

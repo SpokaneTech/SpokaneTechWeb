@@ -1,0 +1,16 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+  <h1>Facebook Page Post</h1>
+
+  {% if result %}
+    <p><strong>Post successful!</strong></p>
+    <pre>{{ result|safe }}</pre>
+  {% endif %}
+
+  <form method="get">
+    <label for="message">Message:</label>
+    <input type="text" name="message" id="message" value="{{ message|default:"Hello from Django!" }}">
+    <button type="submit" class="default">Post to Facebook Page</button>
+  </form>
+{% endblock %}

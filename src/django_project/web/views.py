@@ -117,3 +117,52 @@ class TechGroupModalView(ModelDetailBootstrapModalView):
     modal_template = "web/partials/modal/group_information.htm"
     modal_title = "Group Info"
     model = TechGroup
+
+
+import requests
+from django.conf import settings
+from django.http import HttpResponse
+
+
+def facebook_callback(request):
+    code = request.GET.get("code")
+    if not code:
+        return HttpResponse("Missing code", status=400)
+
+    # Step 1: Exchange code for short-lived access token
+    token_url = "https://graph.facebook.com/v19.0/oauth/access_token"
+    params = {
+        "client_id": settings.FACEBOOK_APP_ID,
+        "redirect_uri": "http://localhost:8000/facebook/callback/",
+        "client_secret": settings.FACEBOOK_APP_SECRET,
+        "code": code,
+    }
+    response = requests.get(token_url, params=params)
+    data = response.json()
+    short_token = data.get("access_token")
+
+    if not short_token:
+        return HttpResponse(f"Token exchange failed: {data}", status=500)
+
+    # Step 2: Exchange short token for long-lived token
+    long_url = "https://graph.facebook.com/v19.0/oauth/access_token"
+    params = {
+        "grant_type": "fb_exchange_token",
+        "client_id": settings.FACEBOOK_APP_ID,
+        "client_secret": settings.FACEBOOK_APP_SECRET,
+        "fb_exchange_token": short_token,
+    }
+    long_response = requests.get(long_url, params=params)
+    long_data = long_response.json()
+    long_token = long_data.get("access_token")
+
+    if not long_token:
+        return HttpResponse(f"Long token exchange failed: {long_data}", status=500)
+
+    return HttpResponse(f"✅ Long-lived token:<br><code>{long_token}</code>")
+
+
+"""
+https://www.facebook.com/v19.0/dialog/oauth?client_id=1049092166971471&redirect_uri=http://localhost:8000/facebook/callback/&scope=pages_manage_posts,pages_show_list&response_type=code&auth_type=rerequest
+
+"""
