@@ -2,6 +2,7 @@ import logging
 import random
 import re
 import time
+from datetime import datetime, timedelta
 from typing import Any
 
 from celery import shared_task
@@ -191,7 +192,7 @@ def launch_eventbrite_event_ingestion() -> str:
     return f"ingesting future events for {len(tech_group_list)} tech groups on Eventbrite"
 
 
-@shared_task
+@shared_task(time_limit=300, max_retries=0, name="web.post_event_to_linkedin")
 def post_event_to_linkedin(event_pk: int, is_new: bool) -> str:
     event: Event = Event.objects.get(pk=event_pk)
     if not event:
@@ -217,3 +218,40 @@ def post_event_to_linkedin(event_pk: int, is_new: bool) -> str:
             location_name=event.location_name,
         )
     return "Event posted to LinkedIn successfully."
+
+
+@shared_task(time_limit=300, max_retries=0, name="web.post_event_reminder_to_linkedin")
+def post_event_reminder_to_linkedin(event_pk: int) -> str:
+    event: Event = Event.objects.get(pk=event_pk)
+    if not event:
+        return f"Event with pk {event_pk} not found."
+
+    # Ensure LinkedIn API credentials are set
+    if not settings.LINKEDIN_ACCESS_TOKEN or not settings.LINKEDIN_ORGANIZATION_URN:
+        return "LinkedIn API credentials not configured in settings. Skipping post."
+
+    # Initialize LinkedIn client
+    linkedin_client = LinkedInOrganizationClient(
+        access_token=settings.LINKEDIN_ACCESS_TOKEN,
+        organization_urn=settings.LINKEDIN_ORGANIZATION_URN,
+    )
+
+    linkedin_client.post_event_reminder(
+        name=event.name,
+        date_time=event.start_datetime,
+        url=event.url,
+        location_name=event.location_name,
+    )
+    return f"Event reminder for {event.name} posted to LinkedIn successfully."
+
+
+@shared_task(time_limit=900, max_retries=3, name="web.launch_event_reminders")
+def launch_event_reminders() -> str:
+    """parent task for ingesting details for all tech groups"""
+    count: int = 0
+    tomorrow = (datetime.now() + timedelta(days=1)).date()
+    for event in Event.objects.filter(start_datetime__date=tomorrow, group__enabled=True):
+        job: Any = post_event_reminder_to_linkedin.s(event.pk)
+        job.apply_async()
+        count += 1
+    return f"sending reminders for {count} events"
