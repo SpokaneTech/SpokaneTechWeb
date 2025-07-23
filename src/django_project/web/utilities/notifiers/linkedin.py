@@ -1,6 +1,7 @@
 import json
 from datetime import datetime
 from typing import Any, Optional
+from zoneinfo import ZoneInfo
 
 import requests
 from bs4 import BeautifulSoup
@@ -72,7 +73,10 @@ class LinkedInOrganizationClient:
             str: A formatted commentary string suitable for posting on LinkedIn.
         """
         if isinstance(event_date, datetime):
-            formatted_date: str = event_date.strftime("%A, %B %d, %Y at %I:%M %p")
+            pacific = ZoneInfo("America/Los_Angeles")
+            localized_dt: datetime = event_date.astimezone(pacific)
+            tz_name: str | None = localized_dt.tzname()
+            formatted_date: str = localized_dt.strftime(f"%A, %B %d, %Y at %I:%M %p {tz_name}")
         else:
             formatted_date = str(event_date)
 
@@ -100,7 +104,10 @@ class LinkedInOrganizationClient:
             str: A formatted reminder string containing event details.
         """
         if isinstance(event_date, datetime):
-            formatted_date: str = event_date.strftime("%A, %B %d, %Y at %I:%M %p")
+            pacific = ZoneInfo("America/Los_Angeles")
+            localized_dt: datetime = event_date.astimezone(pacific)
+            tz_name: str | None = localized_dt.tzname()
+            formatted_date: str = localized_dt.strftime(f"%A, %B %d, %Y at %I:%M %p {tz_name}")
         else:
             formatted_date = str(event_date)
 
