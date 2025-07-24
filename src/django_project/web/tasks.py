@@ -249,9 +249,9 @@ def post_event_reminder_to_linkedin(event_pk: int) -> str:
     return f"Event reminder for {event.name} posted to LinkedIn successfully."
 
 
-@shared_task(time_limit=900, max_retries=3, name="web.launch_event_reminders")
-def launch_event_reminders() -> str:
-    """parent task for ingesting details for all tech groups"""
+@shared_task(time_limit=900, max_retries=3, name="web.launch_reminders_for_tomorrows_events")
+def launch_reminders_for_tomorrows_events() -> str:
+    """parent task for posting reminders for events happening tomorrow"""
     count: int = 0
 
     # Get current time in Pacific Time
