@@ -2,11 +2,13 @@ import logging
 import random
 import re
 import time
-from datetime import datetime, timedelta
+from datetime import timedelta
 from typing import Any
+from zoneinfo import ZoneInfo
 
 from celery import shared_task
 from django.conf import settings
+from django.utils import timezone
 from web.models import Event, Link, Tag, TechGroup
 from web.utilities.notifiers.linkedin import LinkedInOrganizationClient
 from web.utilities.scrapers.eventbrite import (
@@ -20,6 +22,8 @@ from web.utilities.scrapers.meetup import (
     get_event_links,
     get_group_description,
 )
+
+PACIFIC = ZoneInfo("America/Los_Angeles")
 
 
 @shared_task(time_limit=30, max_retries=0, name="web.test_task")
@@ -245,12 +249,26 @@ def post_event_reminder_to_linkedin(event_pk: int) -> str:
     return f"Event reminder for {event.name} posted to LinkedIn successfully."
 
 
-@shared_task(time_limit=900, max_retries=3, name="web.launch_event_reminders")
-def launch_event_reminders() -> str:
-    """parent task for ingesting details for all tech groups"""
+@shared_task(time_limit=900, max_retries=3, name="web.launch_reminders_for_tomorrows_events")
+def launch_reminders_for_tomorrows_events() -> str:
+    """parent task for posting reminders for events happening tomorrow"""
     count: int = 0
-    tomorrow = (datetime.now() + timedelta(days=1)).date()
-    for event in Event.objects.filter(start_datetime__date=tomorrow, group__enabled=True):
+
+    # Get current time in Pacific Time
+    now_pacific: timezone.datetime = timezone.now().astimezone(PACIFIC)
+
+    # Compute "tomorrow" in Pacific Time
+    tomorrow_start_pacific: timezone.datetime = (now_pacific + timedelta(days=1)).replace(
+        hour=0, minute=0, second=0, microsecond=0
+    )
+    tomorrow_end_pacific: timezone.datetime = tomorrow_start_pacific + timedelta(days=1)
+
+    # Convert to UTC
+    start_utc: timezone.datetime = tomorrow_start_pacific.astimezone(timezone.utc)
+    end_utc: timezone.datetime = tomorrow_end_pacific.astimezone(timezone.utc)
+
+    # Filter events that start anytime tomorrow
+    for event in Event.objects.filter(start_datetime__gte=start_utc, start_datetime__lt=end_utc, group__enabled=True):
         job: Any = post_event_reminder_to_linkedin.s(event.pk)
         job.apply_async()
         count += 1
