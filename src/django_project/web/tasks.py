@@ -214,11 +214,13 @@ def post_event_to_linkedin(event_pk: int, is_new: bool) -> str:
 
     # If the event is new, prepare the LinkedIn post data
     if is_new:
+        # Convert event.start_datetime from UTC to Pacific Time
+        date_time_pacific: timezone.datetime = event.start_datetime.astimezone(PACIFIC)
         linkedin_client.post_event_created(
             name=event.name,
             url=event.url,
             description=event.description,
-            date_time=event.start_datetime,
+            date_time=date_time_pacific,
             location_name=event.location_name,
         )
     return "Event posted to LinkedIn successfully."
@@ -240,9 +242,11 @@ def post_event_reminder_to_linkedin(event_pk: int) -> str:
         organization_urn=settings.LINKEDIN_ORGANIZATION_URN,
     )
 
+    # Convert event.start_datetime from UTC to Pacific Time
+    date_time_pacific: timezone.datetime = event.start_datetime.astimezone(PACIFIC)
     linkedin_client.post_event_reminder(
         name=event.name,
-        date_time=event.start_datetime,
+        date_time=date_time_pacific,
         url=event.url,
         location_name=event.location_name,
     )
