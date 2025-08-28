@@ -6,6 +6,7 @@ from datetime import timedelta
 from typing import Any
 from zoneinfo import ZoneInfo
 
+import requests
 from celery import shared_task
 from django.conf import settings
 from django.utils import timezone
@@ -277,3 +278,31 @@ def launch_reminders_for_tomorrows_events() -> str:
         job.apply_async()
         count += 1
     return f"sending reminders for {count} events"
+
+
+@shared_task(time_limit=900, max_retries=3, name="web.post_event_to_spug_task")
+def post_event_to_spug_task(event_pk: int) -> str:
+    """post an event to SPUG via their API"""
+    event: Event = Event.objects.get(pk=event_pk)
+    if not event:
+        return f"Event with pk {event_pk} not found."
+    spug_url: str | None = getattr(settings, "SPUG_API_URL", None)
+    spug_token: str | None = getattr(settings, "SPUG_API_TOKEN", None)
+    if not spug_url or not spug_token:
+        raise ValueError("SPUG API URL or token not configured in settings.")
+
+    payload: dict[str, Any] = {
+        "description": event.description,
+        "end_date_time": event.end_datetime.isoformat() if event.end_datetime else None,
+        "location": event.location_name,
+        "name": event.name,
+        "start_date_time": event.start_datetime.isoformat() if event.start_datetime else None,
+        "url": event.url,
+    }
+    headers: dict[str, str] = {
+        "Authorization": f"Token {spug_token}",
+        "Content-Type": "application/json",
+    }
+    response: requests.Response = requests.post(spug_url, json=payload, headers=headers, timeout=15)
+    response.raise_for_status()
+    return f"Event {event.name} posted to SPUG successfully."
