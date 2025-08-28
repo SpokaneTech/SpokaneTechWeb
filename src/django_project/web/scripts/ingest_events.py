@@ -23,5 +23,5 @@ def get_meetup_events() -> None:
 
 
 def run():
-    get_eventbright_events()
+    # get_eventbright_events()
     get_meetup_events()
