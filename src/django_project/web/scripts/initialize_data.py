@@ -58,6 +58,12 @@ def create_groups() -> None:
             "platform page": "https://www.eventbrite.com/o/fuel-coworking-110692675491",
         },
         {
+            "name": "IntelliTect",
+            "icon": """<i class="fa-solid fa-globe"></i>""",
+            "platform": "Eventbrite",
+            "platform page": "https://www.eventbrite.com/o/intellitect-114361599431",
+        },
+        {
             "name": "Greater Spokane Inc",
             "icon": """<i class="fa-solid fa-city"></i>""",
             "platform": "Other",
