@@ -7,6 +7,7 @@ from typing import Any
 from zoneinfo import ZoneInfo
 
 import requests
+from bs4 import BeautifulSoup
 from celery import shared_task
 from django.conf import settings
 from django.utils import timezone
@@ -292,7 +293,7 @@ def post_event_to_spug_task(event_pk: int) -> str:
         raise ValueError("SPUG API URL or token not configured in settings.")
 
     payload: dict[str, Any] = {
-        "description": event.description,
+        "description": BeautifulSoup(event.description, "html.parser").get_text(),
         "end_date_time": event.end_datetime.isoformat() if event.end_datetime else None,
         "location": event.location_name,
         "name": event.name,
