@@ -10,8 +10,10 @@ import requests
 from bs4 import BeautifulSoup
 from celery import shared_task
 from django.conf import settings
+from django.db.models.manager import BaseManager
 from django.utils import timezone
 from web.models import Event, Link, Tag, TechGroup
+from web.utilities.notifiers.discord import DiscordNotifier
 from web.utilities.notifiers.linkedin import LinkedInOrganizationClient
 from web.utilities.scrapers.eventbrite import (
     create_google_map_link,
@@ -255,10 +257,40 @@ def post_event_reminder_to_linkedin(event_pk: int) -> str:
     return f"Event reminder for {event.name} posted to LinkedIn successfully."
 
 
+@shared_task(time_limit=300, max_retries=0, name="web.post_event_to_discord")
+def post_event_to_discord(event_pk: int, reminder=False) -> str:
+    """post an event to Discord via webhook"""
+    event: Event = Event.objects.get(pk=event_pk)
+    if not event:
+        return f"Event with pk {event_pk} not found."
+
+    # Ensure Discord webhook URL is set
+    if not settings.DISCORD_WEBHOOK_URL:
+        return "Discord webhook URL not configured in settings. Skipping post."
+
+    # Convert event.start_datetime from UTC to Pacific Time
+    event_start_datetime: timezone.datetime = event.start_datetime.astimezone(PACIFIC)
+    event_end_datetime: timezone.datetime = event.end_datetime.astimezone(PACIFIC)
+
+    discord_notifier = DiscordNotifier(webhook_url=settings.DISCORD_WEBHOOK_URL)
+    discord_notifier.post_event(
+        event_name=event.name,
+        event_start_datetime=event_start_datetime,
+        event_end_datetime=event_end_datetime,
+        event_location_name=event.location_name,
+        event_url=event.url,
+        group_name=event.group.name,
+        group_discord_webhook_url=event.group.discord_webhook_url,
+        reminder=reminder,
+    )
+    if reminder:
+        return f"Event reminder for {event.name} posted to Discord successfully."
+    return f"Event created message for {event.name} posted to Discord successfully."
+
+
 @shared_task(time_limit=900, max_retries=3, name="web.launch_reminders_for_tomorrows_events")
 def launch_reminders_for_tomorrows_events() -> str:
     """parent task for posting reminders for events happening tomorrow"""
-    count: int = 0
 
     # Get current time in Pacific Time
     now_pacific: timezone.datetime = timezone.now().astimezone(PACIFIC)
@@ -274,11 +306,19 @@ def launch_reminders_for_tomorrows_events() -> str:
     end_utc: timezone.datetime = tomorrow_end_pacific.astimezone(timezone.utc)
 
     # Filter events that start anytime tomorrow
-    for event in Event.objects.filter(start_datetime__gte=start_utc, start_datetime__lt=end_utc, group__enabled=True):
-        job: Any = post_event_reminder_to_linkedin.s(event.pk)
-        job.apply_async()
-        count += 1
-    return f"sending reminders for {count} events"
+    event_list: BaseManager[Event] = Event.objects.filter(
+        start_datetime__gte=start_utc, start_datetime__lt=end_utc, group__enabled=True
+    )
+    for event in event_list:
+        # post reminders to Discord
+        discord_job: Any = post_event_to_discord.s(event.pk, reminder=True)
+        discord_job.apply_async()
+
+        # post reminders to LinkedIn
+        linkedin_job: Any = post_event_reminder_to_linkedin.s(event.pk)
+        linkedin_job.apply_async()
+
+    return f"sending reminders for {event_list.count()} events"
 
 
 @shared_task(time_limit=900, max_retries=3, name="web.post_event_to_spug_task")

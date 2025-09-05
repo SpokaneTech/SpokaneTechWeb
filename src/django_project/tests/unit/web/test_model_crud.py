@@ -71,7 +71,7 @@ class EventTests(TestCase):
         """verify group (ForeignKey) can be updated"""
         row = self.bake()
         original_value = row.group
-        baker.make(self.model.group.field.related_model._meta.label, _fill_optional=True)
+        baker.make(self.model.group.field.related_model._meta.label, _fill_optional=["icon"])
         if original_value:
             updated_value = random.choice(self.model.group.field.related_model.objects.exclude(pk=original_value.pk))
         else:

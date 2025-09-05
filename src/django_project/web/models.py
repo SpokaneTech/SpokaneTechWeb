@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from django.db import models
 from django.urls import reverse
+from encrypted_fields.fields import EncryptedTextField
 from handyhelpers.models import HandyHelperBaseModel
 
 
@@ -105,6 +106,7 @@ class TechGroup(HandyHelperBaseModel):
     tags = models.ManyToManyField("Tag", blank=True)
     links = models.ManyToManyField("Link", blank=True)
     image = models.ImageField(upload_to="techgroups/", blank=True, null=True)
+    discord_webhook_url = EncryptedTextField(blank=True, null=True)
 
     class Meta:
         ordering = ["name"]

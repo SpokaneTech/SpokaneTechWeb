@@ -281,9 +281,12 @@ CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = env.bool(
 )  # Retry connection if Redis is down
 
 
+SALT_KEY: str = env.str("SALT_KEY", "this_should_be_changed")
+
 # third party integrations
 EVENTBRITE_API_KEY = env.str("EVENTBRITE_API_KEY", None)
 LINKEDIN_ACCESS_TOKEN = env.str("LINKEDIN_ACCESS_TOKEN", None)
 LINKEDIN_ORGANIZATION_URN = env.str("LINKEDIN_ORGANIZATION_URN", None)
 SPUG_API_TOKEN = env.str("SPUG_API_TOKEN", None)
 SPUG_API_URL = env.str("SPUG_API_URL", None)
+DISCORD_WEBHOOK_URL = env.str("DISCORD_WEBHOOK_URL", None)  # for the general channel
