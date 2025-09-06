@@ -260,7 +260,7 @@ LOGGING = {
 
 PROJECT_NAME = "spokanetech"
 PROJECT_DESCRIPTION = """Home of the Spokane tech community."""
-PROJECT_VERSION = env.str("PROJECT_VERSION", "")
+PROJECT_VERSION = env.str("IMAGE_TAG", "0.0.0")
 PROJECT_SOURCE = "https://github.com/SpokaneTech/SpokaneTechWeb"
 
 
