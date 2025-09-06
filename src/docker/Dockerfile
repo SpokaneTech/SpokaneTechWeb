@@ -31,6 +31,9 @@ RUN uv pip install .[docker] --prerelease=allow \
 # ====================
 FROM python:3.12-slim
 
+ARG IMAGE_TAG=dev
+ENV IMAGE_TAG=${IMAGE_TAG}
+
 WORKDIR /app
 
 # Install only necessary system dependencies for Chromium to run
