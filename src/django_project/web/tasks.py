@@ -4,7 +4,6 @@ import re
 import time
 from datetime import timedelta
 from typing import Any
-from zoneinfo import ZoneInfo
 
 import requests
 from bs4 import BeautifulSoup
@@ -13,6 +12,7 @@ from django.conf import settings
 from django.db.models.manager import BaseManager
 from django.utils import timezone
 from web.models import Event, Link, Tag, TechGroup
+from web.utilities.dt_utils import convert_to_pacific
 from web.utilities.notifiers.discord import DiscordNotifier
 from web.utilities.notifiers.linkedin import LinkedInOrganizationClient
 from web.utilities.scrapers.eventbrite import (
@@ -26,8 +26,6 @@ from web.utilities.scrapers.meetup import (
     get_event_links,
     get_group_description,
 )
-
-PACIFIC = ZoneInfo("America/Los_Angeles")
 
 
 @shared_task(time_limit=30, max_retries=0, name="web.test_task")
@@ -219,7 +217,7 @@ def post_event_to_linkedin(event_pk: int, is_new: bool) -> str:
     # If the event is new, prepare the LinkedIn post data
     if is_new:
         # Convert event.start_datetime from UTC to Pacific Time
-        date_time_pacific: timezone.datetime = event.start_datetime.astimezone(PACIFIC)
+        date_time_pacific: timezone.datetime = convert_to_pacific(event.start_datetime)
         linkedin_client.post_event_created(
             name=event.name,
             url=event.url,
@@ -247,7 +245,7 @@ def post_event_reminder_to_linkedin(event_pk: int) -> str:
     )
 
     # Convert event.start_datetime from UTC to Pacific Time
-    date_time_pacific: timezone.datetime = event.start_datetime.astimezone(PACIFIC)
+    date_time_pacific: timezone.datetime = convert_to_pacific(event.start_datetime)
     linkedin_client.post_event_reminder(
         name=event.name,
         date_time=date_time_pacific,
@@ -268,19 +266,9 @@ def post_event_to_discord(event_pk: int, reminder=False) -> str:
     if not settings.DISCORD_WEBHOOK_URL:
         return "Discord webhook URL not configured in settings. Skipping post."
 
-    # Convert event.start_datetime from UTC to Pacific Time
-    event_start_datetime: timezone.datetime = event.start_datetime.astimezone(PACIFIC)
-    event_end_datetime: timezone.datetime = event.end_datetime.astimezone(PACIFIC)
-
     discord_notifier = DiscordNotifier(webhook_url=settings.DISCORD_WEBHOOK_URL)
     discord_notifier.post_event(
-        event_name=event.name,
-        event_start_datetime=event_start_datetime,
-        event_end_datetime=event_end_datetime,
-        event_location_name=event.location_name,
-        event_url=event.url,
-        group_name=event.group.name,
-        group_discord_webhook_url=event.group.discord_webhook_url,
+        event=event,
         reminder=reminder,
     )
     if reminder:
@@ -293,7 +281,7 @@ def launch_reminders_for_tomorrows_events() -> str:
     """parent task for posting reminders for events happening tomorrow"""
 
     # Get current time in Pacific Time
-    now_pacific: timezone.datetime = timezone.now().astimezone(PACIFIC)
+    now_pacific: timezone.datetime = convert_to_pacific(timezone.now())
 
     # Compute "tomorrow" in Pacific Time
     tomorrow_start_pacific: timezone.datetime = (now_pacific + timedelta(days=1)).replace(
@@ -302,8 +290,8 @@ def launch_reminders_for_tomorrows_events() -> str:
     tomorrow_end_pacific: timezone.datetime = tomorrow_start_pacific + timedelta(days=1)
 
     # Convert to UTC
-    start_utc: timezone.datetime = tomorrow_start_pacific.astimezone(timezone.utc)
-    end_utc: timezone.datetime = tomorrow_end_pacific.astimezone(timezone.utc)
+    start_utc: timezone.datetime = convert_to_pacific(tomorrow_start_pacific).astimezone(timezone.utc)
+    end_utc: timezone.datetime = convert_to_pacific(tomorrow_end_pacific).astimezone(timezone.utc)
 
     # Filter events that start anytime tomorrow
     event_list: BaseManager[Event] = Event.objects.filter(
@@ -347,3 +335,31 @@ def post_event_to_spug_task(event_pk: int) -> str:
     response: requests.Response = requests.post(spug_url, json=payload, headers=headers, timeout=15)
     response.raise_for_status()
     return f"Event {event.name} posted to SPUG successfully."
+
+
+@shared_task(time_limit=900, max_retries=3, name="web.post_weekly_event_summary_to_discord")
+def post_weekly_event_summary_to_discord() -> str:
+    """Posts a summary of the week's events to Discord."""
+    # Get the current time in Pacific Time
+    now_pacific: timezone.datetime = convert_to_pacific(timezone.now())
+
+    # Compute the start and end of the week in Pacific Time
+    week_start_pacific: timezone.datetime = now_pacific - timezone.timedelta(days=now_pacific.weekday())
+    week_end_pacific: timezone.datetime = week_start_pacific + timezone.timedelta(days=7)
+
+    # Convert to UTC
+    start_utc: timezone.datetime = convert_to_pacific(week_start_pacific).astimezone(timezone.utc)
+    end_utc: timezone.datetime = convert_to_pacific(week_end_pacific).astimezone(timezone.utc)
+
+    # Filter events that start within the week
+    event_list: BaseManager[Event] = Event.objects.filter(
+        start_datetime__gte=start_utc, start_datetime__lt=end_utc, group__enabled=True
+    )
+    if not event_list.exists():
+        return "No events found for the week."
+
+    # Build and send the summary message to Discord
+    discord_notifier = DiscordNotifier(webhook_url=settings.DISCORD_WEBHOOK_URL)
+    discord_notifier.post_weekly_summary(event_list=event_list)
+
+    return "Weekly event summary posted to Discord successfully."
