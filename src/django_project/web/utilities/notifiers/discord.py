@@ -1,8 +1,17 @@
 import json
-from datetime import datetime
+from multiprocessing.managers import BaseManager
 from typing import Any
 
 import requests
+from django.utils import timezone
+from web.models import Event
+from web.utilities.ai.gemini import generate_post_content
+from web.utilities.ai.prompts import (
+    create_event_reminder_prompt,
+    create_new_event_prompt,
+    create_weekly_events_list_prompt,
+)
+from web.utilities.dt_utils import convert_to_pacific
 
 
 class DiscordNotifier:
@@ -31,30 +40,34 @@ class DiscordNotifier:
 
     def build_event_created_message(
         self,
-        event_name: str,
-        event_start_datetime: datetime,
-        event_end_datetime: datetime,
-        event_location_name: str | None = None,
-        event_url: str | None = None,
-        group_name: str | None = None,
+        event: Event,
     ) -> dict[str, Any]:
         """
         Builds a Discord message payload for a newly created event.
 
         Args:
-            event_name (str): The name of the event.
-            event_start_datetime (datetime): The start date and time of the event.
-            event_end_datetime (datetime): The end date and time of the event.
-            event_location_name (str | None, optional): The location of the event. Defaults to None.
-            event_url (str | None, optional): The URL to RSVP or view the event. Defaults to None.
+            event (Event): The event object containing details about the event.
             group_name (str | None, optional): The name of the group hosting the event. Defaults to None.
 
         Returns:
             str: A dictionary representing the Discord message payload for the event.
         """
+        try:
+            prompt: str = create_new_event_prompt(
+                event_description=event.name,
+                platform_name=event.group.platform.name,
+                group_name=event.group.name or "Unknown Group",
+            )
+            content: str = generate_post_content(prompt)
+        except (ValueError, requests.HTTPError):
+            content = f"📢 A new event from {event.group.name} has just been created!\n\n👉 RSVP here: {event.url}"
+
+        event_start_datetime: timezone.datetime = convert_to_pacific(event.start_datetime)
+        event_end_datetime: timezone.datetime = convert_to_pacific(event.end_datetime)
+
         fields: list[dict[str, Any]] = []
-        if event_location_name is not None:
-            fields.append({"name": "📍 Location", "value": event_location_name, "inline": False})
+        if event.location_name is not None:
+            fields.append({"name": "📍 Location", "value": event.location_name, "inline": False})
         fields.extend(
             [
                 {"name": "📅 Date", "value": str(event_start_datetime.date()), "inline": True},
@@ -66,13 +79,13 @@ class DiscordNotifier:
             ]
         )
         data: dict[str, Any] = {
-            "content": f"📢 A new event from {group_name} has just been created!\n\n👉 RSVP here: {event_url}",
+            "content": content,
             "embeds": [
                 {
-                    "title": event_name,
-                    "url": event_url,
+                    "title": event.name,
+                    "url": event.url,
                     "fields": fields,
-                    "footer": {"text": f"Hosted by {group_name}"},
+                    "footer": {"text": f"Hosted by {event.group.name}"},
                 }
             ],
         }
@@ -80,30 +93,29 @@ class DiscordNotifier:
 
     def build_event_reminder_message(
         self,
-        event_name: str,
-        event_start_datetime: datetime,
-        event_end_datetime: datetime,
-        event_location_name: str | None = None,
-        event_url: str | None = None,
-        group_name: str | None = None,
+        event: Event,
     ) -> dict[str, Any]:
         """
         Builds a Discord event reminder message payload.
 
         Args:
-            event_name (str): The name of the event.
-            event_start_datetime (datetime): The start datetime of the event.
-            event_end_datetime (datetime): The end datetime of the event.
-            event_location_name (str | None, optional): The location name of the event. Defaults to None.
-            event_url (str | None, optional): The URL for the event. Defaults to None.
-            group_name (str | None, optional): The name of the hosting group. Defaults to None.
+            event (Event): The event object containing details about the event.
 
         Returns:
             str: A dictionary representing the Discord message payload, including content and embeds.
         """
+        try:
+            prompt: str = create_event_reminder_prompt(event_description=event.description)
+            content: str = generate_post_content(prompt)
+        except (ValueError, requests.HTTPError):
+            content = f"📢 A new event from {event.group.name} has just been created!\n\n👉 RSVP here: {event.url}"
+
+        event_start_datetime: timezone.datetime = convert_to_pacific(event.start_datetime)
+        event_end_datetime: timezone.datetime = convert_to_pacific(event.end_datetime)
+
         fields: list[dict[str, Any]] = []
-        if event_location_name is not None:
-            fields.append({"name": "📍 Location", "value": event_location_name, "inline": False})
+        if event.location_name is not None:
+            fields.append({"name": "📍 Location", "value": event.location_name, "inline": False})
         fields.extend(
             [
                 {"name": "📅 Date", "value": str(event_start_datetime.date()), "inline": True},
@@ -115,27 +127,59 @@ class DiscordNotifier:
             ]
         )
         data: dict[str, Any] = {
-            "content": f"🚀 Don't miss out! RSVP now for the next {group_name} event! 🎉 👉 {event_url}",
+            "content": content,
             "embeds": [
                 {
-                    "title": event_name,
-                    "url": event_url,
+                    "title": event.name,
+                    "url": event.url,
                     "fields": fields,
-                    "footer": {"text": f"Hosted by {group_name}"},
+                    "footer": {"text": f"Hosted by {event.group.name}"},
                 }
             ],
         }
         return data
 
+    def build_weekly_event_summary(
+        self,
+        event_list,
+    ) -> dict[str, Any]:
+        """
+        Builds a Discord message payload summarizing the week's events.
+
+        Args:
+            event_list (BaseManager[Event]): A queryset of events to include in the summary.
+
+        Returns:
+            dict: A dictionary representing the Discord message payload, including content and embeds.
+        """
+        if not event_list:
+            return {"content": "No events found for the week."}
+
+        try:
+            prompt: str = create_weekly_events_list_prompt(event_count=event_list.count())
+            content: str = generate_post_content(prompt)
+        except (ValueError, requests.HTTPError):
+            content = f"📢 Hello Spokane Tech Community! We have {event_list.count()} great events happening this week!\n👉 Check them out!"
+
+        embeded_event_list: list[dict[str, Any]] = []
+        for event in event_list:
+            embeded_event_list.append(
+                {
+                    "name": f"{convert_to_pacific(event.start_datetime).strftime('%Y-%m-%d %I:%M %p')} {event.name}",
+                    "value": f"{event.description}\n[RSVP here]({event.url})",
+                    "inline": False,
+                },
+            )
+
+        data: dict[str, Any] = {
+            "content": content,
+            "embeds": [{"fields": embeded_event_list}],
+        }
+        return data
+
     def post_event(
         self,
-        event_name: str,
-        event_start_datetime: datetime,
-        event_end_datetime: datetime,
-        group_name: str,
-        event_location_name: str | None = None,
-        event_url: str | None = None,
-        group_discord_webhook_url: str | None = None,
+        event: Event,
         reminder=False,
     ) -> None:
         """
@@ -144,29 +188,31 @@ class DiscordNotifier:
         and sends it to the general Discord channel. If a group-specific Discord webhook URL is provided,
         also sends the message to the group's Discord channel.
         Args:
-            event_name (str): The name of the event.
-            event_start_datetime (datetime): The start date and time of the event.
-            event_end_datetime (datetime): The end date and time of the event.
-            group_name (str): The name of the group hosting the event.
-            event_location_name (str, optional): The name of the event location. Defaults to None.
-            event_url (str, optional): The URL for the event. Defaults to None.
-            group_discord_webhook_url (str, optional): The Discord webhook URL for the group channel. Defaults to None.
+            event (Event): The event object containing details about the event.
             reminder (bool, optional): If True, sends a reminder message; otherwise, sends an event creation message. Defaults to False.
         Returns:
             None
         """
         if reminder:
-            message: dict = self.build_event_reminder_message(
-                event_name, event_start_datetime, event_end_datetime, event_location_name, event_url, group_name
-            )
+            message: dict = self.build_event_reminder_message(event)
         else:
-            message = self.build_event_created_message(
-                event_name, event_start_datetime, event_end_datetime, event_location_name, event_url, group_name
-            )
+            message = self.build_event_created_message(event)
 
         # send to the general Discord channel
         self.send_message(message)
 
         # send to the group's Discord channel if a webhook URL is provided
-        if group_discord_webhook_url:
-            self.send_message(message, url=group_discord_webhook_url)
+        if event.group.discord_webhook_url:
+            self.send_message(message, url=event.group.discord_webhook_url)
+
+    def post_weekly_summary(self, event_list: BaseManager) -> None:
+        """
+        Posts a weekly event summary to the general Discord channel.
+        Constructs a summary message for the provided list of events and sends it to the general Discord channel.
+        Args:
+            event_list (BaseManager): A queryset of events to include in the weekly summary.
+        Returns:
+            None
+        """
+        payload: dict = self.build_weekly_event_summary(event_list)
+        self.send_message(payload=payload)
