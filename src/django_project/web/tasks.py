@@ -214,49 +214,17 @@ def post_event_to_linkedin(event_pk: int, is_new: bool) -> str:
         organization_urn=settings.LINKEDIN_ORGANIZATION_URN,
     )
 
-    # If the event is new, prepare the LinkedIn post data
+    linkedin_client.post_event(
+        event=event,
+        is_new=is_new,
+    )
     if is_new:
-        # Convert event.start_datetime from UTC to Pacific Time
-        date_time_pacific: timezone.datetime = convert_to_pacific(event.start_datetime)
-        linkedin_client.post_event_created(
-            name=event.name,
-            url=event.url,
-            description=event.description,
-            date_time=date_time_pacific,
-            location_name=event.location_name,
-        )
-    return "Event posted to LinkedIn successfully."
-
-
-@shared_task(time_limit=300, max_retries=0, name="web.post_event_reminder_to_linkedin")
-def post_event_reminder_to_linkedin(event_pk: int) -> str:
-    event: Event = Event.objects.get(pk=event_pk)
-    if not event:
-        return f"Event with pk {event_pk} not found."
-
-    # Ensure LinkedIn API credentials are set
-    if not settings.LINKEDIN_ACCESS_TOKEN or not settings.LINKEDIN_ORGANIZATION_URN:
-        return "LinkedIn API credentials not configured in settings. Skipping post."
-
-    # Initialize LinkedIn client
-    linkedin_client = LinkedInOrganizationClient(
-        access_token=settings.LINKEDIN_ACCESS_TOKEN,
-        organization_urn=settings.LINKEDIN_ORGANIZATION_URN,
-    )
-
-    # Convert event.start_datetime from UTC to Pacific Time
-    date_time_pacific: timezone.datetime = convert_to_pacific(event.start_datetime)
-    linkedin_client.post_event_reminder(
-        name=event.name,
-        date_time=date_time_pacific,
-        url=event.url,
-        location_name=event.location_name,
-    )
+        return f"Event created message for {event.name} posted to LinkedIn successfully."
     return f"Event reminder for {event.name} posted to LinkedIn successfully."
 
 
 @shared_task(time_limit=300, max_retries=0, name="web.post_event_to_discord")
-def post_event_to_discord(event_pk: int, reminder=False) -> str:
+def post_event_to_discord(event_pk: int, is_new: bool = True) -> str:
     """post an event to Discord via webhook"""
     event: Event = Event.objects.get(pk=event_pk)
     if not event:
@@ -269,11 +237,11 @@ def post_event_to_discord(event_pk: int, reminder=False) -> str:
     discord_notifier = DiscordNotifier(webhook_url=settings.DISCORD_WEBHOOK_URL)
     discord_notifier.post_event(
         event=event,
-        reminder=reminder,
+        is_new=is_new,
     )
-    if reminder:
-        return f"Event reminder for {event.name} posted to Discord successfully."
-    return f"Event created message for {event.name} posted to Discord successfully."
+    if is_new:
+        return f"Event created message for {event.name} posted to Discord successfully."
+    return f"Event reminder for {event.name} posted to Discord successfully."
 
 
 @shared_task(time_limit=900, max_retries=3, name="web.launch_reminders_for_tomorrows_events")
@@ -299,11 +267,11 @@ def launch_reminders_for_tomorrows_events() -> str:
     )
     for event in event_list:
         # post reminders to Discord
-        discord_job: Any = post_event_to_discord.s(event.pk, reminder=True)
+        discord_job: Any = post_event_to_discord.s(event.pk, is_new=False)
         discord_job.apply_async()
 
         # post reminders to LinkedIn
-        linkedin_job: Any = post_event_reminder_to_linkedin.s(event.pk)
+        linkedin_job: Any = post_event_to_linkedin.s(event.pk, is_new=False)
         linkedin_job.apply_async()
 
     return f"sending reminders for {event_list.count()} events"

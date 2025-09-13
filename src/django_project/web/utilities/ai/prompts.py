@@ -1,6 +1,6 @@
 def create_new_event_prompt(event_description: str, platform_name: str, group_name: str) -> str:
     """
-    Generates a prompt string for announcing a new event on Discord.
+    Build a prompt string for announcing a new event on social platforms.
     Args:
         event_description (str): The description of the event.
         platform_name (str): The name of the platform where the event is added.
@@ -9,28 +9,27 @@ def create_new_event_prompt(event_description: str, platform_name: str, group_na
         str: A formatted prompt for a friendly and inviting event announcement, excluding links, dates, and location.
     """
 
-    prompt: str = f"create a single friendly and inviting announcement for a new event that was just added to {platform_name} from the {group_name}. This will be posted to Discord via webhook, and we only need the content section, do not include links or dates or location. Here is the event description: {event_description}"
+    prompt: str = f"create a single friendly and inviting announcement for a new event that was just added to {platform_name} from the {group_name}. Do not include links or dates or location. Here is the event description: {event_description}"
     return prompt
 
 
 def create_event_reminder_prompt(event_description: str) -> str:
     """
-    Generates a prompt for creating a friendly and inviting event reminder for an event happening tomorrow.
-    The prompt is intended for posting to Discord via webhook and requests only the content section,
-    excluding links, dates, and location information.
+    Build a prompt string for posting an event reminder to social platforms.
+
     Args:
         event_description (str): A description of the event to be included in the reminder.
     Returns:
         str: A formatted prompt string for generating the event reminder.
     """
 
-    prompt: str = f"create a single friendly and inviting event reminder for the following event that is happening tomorrow. This will be posted to Discord via webhook, and we only need the content section, do not include links or dates or location. Here is the event description: {event_description}"
+    prompt: str = f"create a single friendly and inviting event reminder for the following event that is happening tomorrow. We only need the content section, do not include links or dates or location. Here is the event description: {event_description}"
     return prompt
 
 
 def create_weekly_events_list_prompt(event_count: int) -> str:
     """
-    Generates a prompt for creating a friendly and inviting weekly events list.
+    Build a prompt for creating a friendly and inviting weekly events list.
     The prompt is intended for posting to Discord via webhook and requests only the content section,
     excluding links, dates, and location information.
     Args:
