@@ -12,6 +12,7 @@ from web.utilities.ai.prompts import (
     create_weekly_events_list_prompt,
 )
 from web.utilities.dt_utils import convert_to_pacific
+from web.utilities.html_utils import convert_html_to_text
 
 
 class DiscordNotifier:
@@ -54,16 +55,19 @@ class DiscordNotifier:
         """
         try:
             prompt: str = create_new_event_prompt(
-                event_description=event.name,
+                event_description=convert_html_to_text(event.description) if event.description else event.name,
                 platform_name=event.group.platform.name,
-                group_name=event.group.name or "Unknown Group",
+                group_name=event.group.name,
             )
             content: str = generate_post_content(prompt)
         except (ValueError, requests.HTTPError):
             content = f"📢 A new event from {event.group.name} has just been created!\n\n👉 RSVP here: {event.url}"
 
         event_start_datetime: timezone.datetime = convert_to_pacific(event.start_datetime)
-        event_end_datetime: timezone.datetime = convert_to_pacific(event.end_datetime)
+        if event.end_datetime:
+            event_end_datetime: timezone.datetime = convert_to_pacific(event.end_datetime)
+        else:
+            event_end_datetime = None
 
         fields: list[dict[str, Any]] = []
         if event.location_name is not None:
@@ -73,7 +77,7 @@ class DiscordNotifier:
                 {"name": "📅 Date", "value": str(event_start_datetime.date()), "inline": True},
                 {
                     "name": "⏰ Time",
-                    "value": f"{event_start_datetime.strftime('%I:%M %p')} - {event_end_datetime.strftime('%I:%M %p')}",
+                    "value": f"{event_start_datetime.strftime('%I:%M %p')} - {event_end_datetime.strftime('%I:%M %p') if event_end_datetime else ''}",
                     "inline": True,
                 },
             ]
@@ -105,13 +109,16 @@ class DiscordNotifier:
             str: A dictionary representing the Discord message payload, including content and embeds.
         """
         try:
-            prompt: str = create_event_reminder_prompt(event_description=event.description)
+            prompt: str = create_event_reminder_prompt(event_description=convert_html_to_text(event.description))
             content: str = generate_post_content(prompt)
         except (ValueError, requests.HTTPError):
-            content = f"📢 A new event from {event.group.name} has just been created!\n\n👉 RSVP here: {event.url}"
+            content = f"🔔 Reminder: {event.name} is happening soon!\n\n👉 RSVP here: {event.url}"
 
         event_start_datetime: timezone.datetime = convert_to_pacific(event.start_datetime)
-        event_end_datetime: timezone.datetime = convert_to_pacific(event.end_datetime)
+        if event.end_datetime:
+            event_end_datetime: timezone.datetime = convert_to_pacific(event.end_datetime)
+        else:
+            event_end_datetime = None
 
         fields: list[dict[str, Any]] = []
         if event.location_name is not None:
@@ -121,7 +128,7 @@ class DiscordNotifier:
                 {"name": "📅 Date", "value": str(event_start_datetime.date()), "inline": True},
                 {
                     "name": "⏰ Time",
-                    "value": f"{event_start_datetime.strftime('%I:%M %p')} - {event_end_datetime.strftime('%I:%M %p')}",
+                    "value": f"{event_start_datetime.strftime('%I:%M %p')} - {event_end_datetime.strftime('%I:%M %p') if event_end_datetime else ''}",
                     "inline": True,
                 },
             ]
@@ -166,7 +173,7 @@ class DiscordNotifier:
             embeded_event_list.append(
                 {
                     "name": f"{convert_to_pacific(event.start_datetime).strftime('%Y-%m-%d %I:%M %p')} {event.name}",
-                    "value": f"{event.description}\n[RSVP here]({event.url})",
+                    "value": f"{convert_html_to_text(event.description)}\n[RSVP here]({event.url})",
                     "inline": False,
                 },
             )
@@ -180,7 +187,7 @@ class DiscordNotifier:
     def post_event(
         self,
         event: Event,
-        reminder=False,
+        is_new: bool = True,
     ) -> None:
         """
         Posts an event notification to Discord channels.
@@ -189,14 +196,14 @@ class DiscordNotifier:
         also sends the message to the group's Discord channel.
         Args:
             event (Event): The event object containing details about the event.
-            reminder (bool, optional): If True, sends a reminder message; otherwise, sends an event creation message. Defaults to False.
+            is_new (bool, optional): If True, sends a creation message; otherwise, sends a reminder message. Defaults to True.
         Returns:
             None
         """
-        if reminder:
-            message: dict = self.build_event_reminder_message(event)
+        if is_new:
+            message: dict = self.build_event_created_message(event)
         else:
-            message = self.build_event_created_message(event)
+            message = self.build_event_reminder_message(event)
 
         # send to the general Discord channel
         self.send_message(message)

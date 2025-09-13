@@ -15,7 +15,7 @@ class Event(HandyHelperBaseModel):
         auto_now=False, auto_now_add=False, help_text="date and time the event starts"
     )
     end_datetime = models.DateTimeField(
-        auto_now=False, auto_now_add=False, null=True, help_text="date and time the event ends"
+        auto_now=False, auto_now_add=False, blank=True, null=True, help_text="date and time the event ends"
     )
     location_name = models.CharField(
         max_length=64,

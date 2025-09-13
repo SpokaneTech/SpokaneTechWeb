@@ -89,3 +89,15 @@ def find_target(
         time.sleep(1 + retries)
 
     raise Exception("target_ul not found after maximum retries")
+
+
+def convert_html_to_text(html_content: str) -> str:
+    """convert html content to plain text
+
+    Args:
+        html_content (str): html content to convert
+
+    Returns:
+        str: plain text content
+    """
+    return BeautifulSoup(html_content, "html.parser").get_text()

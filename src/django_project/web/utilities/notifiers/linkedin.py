@@ -1,10 +1,16 @@
 import json
-from datetime import datetime
 from typing import Any, Optional
-from zoneinfo import ZoneInfo
 
 import requests
 from bs4 import BeautifulSoup
+from django.utils import timezone
+from web.models import Event
+from web.utilities.ai.gemini import generate_post_content
+from web.utilities.ai.prompts import (
+    create_event_reminder_prompt,
+    create_new_event_prompt,
+)
+from web.utilities.dt_utils import convert_to_pacific
 
 
 class LinkedInOrganizationClient:
@@ -55,110 +61,68 @@ class LinkedInOrganizationClient:
         response.raise_for_status()
         return response
 
-    def build_event_created_commentary(
+    def build_event_commentary(
         self,
-        event_name: str,
-        event_date: datetime,
-        location_name: Optional[str] = None,
-        description: Optional[str] = None,
-    ) -> str:
-        """
-        Constructs a LinkedIn-style commentary string for a new event announcement.
-        Args:
-            event_name (str): The name of the event.
-            event_date (datetime): The date and time of the event.
-            location_name (Optional[str], optional): The location of the event. Defaults to None.
-            description (Optional[str], optional): A description of the event. If provided, only the first 500 characters are included. Defaults to None.
-        Returns:
-            str: A formatted commentary string suitable for posting on LinkedIn.
-        """
-        if isinstance(event_date, datetime):
-            pacific = ZoneInfo("America/Los_Angeles")
-            localized_dt: datetime = event_date.astimezone(pacific)
-            tz_name: str | None = localized_dt.tzname()
-            formatted_date: str = localized_dt.strftime(f"%A, %B %d, %Y at %I:%M %p {tz_name}")
-        else:
-            formatted_date = str(event_date)
-
-        commentary: str = f"🚀 New Event Alert! Join us for: {event_name}\n\n"
-        commentary += f"🗓️ When: {formatted_date}\n\n"
-        if location_name:
-            commentary += f"📍 Where: {location_name}\n\n"
-        if description:
-            description = BeautifulSoup(description, "html.parser").get_text()
-            commentary += f"Details: {description[:500]}..."
-        return commentary
-
-    def build_event_reminder_commentary(
-        self, event_name: str, event_date: datetime, location_name: Optional[str] = None
+        event: Event,
+        is_new: bool = True,
     ) -> str:
         """
         Generates a reminder commentary string for an event, including its name, date, and optional location.
 
         Args:
-            event_name (str): The name of the event.
-            event_date (datetime.datetime): The date and time of the event.
-            location_name (Optional[str], optional): The name of the event location. Defaults to None.
+            event (Event): The event object containing details about the event.
+            is_new (bool, optional): If True, sends a creation message; otherwise, sends a reminder message. Defaults to True.
 
         Returns:
             str: A formatted reminder string containing event details.
         """
-        if isinstance(event_date, datetime):
-            pacific = ZoneInfo("America/Los_Angeles")
-            localized_dt: datetime = event_date.astimezone(pacific)
-            tz_name: str | None = localized_dt.tzname()
-            formatted_date: str = localized_dt.strftime(f"%A, %B %d, %Y at %I:%M %p {tz_name}")
+        event_start_datetime: timezone.datetime = convert_to_pacific(event.start_datetime)
+
+        try:
+            if is_new:
+                prompt: str = create_new_event_prompt(
+                    event_description=(
+                        BeautifulSoup(event.description, "html.parser").get_text() if event.description else event.name
+                    ),
+                    platform_name=event.group.platform.name,
+                    group_name=event.group.name,
+                )
+            else:
+                prompt = create_event_reminder_prompt(
+                    event_description=(
+                        BeautifulSoup(event.description, "html.parser").get_text() if event.description else event.name
+                    ),
+                )
+            commentary: str = generate_post_content(prompt)
+        except (ValueError, requests.HTTPError):
+            if is_new:
+                commentary = f"🚀 New Event Alert! Join us for: {event.name}\n\n"
+            else:
+                commentary = f"🔔 Reminder: {event.name} is happening soon!\n\n"
+
+        if event.location_name:
+            commentary += f"\n\n📍 Location: {event.location_name}."
+        commentary += f"\n\n📅 Date: {event_start_datetime.date()}."
+        commentary += f"\n⏰ Time: {event_start_datetime.strftime('%I:%M %p')}."
+        if event.url:
+            commentary += f"\n\n👉 RSVP here: {event.url}"
+        return commentary
+
+    def post_event(
+        self,
+        event: Event,
+        is_new: bool = True,
+    ) -> requests.Response:
+        """
+        Posts an event notification to LinkedIn.
+        Args:
+            event (Event): The event object containing details about the event.
+            is_new (bool, optional): If True, sends a creation message; otherwise, sends a reminder message. Defaults to True.
+        Returns:
+            None
+        """
+        if is_new:
+            commentary: str = self.build_event_commentary(event, is_new)
         else:
-            formatted_date = str(event_date)
-
-        reminder: str = f"🔔 Reminder: {event_name} is happening on {formatted_date}."
-        if location_name:
-            reminder += f"📍 Location: {location_name}."
-        return reminder
-
-    def post_event_created(
-        self,
-        name: str,
-        date_time: datetime,
-        url: Optional[str] = None,
-        location_name: Optional[str] = None,
-        description: Optional[str] = None,
-    ) -> requests.Response:
-        """
-        Posts a new event announcement to LinkedIn.
-        Args:
-            event_name (str): The name of the event.
-            event_date (datetime): The date and time of the event.
-            location_name (Optional[str], optional): The location of the event. Defaults to None.
-            description (Optional[str], optional): A description of the event. Defaults to None.
-        Returns:
-            dict: The response from the LinkedIn API after posting the event.
-        """
-        commentary: str = self.build_event_created_commentary(
-            event_name=name, event_date=date_time, location_name=location_name, description=description
-        )
-        return self.post_organization_post(
-            commentary,
-            article_url=url,
-            article_title=name,
-            article_description=description or "Learn more about this event.",
-        )
-
-    def post_event_reminder(
-        self,
-        name: str,
-        date_time: datetime,
-        url: Optional[str] = None,
-        location_name: Optional[str] = None,
-    ) -> requests.Response:
-        """
-        Posts a reminder for an upcoming event to LinkedIn.
-        Args:
-            event_name (str): The name of the event.
-            event_date (datetime): The date and time of the event.
-            location_name (Optional[str], optional): The location of the event. Defaults to None.
-        Returns:
-            dict: The response from the LinkedIn API after posting the reminder.
-        """
-        commentary: str = self.build_event_reminder_commentary(name, date_time, location_name)
-        return self.post_organization_post(commentary, article_url=url, article_title=name)
+            commentary = self.build_event_commentary(event, is_new)
+        return self.post_organization_post(commentary, article_url=event.url, article_title=event.name)
