@@ -38,5 +38,5 @@ def create_weekly_events_list_prompt(event_count: int) -> str:
         str: A formatted prompt string for generating the weekly events list.
     """
 
-    prompt: str = f"create a single friendly and exciting sounding header for a post sharing {event_count} events occurring in Spokane this week as available from SpokaneTech.org. This will be posted to Discord via webhook, and we only need the content section; do not include any dates. The actual events will be added separately. The post should sound exciting and fun and encourage people to check out the events and attend them! Just provide one, I don't need multiple options."
+    prompt: str = f"Create a friendly and exciting sounding header for a post sharing {event_count} events occurring in Spokane this week as available from SpokaneTech.org. This will be posted to social platforms and we only need the title; do not include any dates. The actual events will be added separately. The post should sound exciting and fun and encourage people to check out the events and attend them! Just provide one, I don't need multiple options."
     return prompt
