@@ -8,6 +8,8 @@ from django.urls import reverse
 
 BASE_DIR = Path(__file__).parents[4]
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.settings")
+os.environ.setdefault("ENV_PATH", f"{BASE_DIR}/envs/.env.test")
+
 django.setup()
 from model_bakery import baker
 
