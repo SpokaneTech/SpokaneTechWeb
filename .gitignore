@@ -69,6 +69,7 @@ target/
 local_test
 src/envs/*
 !src/envs/.env.template
+!src/envs/.env.test
 src/logs
 django_project/yarn.lock
 django_project/__version__.py
