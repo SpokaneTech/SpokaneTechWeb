@@ -8,6 +8,8 @@ from django.test import TestCase
 
 BASE_DIR = Path(__file__).parents[4]
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.settings")
+os.environ.setdefault("ENV_PATH", "../../../envs/.env.test")
+
 django.setup()
 from django.db.models.signals import post_save
 from model_bakery import baker

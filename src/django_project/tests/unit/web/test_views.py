@@ -9,6 +9,8 @@ from django.utils import timezone
 
 BASE_DIR = Path(__file__).parents[4]
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.settings")
+os.environ.setdefault("ENV_PATH", "../../../envs/.env.test")
+
 django.setup()
 from model_bakery import baker
 
