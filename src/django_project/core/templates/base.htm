@@ -3,15 +3,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    {% if GOOGLE_ANALYTICS_TAG_ID %}
     <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-34QS0BNX77"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ GOOGLE_ANALYTICS_TAG_ID }}"></script>
     <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
 
-    gtag('config', 'G-34QS0BNX77');
+        gtag('config', '{{ GOOGLE_ANALYTICS_TAG_ID }}');
     </script>
+    {% endif %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Home of the Spokane and Inland Northwest tech community">

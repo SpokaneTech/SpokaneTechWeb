@@ -287,6 +287,7 @@ SALT_KEY: str = env.str("SALT_KEY", "this_should_be_changed")
 DISCORD_WEBHOOK_URL: str | None = env.str("DISCORD_WEBHOOK_URL", None)  # for the general channel
 EVENTBRITE_API_KEY: str | None = env.str("EVENTBRITE_API_KEY", None)
 GEMINI_API_KEY: str | None = env.str("GEMINI_API_KEY", None)
+GOOGLE_ANALYTICS_TAG_ID: str | None = env.str("GOOGLE_ANALYTICS_TAG_ID", None)
 LINKEDIN_ACCESS_TOKEN: str | None = env.str("LINKEDIN_ACCESS_TOKEN", None)
 LINKEDIN_ORGANIZATION_URN: str | None = env.str("LINKEDIN_ORGANIZATION_URN", None)
 SPUG_API_TOKEN: str | None = env.str("SPUG_API_TOKEN", None)
