@@ -1,0 +1,38 @@
+{% extends BASE_TEMPLATE|default:"base.htm" %}
+
+{% block main_content %}
+    <main id="body_main">
+        <section id="hero" class="p-5 d-flex justify-content-center">
+        <div class="container text-center p-2">
+            <h1 class="display-3 fw-bold"><span class="highlight">SpokaneTech.org</span></h1>
+            <p class="my-4 lead fw-bold">This page provides information about the host system running this application.</p>
+            <div class="my-5">
+                <div class="row mb-4">
+                    <span class="highlight fw-bold">Start Time:</span>
+                    <span class="text-light">{{ HH_STARTTIME }}</span>
+                </div>
+                <div class="row mb-4">
+                    <span class="highlight fw-bold">Version</span>
+                    <span class="text-light">{{ PROJECT_VERSION }}</span>
+                </div>
+                <div class="row mb-4">
+                    <span class="highlight fw-bold">Python Version:</span>
+                    <span class="text-light">{{ python_version }}</span>
+                </div>
+                <div class="row mb-4">
+                    <span class="highlight fw-bold">Django Version:</span>
+                    <span class="text-light">{{ django_version }}</span>
+                </div>
+                <div class="row mb-4">
+                    <span class="highlight fw-bold">Hostname:</span>
+                    <span class="text-light">{{ hostname }}</span>
+                </div>
+                <div class="row mb-4">
+                    <span class="highlight fw-bold">Source Code:</span>
+                    <span class="text-light"><a href="{{ source_code }}" target="_blank" class="text-light">{{ source_code }}</a></span>
+                </div>
+            </div>
+        </div>
+    </section>
+    </main>
+{% endblock main_content %}
