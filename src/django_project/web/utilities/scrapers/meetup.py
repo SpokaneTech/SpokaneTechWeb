@@ -1,3 +1,4 @@
+import html
 import re
 from datetime import datetime, timedelta, timezone
 from typing import Any
@@ -56,13 +57,12 @@ def get_event_information(url: str) -> dict:
     """
 
     try:
-        page_content = fetch_content_with_playwright(url)
-        # page_content: bytes | Any = fetch_content(url)
+        page_content: str = fetch_content_with_playwright(url)
         soup = BeautifulSoup(page_content, "html.parser")
 
         event_info: dict = {}
         event_info["url"] = url
-        event_info["name"] = soup.find("h1", class_="overflow-hidden overflow-ellipsis text-3xl font-bold leading-snug")
+        event_info["name"] = soup.find("h1", class_="ds2-b32 text-ds2-text-fill-primary-enabled lg:ds2-b48")
         if event_info["name"]:
             event_info["name"] = event_info["name"].text
         description_div: PageElement | Tag | NavigableString | None = soup.find("div", class_="break-words")
@@ -81,30 +81,37 @@ def get_event_information(url: str) -> dict:
                     if isinstance(start_time_string, str):  # Check if start_time_string is a str
                         event_info["start_datetime"] = datetime.fromisoformat(start_time_string)
                         event_info["end_datetime"] = get_end_datetime(start_time_string, end_time_string)
-        location_div: PageElement | Tag | NavigableString | None = soup.find(
-            "div", class_="overflow-hidden pl-4 md:pl-4.5 lg:pl-5"
-        )
 
-        if location_div and "Needs a location" not in location_div.text:
-            if isinstance(location_div, Tag):  # Check if location_div is a Tag
-                location_name: PageElement | Tag | NavigableString | None = location_div.find(
-                    "a", {"data-testid": "venue-name-link"}
-                )
-                location_address: PageElement | Tag | NavigableString | None = location_div.find(
-                    "div", {"data-testid": "location-info"}
-                )
-                map_link: PageElement | Tag | NavigableString | None = location_div.find(
-                    "a", {"data-testid": "venue-name-link"}
-                )
-                if location_name:
-                    event_info["location_name"] = location_name.text
-                if location_address:
-                    event_info["location_address"] = location_address.text
-                if map_link:
-                    if isinstance(map_link, Tag):  # Ensure map_link is a Tag before accessing attributes
-                        event_info["map_link"] = map_link["href"]
+        location_name: str | Any = None
+        match = re.search(r'"__typename":"Venue","id":"\d+","name":"([^"]+)"', page_content)
+        if match:
+            location_name = match.group(1)
+        event_info["location_name"] = location_name
+
+        location_address: str | Any = None
+        address_match: re.Match[str] | None = re.search(
+            r'"__typename":"Venue","id":"\d+","name":"[^"]+","address":"([^"]+)","city":"([^"]+)","state":"([^"]+)","country":"([^"]+)"',
+            page_content,
+        )
+        if address_match:
+            street: str | Any = address_match.group(1)
+            city: str | Any = address_match.group(2)
+            state: str | Any = address_match.group(3)
+            country: str | Any = address_match.group(4)
+            location_address = f"{street}, {city}, {state}, {country.upper()}"
+        event_info["location_address"] = location_address
+
+        map_link: str | Any = None
+        map_link_match: re.Match[str] | None = re.search(
+            r'<a[^>]*data-testid="map-link"[^>]*href="([^"]+)"', page_content
+        )
+        if map_link_match:
+            raw_link: str | Any = map_link_match.group(1)
+            map_link = html.unescape(raw_link)
+        event_info["map_link"] = map_link
+
         pattern = r"/events/([^/]+)/"
-        match: re.Match[str] | None = re.search(pattern, url)
+        match = re.search(pattern, url)
         if match:
             event_info["social_platform_id"] = match.group(1)
         return event_info
@@ -117,7 +124,7 @@ def get_event_links(url: str) -> list:
     """capture urls for upcoming events from a group page on meetup.com
 
     Args:
-        url (str): url of the group page; example: "https://www.meetup.com/python-spokane/events/?type=upcoming"
+        url (str): url of the group page; example: "https://www.meetup.com/python-spokane/events/"
 
     Raises:
         Exception:
@@ -125,23 +132,11 @@ def get_event_links(url: str) -> list:
     Returns:
         list: list of urls for upcoming events as available on the group page on meetup.com
     """
-    page_content: str | None = fetch_content_with_playwright(url)
+    page_content: str | None = fetch_content_with_playwright(f"{url}/events/?type=upcoming")
     if page_content:
-        soup = BeautifulSoup(page_content, "html.parser")
-        event_list: PageElement | Tag | NavigableString | None = soup.find(
-            "ul", class_="flex w-full flex-col space-y-5 px-4 md:px-0"
-        )
-
-        if event_list and isinstance(event_list, Tag):  # Ensure event_list is a Tag
-            urls: list = []
-            for li in event_list.find_all("li"):  # Iterate over li elements
-                if isinstance(li, Tag):  # Ensure li is a Tag
-                    a: PageElement | Tag | NavigableString | None = li.find(
-                        "a", href=True
-                    )  # Find <a> with href attribute
-                    if isinstance(a, Tag):  # Ensure a is a Tag
-                        urls.append(a["href"])  # Access href attribute
-            return urls
+        event_url_prefix: str = url.rstrip("/") + "/events/"
+        event_urls: list[Any] = re.findall(rf'"eventUrl":"({re.escape(event_url_prefix)}\d+/)"', page_content)
+        return [url for url in event_urls]
     return []
 
 

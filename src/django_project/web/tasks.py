@@ -93,9 +93,7 @@ def ingest_future_meetup_events(group_pk) -> str:
     numeric_event_pattern = re.compile(r"/events/(\d+)/")
 
     for link in group.links.filter(name=f"{group.name} {group.platform.name} page").distinct():
-        ingest_links: list = [
-            url for url in get_event_links(f"{link.url}events/?type=upcoming") if numeric_event_pattern.search(url)
-        ]
+        ingest_links: list = [url for url in get_event_links(link.url) if numeric_event_pattern.search(url)]
         event_links.extend(ingest_links)
         for event_link in ingest_links:
             event_info = get_event_information(event_link)
