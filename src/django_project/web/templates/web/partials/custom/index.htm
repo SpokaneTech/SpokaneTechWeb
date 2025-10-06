@@ -1,8 +1,8 @@
 <section class="hero">
-    <div class="container hero-content text-center fade-in-blur"style="--fade-duration: .25s;">
-        <h1><span class="fst-italic" style="color: #0074d9;">Your </span>Inland Northwest Tech Community</h1>
-        <p class="lead text-light fw-bold fs-4 pb-3">Innovate, Connect, Thrive.</p>
-        <div class="mb-5">
+    <div class="container text-center fade-in-blur"style="--fade-duration: .25s;">
+        <div class="my-4">
+            <h1><span class="fst-italic" style="color: #0074d9;">Your </span>Inland Northwest Tech Community</h1>
+            <p class="lead text-light fw-bold fs-4 pb-5" style="opacity: 0.5;">Innovate, Connect, Thrive.</p>
             <button class="btn btn-primary btn-lg mx-2" hx-get="{% url 'web:about' %}" hx-target="#body_main" hx-push-url="{% url 'web:about' %}">Learn More</button>
             <button class="btn btn-secondary btn-lg mx-2" hx-get="{% url 'web:develop' %}" hx-target="#body_main" hx-push-url="{% url 'web:develop' %}">Develop with us</button>
         </div>

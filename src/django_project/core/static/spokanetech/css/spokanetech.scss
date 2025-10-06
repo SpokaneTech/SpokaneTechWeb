@@ -107,3 +107,36 @@ body {
   min-height: 100vh;
 }
 
+footer {
+  margin-top: auto;
+  width: 100%;
+  background-color: $dark;
+  color: $light;
+  padding: 1rem 0;
+  text-align: center;
+}
+
+
+.hero {
+    display: flex;
+    align-items: center;
+    text-align: left;
+    color: var(--light);
+    background: linear-gradient(135deg, rgba(0, 76, 138, 0.92) 0%, rgba(0, 12, 32, 0.92) 100%),
+                url('/static/spokanetech/img/hero.jpg') center/cover no-repeat;
+    background-attachment: fixed;
+    width: 100vw;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
+    position: relative;
+    padding-top: 5rem;
+    padding-bottom: 5rem;
+}
+.hero h1 {
+  font-size: 4rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: $light;
+}
