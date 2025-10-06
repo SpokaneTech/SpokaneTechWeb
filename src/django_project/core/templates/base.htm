@@ -29,49 +29,80 @@
 
     <link href="{% static 'node_modules/bootstrap/dist/css/bootstrap.min.css' %}" rel="stylesheet">
     <link href="{% static 'node_modules/@fortawesome/fontawesome-free/css/all.min.css' %}" rel="stylesheet">
-    
-    <link rel="stylesheet" href="{% static 'spokanetech/css/index-styles.css' %}">
-    <link rel="stylesheet" href="{% static 'node_modules/tippy.js/dist/tippy.css' %}">
-    <link rel="stylesheet" href="{% static 'node_modules/fun-effects/src/css/fades.css' %}">
-    <link rel="stylesheet" href="{% static 'node_modules/fun-effects/src/css/marquee.css' %}">
-    <link rel="stylesheet" href="{% static 'node_modules/fun-effects/src/css/blur_group.css' %}">
-    <link rel="stylesheet" href="{% static 'node_modules/fun-effects/src/css/background_icons.css' %}">
+    <link rel="stylesheet" href="{% static 'spokanetech/css/spokanetech.css' %}">
 
 </head>
-<body> 
-    <header class="fade-in-blur" style="--fade-duration: .25s;">
-        <nav class="navbar">
-            <div class="logo">
-                <a href="" title="SpokaneTech.org home" hx-get="{% url 'web:index' %}" hx-target="#body_main" hx-push-url="{% url 'web:index' %}">Home</a>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid mx-2 my-2">
+            <a class="navbar-brand fw-bold text-primary" href="#">
+                <i class="fa-brands fa-python me-2"></i>SpokaneTech
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#upcoming-events">Upcoming Events</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#past-events">Past Events</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#resources">Resources</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#get-involved">Get Involved</a></li>
+                </ul>
             </div>
-            
-            <ul class="menu">
-                <li><a href="https://discord.gg/wHrSJNgpnP" target="_blank" class="tippy-tooltip" data-tippy-content="Join us on Discord" aria-label="Join us on Discord"><i class="fa-brands fa-discord"></i></a></li>
-                <li><a href="" hx-get="{% url 'web:get_techgroups' display='list' %}" hx-target="#body_main" hx-push-url="{% url 'web:get_techgroups' display='list' %}" class="tippy-tooltip" data-tippy-content="View our tech groups" aria-label="View our tech groups">
-                    <i class="fa-solid fa-user-group"></i></a>
-                </li>
-                <li><a href="" hx-get="{% url 'web:get_events' display='list' %}" hx-target="#body_main" hx-push-url="{% url 'web:get_events' display='list' %}" class="tippy-tooltip" data-tippy-content="List upcoming events" aria-label="List upcoming events">
-                    <i class="fa-solid fa-list-check"></i></a>
-                </li>
-                <li><a href="" hx-get="{% url 'web:event_calendar' year=0 month=0 %}" hx-target="#body_main" hx-push-url="{% url 'web:event_calendar' year=0 month=0 %}" class="tippy-tooltip" data-tippy-content="Calendar of events"> 
-                  <i class="fa-solid fa-calendar-days"></i></a>
-                </li>
-                {% comment %}
-                <li><a href="" class="tippy-tooltip" data-tippy-content="Log in or sign up">
-                    <i class="fa-solid fa-right-to-bracket"></i></a>
-                </li>
-                {% endcomment %}
-            </ul>
-        </nav>
-    </header>
+        </div>
+    </nav>
  
     {% block main_content %}
     <main id="body_main"></main>
     {% endblock main_content %}
  
-    <footer class="fade-in-blur" style="--fade-duration: .75s;">
-        <p class="title">SpokaneTech.org</p>
-        <p class="copyright">&copy; 2025 spokantech.org. All rights reserved.</p>
+    <!-- Footer -->
+    <footer class="bg-primary text-light py-2">
+        <div class="container-fluid px-4">
+            <div class="row justify-content-center mb-1">
+                <div class="d-flex justify-content-center">
+                    <span class="text-light mx-2">
+                        <a href="https://discord.gg/wHrSJNgpnP" target="_blank" rel="noopener"
+                            class="social-icon-link text-decoration-none">
+                            <span class="social-icon">
+                                <i class="fab fa-discord text-white fs-6"></i>
+                            </span>
+                        </a>
+                    </span>
+                    <span class="text-light mx-2">
+                        <a href="https://github.com/SpokaneTech" target="_blank" rel="noopener"
+                            class="social-icon-link text-decoration-none">
+                            <span class="social-icon">
+                                <i class="fab fa-github text-white fs-6"></i>
+                            </span>
+                        </a>
+                    </span>
+                    <span class="text-light mx-2">
+                        <a href="https://www.linkedin.com/company/spokanetech/" target="_blank" rel="noopener"
+                            class="social-icon-link text-decoration-none">
+                            <span class="social-icon">
+                                <i class="fab fa-linkedin-in text-white fs-6"></i>
+                            </span>
+                        </a>
+                    </span>
+                    <span class="text-light mx-2">
+                        <a href="https://www.facebook.com/spokanetech.org/" target="_blank" rel="noopener"
+                            class="social-icon-link text-decoration-none">
+                            <span class="social-icon">
+                                <i class="fab fa-facebook-f text-white fs-6"></i>
+                            </span>
+                        </a>
+                    </span>
+                </div>
+            </div>
+            <div class="row m-2">
+                <div class="text-center" style="font-size: .75rem;">
+                    &copy; 2025 SpokaneTech.org. All rights reserved.
+                </div>
+            </div>
+        </div>
     </footer>
 
     {% block modals %}
@@ -84,28 +115,6 @@
     <script type="text/javascript" src="{% static 'node_modules/jquery/dist/jquery.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'node_modules/@popperjs/core/dist/umd/popper.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'node_modules/bootstrap/dist/js/bootstrap.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'node_modules/fun-effects/dist/js/marquee.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'spokanetech/js/bgicons.js' %}"></script>
-    <script type="text/javascript" src="{% static 'node_modules/tippy.js/dist/tippy-bundle.umd.min.js' %}"></script>
-
-    <script>   
-        // Listen for the htmx:afterOnLoad event
-        document.addEventListener('htmx:afterOnLoad', function(event) {
-          addAnimationDelay();
-          setRightProperty();
-          setLeftProperty();
-          addMarqueeMouseListener();
-        });
-      </script>
-
-    <!-- Initialize Tippy.js -->
-    <script>
-        tippy('.tippy-tooltip', {
-            placement: 'bottom',
-            animation: 'fade',
-            arrow: true,
-        });
-    </script>
 
 </body>
 </html>
