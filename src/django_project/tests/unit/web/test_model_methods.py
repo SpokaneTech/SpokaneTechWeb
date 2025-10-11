@@ -5,6 +5,7 @@ from pathlib import Path
 import django
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 BASE_DIR = Path(__file__).parents[4]
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.settings")
@@ -74,3 +75,39 @@ class TechGroupMethodTests(TestCase):
         row = baker.make("web.TechGroup")
         expected_url = reverse("web:get_techgroup", kwargs={"pk": row.pk})
         self.assertEqual(row.get_absolute_url(), expected_url)
+
+    def test_get_upcoming_events(self):
+        """verify get_upcoming_events method returns expected value"""
+        group = baker.make("web.TechGroup")
+        past_events = baker.make(
+            "web.Event",
+            group=group,
+            start_datetime=timezone.now() - timezone.timedelta(days=1),
+            _quantity=3,
+        )
+        future_events = baker.make(
+            "web.Event",
+            group=group,
+            start_datetime=timezone.now() + timezone.timedelta(days=1),
+            _quantity=3,
+        )
+        upcoming = group.get_upcoming_events()
+        self.assertEqual(len(upcoming), len(future_events))
+        for event in future_events:
+            self.assertIn(event, upcoming)
+        for event in past_events:
+            self.assertNotIn(event, upcoming)
+
+    def test_get_upcoming_events_with_no_events(self):
+        """verify get_upcoming_events method returns expected value when their are no upcoming events"""
+        group = baker.make("web.TechGroup")
+        past_events = baker.make(
+            "web.Event",
+            group=group,
+            start_datetime=timezone.now() - timezone.timedelta(days=1),
+            _quantity=3,
+        )
+        upcoming = group.get_upcoming_events()
+        self.assertEqual(len(upcoming), 0)
+        for event in past_events:
+            self.assertNotIn(event, upcoming)
