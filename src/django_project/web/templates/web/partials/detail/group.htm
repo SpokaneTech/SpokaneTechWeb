@@ -1,29 +1,25 @@
-<section class="detail fade-in-blur" style="--fade-duration: .3s;">
-    <div class="h1 fw-bold">{{ object.icon|safe }}</div>
-    <div class="h1 fw-bold">{{ object.name }}</div>
+<section class="text-center my-5 mx-3 animate__animated animate__fadeIn" style="animation-duration: 0.2s;">
+    <div class="h1 text-primary fw-bold ">{{ object.icon|safe }}</div>
+    <div class="h1 text-primary fw-bold">{{ object.name }}</div>
 </section>
 
-<section class="fade-in-blur" style="--fade-duration: .5s;">
-    <div class="homepage">
-        {% if object.homepage %}
-        <a href="{{ object.homepage }}">{{ object.homepage }}</a>
-        {% endif %}
+<section class="text-center m-4 animate__fadeIn" style="animation-duration: 0.3s;">
+    <div>
+        {% if object.description %}
+        {{ object.description|safe }}
+        {% else %}
+        <i>No description</i>
+        {% endif %}  
     </div>
 </section>
 
-<section class="fade-in-blur" style="--fade-duration: .75s;">
+<section class="text-center m-4 animate__fadeIn" style="animation-duration: 0.4s;">
     <div class="tag-container mb-4">
         {% for tag in object.tags.all %}
         <span class="tag">{{ tag.value }}</span>
         {% endfor %}
     </div>
-    <div class="description">
-        {% if object.description %}
-        {{ object.description|safe }}
-        {% else %}
-        <i>No description</i>
-        {% endif %}        
-    </div>
+
     <div class="links">
         {% if object.links.all %}
         <ul>

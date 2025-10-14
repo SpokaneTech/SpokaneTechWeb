@@ -1,14 +1,69 @@
-<section class="about">
-    <h1 class="fade-in-blur mb-2" style="--fade-duration: 0.3s;">Our Tech Groups</h1>
-    <h4 class="text-primary fade-in-blur" style="--fade-duration: 0.4s;"></h1>    
-</section>
+<style>
+.event-card {
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border: 1px solid #dee2e6;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border-radius: 8px;
+    background: #fff;
+    padding: 1.25rem;
+    height: 100%;
+    transform: scale(1);
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), 
+                box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    /* cubic-bezier matches Bootstrap’s standard easing */
+}
+.event-card:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.16);
+    background-color: var(--light);
+    transform: scale(1.03);
+}
+.event-card .icon {
+    color: var(--bs-primary);
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+.event-card .title {
+    font-size: 1rem;
+    font-weight: bold;
+    color: var(--bs-primary);
+    margin-bottom: 1rem;
+}
+.event-card .date {
+    font-size: 0.9rem;
+    color: var(--bs-secondary);
+    margin-bottom: 0.25rem;
+}
+.event-card .techgroup {
+    font-size: 0.85rem;
+    color: var(--bs-secondary);
+}
+.event-footer {
+    margin-top: auto;
+}
+</style>
 
-<div class="list-card-container blur-group-container fade-in-blur" style="--fade-duration: 0.5s;">
-    {% for row in queryset %}
-    <div class="group-card" hx-get="{% url 'web:get_techgroup' row.pk %}" hx-target="#body_main" hx-push-url="{% url 'web:get_techgroup' row.pk %}">
-        <div class="category">{{ row.icon|safe }}</div>
-        <div class="description">{{ row.name }}</div>
+<section class="text-center m-5">
+    <div class="h1 text-primary fw-bold animate__animated animate__fadeIn" style="animation-duration: 0.2s;">
+        Our Tech Groups
     </div>
-    {% endfor %}
-</div>
-
+    <div class="mt-4">&nbsp;
+        <div class="animate__animated animate__fadeIn" style="animation-duration: 0.3s;">
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                {% for row in queryset %}
+                <div class="col">
+                    <div class="event-card h-100"
+                         hx-get="{% url 'web:get_techgroup' row.pk %}"
+                         hx-target="#body_main"
+                         hx-push-url="{% url 'web:get_techgroup' row.pk %}">
+                        <div class="icon">{{ row.icon|safe }}</div>
+                        <div class="title">{{ row.name }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>

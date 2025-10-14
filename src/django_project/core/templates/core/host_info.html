@@ -4,32 +4,32 @@
     <main id="body_main">
         <section id="hero" class="p-5 d-flex justify-content-center">
         <div class="container text-center p-2">
-            <h1 class="display-3 fw-bold"><span class="highlight">SpokaneTech.org</span></h1>
-            <p class="my-4 lead fw-bold">This page provides information about the host system running this application.</p>
+            <h1 class="display-3 fw-bold h1 text-primary"><span class="highlight">SpokaneTech.org</span></h1>
+            <p class="my-4 fw-bold h5 text-secondary">This page provides information about the host system running this application.</p>
             <div class="my-5">
                 <div class="row mb-4">
-                    <span class="highlight fw-bold">Start Time:</span>
-                    <span class="text-light">{{ HH_STARTTIME }}</span>
+                    <span class="text-primary fw-bold">Start Time:</span>
+                    <span class="text-secondary">{{ HH_STARTTIME }}</span>
                 </div>
                 <div class="row mb-4">
-                    <span class="highlight fw-bold">Version</span>
-                    <span class="text-light">{{ PROJECT_VERSION }}</span>
+                    <span class="text-primary fw-bold">Version:</span>
+                    <span class="text-secondary">{{ PROJECT_VERSION }}</span>
                 </div>
                 <div class="row mb-4">
-                    <span class="highlight fw-bold">Python Version:</span>
-                    <span class="text-light">{{ python_version }}</span>
+                    <span class="text-primary fw-bold">Python Version:</span>
+                    <span class="text-secondary">{{ python_version }}</span>
                 </div>
                 <div class="row mb-4">
-                    <span class="highlight fw-bold">Django Version:</span>
-                    <span class="text-light">{{ django_version }}</span>
+                    <span class="text-primary fw-bold">Django Version:</span>
+                    <span class="text-secondary">{{ django_version }}</span>
                 </div>
                 <div class="row mb-4">
-                    <span class="highlight fw-bold">Hostname:</span>
-                    <span class="text-light">{{ hostname }}</span>
+                    <span class="text-primary fw-bold">Hostname:</span>
+                    <span class="text-secondary">{{ hostname }}</span>
                 </div>
                 <div class="row mb-4">
-                    <span class="highlight fw-bold">Source Code:</span>
-                    <span class="text-light"><a href="{{ source_code }}" target="_blank" class="text-light">{{ source_code }}</a></span>
+                    <span class="text-primary fw-bold">Source Code:</span>
+                    <span class="text-secondary"><a href="{{ source_code }}" target="_blank">{{ source_code }}</a></span>
                 </div>
             </div>
         </div>

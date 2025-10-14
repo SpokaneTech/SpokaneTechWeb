@@ -1,0 +1,25 @@
+<div class="row justify-content-center">
+    <ul class="list-group list-group-flush spaced-bordered-items p-2"
+        style="max-height: 350px; overflow-y: auto; scrollbar-color: rgba(108, 117, 125, 0.5) rgba(0,0,0,0.05); scrollbar-width: thin;">
+        {% for row in queryset %}
+        <a href="{{ row.url }}" target="_blank" class="text-decoration-none text-dark">
+            <li class="mx-2 list-group-item shadow-sm hover-grow hover-bg-light">
+                <div class="row px-1">
+                    <div class="col-2 mb-1 text-start text-secondary" style="font-size: 80%;">
+                        <span class="fw-bold">{{ row.start_datetime|date:"D, M j" }}</span><br/>
+                        {{ row.start_datetime|time:"g:i A" }}
+                    </div>
+                    <div class="col-6 mb-1 text-start text-primary">
+                        <span class="fw-bold">{{ row.name }}</span><br/>
+                        <span class="text-secondary" style="font-size: 80%;">{{ row.group.name }}</span>
+                    </div>
+                    <div class="col-4 mb-1 text-secondary text-start">
+                        {{ row.location_name }}<br/>
+                        <span class="text-muted" style="font-size: 80%;">{{ row.location_address }}</span>
+                    </div>
+                </div>
+            </li>
+        </a>
+        {% endfor %}
+    </ul>
+</div>

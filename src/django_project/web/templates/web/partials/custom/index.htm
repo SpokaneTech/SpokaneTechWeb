@@ -1,53 +1,25 @@
-<section class="hero">
-    <div class="container text-center fade-in-blur"style="--fade-duration: .25s;">
+<section class="hero animate__animated animate__fadeIn" style="animation-duration: 0.1s;">
+    <div class="container text-center">
         <div class="my-4">
-            <h1><span class="fst-italic" style="color: #0074d9;">Your </span>Inland Northwest Tech Community</h1>
-            <p class="lead text-light fw-bold fs-4 pb-5" style="opacity: 0.5;">Innovate, Connect, Thrive.</p>
-            <button class="btn btn-primary btn-lg mx-2" hx-get="{% url 'web:about' %}" hx-target="#body_main" hx-push-url="{% url 'web:about' %}">Learn More</button>
-            <button class="btn btn-secondary btn-lg mx-2" hx-get="{% url 'web:develop' %}" hx-target="#body_main" hx-push-url="{% url 'web:develop' %}">Develop with us</button>
+            <h1 class="animate__animated animate__fadeIn" style="animation-duration: 0.2s;">
+                <span class="fst-italic" style="color: #0074d9;">Your </span>Inland Northwest Tech Community
+            </h1>
+            <p class="lead text-light fw-bold fs-4 pb-5 animate__animated animate__fadeIn text-opacity-50" style="animation-duration: 0.3s;">Innovate, Connect, Thrive.</p>
+            <button class="btn btn-primary btn-lg mx-2 animate__animated animate__fadeIn" style="animation-duration: 0.4s;" hx-get="{% url 'web:about' %}" hx-target="#body_main" hx-push-url="{% url 'web:about' %}">Learn More</button>
+            <button class="btn btn-secondary btn-lg mx-2 animate__animated animate__fadeIn" style="animation-duration: 0.5s;" hx-get="{% url 'web:develop' %}" hx-target="#body_main" hx-push-url="{% url 'web:develop' %}">Develop with us</button>
         </div>
     </div>
 </section>
-<section id="upcoming-events" class="pt-3 pb-5 bg-light">
-    <div class="container my-3 px-3">
-
-        <h1 class="section-title fw-bold text-center text-primary">Upcoming Events</h1>
-        <p class="text-center text-secondary fs-5 mb-5">meetups, workshops, and networking opportunities</p>
-
-        <div class="row justify-content-center">
-            <style>
-            .row[style*="overflow-y: auto;"]::-webkit-scrollbar {
-                width: 6px;
-            }
-            .row[style*="overflow-y: auto;"]::-webkit-scrollbar-thumb {
-                background: #ccc;
-                border-radius: 3px;
-            }
-            </style>
-            <ul class="list-group list-group-flush spaced-bordered-items"
-                style="max-height: 350px; overflow-y: auto; scrollbar-color: rgba(108, 117, 125, 0.5) rgba(0,0,0,0.05); scrollbar-width: thin;">
-                {% for event in event_list %}
-                <a href="{{ event.url }}" target="_blank" class="text-decoration-none text-dark mb-2">
-                    <li class="mx-3 list-group-item shadow-sm hover-grow hover-bg-light">
-                        <div class="row">
-                            <div class="col-2 mb-1 text-start text-secondary" style="font-size: 80%;">
-                                <span class="fw-bold">{{ event.start_datetime|date:"D, M j" }}</span><br/>
-                                {{ event.start_datetime|time:"g:i A" }}
-                            </div>
-                            <div class="col-6 mb-1 text-start text-primary">
-                                <span class="fw-bold">{{ event.name }}</span><br/>
-                                <span class="text-secondary" style="font-size: 80%;">{{ event.group.name }}</span>
-                            </div>
-                            <div class="col-4 mb-1 text-secondary text-start">
-                                {{ event.location_name }}<br/>
-                                <span class="text-muted" style="font-size: 80%;">{{ event.location_address }}</span>
-                            </div>
-                        </div>
-                    </li>
-                </a>
-                {% endfor %}
-            </ul>
+<section class="pt-3 pb-5 bg-light">
+    <div class="container-fluid my-3 px-3">
+        <h1 class="section-title fw-bold text-center text-primary animate__animated animate__fadeIn" style="animation-duration: 0.6s;">Upcoming Events</h1>
+        <p class="text-center text-secondary fs-5 mb-5 animate__animated animate__fadeIn" style="animation-duration: 0.7s;">meetups, workshops, networking, and more</p>
+        <div id="upcoming-events" class="row justify-content-center animate__animated animate__fadeIn" style="animation-duration: 0.8s;"
+            hx-get="{% url 'web:get_events' display='minimal' %}" 
+            hx-trigger="load"
+            hx-target="#upcoming-events"
+            hx-swap="innerHTML"
+        >
         </div>
-
     </div>
 </section>

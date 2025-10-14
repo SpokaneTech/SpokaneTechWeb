@@ -1,8 +1,8 @@
-<section class="detail fade-in-blur mb-2" style="--fade-duration: .3s;">
-    <h1 class="fw-bold">{{ object.name }}</h1>
+<section class="text-center my-5 mx-3">
+    <h1 class="h1 text-primary fw-bold animate__animated animate__fadeIn" style="animation-duration: 0.2s;">{{ object.name }}</h1>
 </section>
 
-<section class="fade-in-blur" style="--fade-duration: .5s;">
+<section class="text-center m-4 animate__fadeIn" style="animation-duration: 0.3s;">
     <div class="mb-4">{{ object.date_time }}</div>
     <div>
         {% if object.group %}
@@ -15,7 +15,7 @@
     </div>
 </section>
 
-<section class="fade-in-blur" style="--fade-duration: .75s;">
+<section class="text-center m-4 animate__fadeIn" style="animation-duration: 0.4s;">
     <div class="m-3">
         {% if object.description %}
         {{ object.description|safe }}
@@ -42,7 +42,7 @@
     {% endif %}
 </section>
 
-<section class="fade-in-blur" style="--fade-duration: 1s;">
+<section class="text-center m-4 animate__fadeIn" style="animation-duration: 0.5s;">
     <div class="tag-container mb-4">
         {% for tag in object.tags.all %}
         <span class="tag">{{ tag.value }}</span>

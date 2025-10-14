@@ -10329,7 +10329,8 @@ textarea.form-control-lg {
   box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25); }
 
 .navbar-nav .nav-link:hover {
-  color: #3776AB !important; }
+  color: #3776AB !important;
+  text-shadow: 0 1px 2px rgba(55, 118, 171, 0.15); }
 
 .spaced-bordered-items .list-group-item {
   margin-bottom: 0.75rem;

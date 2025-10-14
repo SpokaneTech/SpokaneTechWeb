@@ -12,15 +12,15 @@ from web.models import Event, TechGroup
 class AboutContentView(HtmxOptionView):
     """Render the 'about' page"""
 
-    htmx_template_name = "web/partials/custom/about.htm"
-    template_name = "web/full/custom/about.html"
+    htmx_template_name: str = "web/partials/custom/about.htm"
+    template_name: str = "web/full/custom/about.html"
 
 
 class DevelopContentView(HtmxOptionView):
     """Render the 'development' page"""
 
-    htmx_template_name = "web/partials/custom/develop.htm"
-    template_name = "web/full/custom/develop.html"
+    htmx_template_name: str = "web/partials/custom/develop.htm"
+    template_name: str = "web/full/custom/develop.html"
 
 
 class EventCalendarView(HtmxCalendarView):
@@ -43,32 +43,25 @@ class EventCalendarView(HtmxCalendarView):
 class IndexContentView(HtmxOptionView):
     """Render the index page"""
 
-    htmx_template_name = "web/partials/custom/index.htm"
-    template_name = "web/full/custom/index.html"
-
-    def get(self, request):
-        self.context = {
-            "event_count": Event.objects.filter(start_datetime__gte=timezone.now()).count(),
-            "group_count": TechGroup.objects.filter(enabled=True).count(),
-        }
-        return super().get(request)
+    htmx_template_name: str = "web/partials/custom/index.htm"
+    template_name: str = "web/full/custom/index.html"
 
 
 class TechEventView(HtmxOptionDetailView):
     """Render detail page for an Event instance"""
 
     model = Event
-    htmx_template_name = "web/partials/detail/event.htm"
-    template_name = "web/full/detail/event.html"
+    htmx_template_name: str = "web/partials/detail/event.htm"
+    template_name: str = "web/full/detail/event.html"
 
 
 class TechEventsView(HtmxOptionMultiFilterView):
     """Render a list of Event instances"""
 
-    htmx_list_template_name = "web/partials/list/events.htm"
-    htmx_list_wrapper_template_name = "web/partials/list/wrapper_list.htm"
-    htmx_template_name = "web/partials/marquee/events.htm"
-    template_name = "web/full/list/events.html"
+    htmx_minimal_wrapper_template_name: str = "web/partials/li/events.htm"
+    htmx_list_wrapper_template_name: str = "web/partials/list/events.htm"
+    htmx_template_name: str = "web/partials/li/events.htm"
+    template_name: str = "web/full/list/events.html"
 
     def get(self, request, *args, **kwargs):
         self.queryset = Event.objects.filter(start_datetime__gte=timezone.now())
