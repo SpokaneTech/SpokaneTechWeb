@@ -128,3 +128,13 @@ class TechGroup(HandyHelperBaseModel):
         from django.utils import timezone
 
         return Event.objects.filter(group=self, start_datetime__lt=timezone.now()).order_by("-start_datetime")
+
+    @property
+    def upcoming_events(self):
+        """Property to get upcoming events for this tech group"""
+        return self.get_upcoming_events()
+
+    @property
+    def past_events(self):
+        """Property to get past events for this tech group"""
+        return self.get_past_events()
