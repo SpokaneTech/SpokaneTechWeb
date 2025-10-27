@@ -11,6 +11,7 @@ from celery import shared_task
 from django.conf import settings
 from django.db.models.manager import BaseManager
 from django.utils import timezone
+
 from web.models import Event, Link, Tag, TechGroup
 from web.utilities.dt_utils import convert_to_pacific
 from web.utilities.notifiers.discord import DiscordNotifier
@@ -40,8 +41,9 @@ def test_task() -> str:
 def ingest_meetup_group_details(group_pk, url: str) -> str:
     updated = False
     group = TechGroup.objects.get(pk=group_pk)
-    group = TechGroup.objects.get(pk=group_pk)
     group_details = get_group_description(url)
+    if not group_details:
+        return f"no details found for {group.name}"
     if group.description != group_details:
         group.description = group_details
         group.save()

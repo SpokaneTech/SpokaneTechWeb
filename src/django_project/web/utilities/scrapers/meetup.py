@@ -5,6 +5,7 @@ from typing import Any
 
 from bs4 import BeautifulSoup, Tag
 from bs4.element import AttributeValueList, NavigableString, PageElement
+
 from web.utilities.html_utils import fetch_content, fetch_content_with_playwright
 
 
@@ -155,7 +156,7 @@ def get_group_description(url: str) -> str:
     page_content: bytes | Any = fetch_content(url)
     soup = BeautifulSoup(page_content, "html.parser")
     description_div: PageElement | Tag | NavigableString | None = soup.find(
-        "div", class_="break-words utils_description__BlOCA"
+        "div", class_="ds2-r16 break-words utils_description__BlOCA"
     )
 
     if description_div and isinstance(description_div, Tag):  # Check if description_div is a Tag
