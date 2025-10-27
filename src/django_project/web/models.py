@@ -116,3 +116,15 @@ class TechGroup(HandyHelperBaseModel):
 
     def get_absolute_url(self) -> str:
         return reverse("web:get_techgroup", kwargs={"pk": self.pk})
+
+    def get_upcoming_events(self) -> models.QuerySet[Event]:
+        """Get upcoming events for this TechGroup"""
+        from django.utils import timezone
+
+        return Event.objects.filter(group=self, start_datetime__gte=timezone.now()).order_by("start_datetime")
+
+    def get_past_events(self) -> models.QuerySet[Event]:
+        """Get past events for this TechGroup"""
+        from django.utils import timezone
+
+        return Event.objects.filter(group=self, start_datetime__lt=timezone.now()).order_by("-start_datetime")

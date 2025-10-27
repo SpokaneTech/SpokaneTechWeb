@@ -200,6 +200,15 @@ body {
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0); }
 
+  /* Make all links have no underline by default */
+  a,
+  a:link,
+  a:visited,
+  a:hover,
+  a:focus {
+    text-decoration: none !important;
+  }
+
 hr {
   margin: 1rem 0;
   color: inherit;

@@ -26,12 +26,12 @@ class DevelopContentView(HtmxOptionView):
 class EventCalendarView(HtmxCalendarView):
     """Render a monthly calendar view of Event instances"""
 
-    event_detail_url = "web:techevent_modal"
+    event_detail_url: str = "web:techevent_modal"
     event_model = Event
-    event_model_date_field = "start_datetime"
-    htmx_template_name = "web/partials/custom/calendar.htm"
-    template_name = "web/full/custom/calendar.html"
-    title = "Spokane Tech Event Calendar"
+    event_model_date_field: str = "start_datetime"
+    htmx_template_name: str = "web/partials/custom/calendar.htm"
+    template_name: str = "web/full/custom/calendar.html"
+    title: str = "Spokane Tech Event Calendar"
 
     def get(self, request, *args, **kwargs):
         user_agent = request.META.get("HTTP_USER_AGENT", "")
@@ -72,9 +72,9 @@ class TechEventModalView(ModelDetailBootstrapModalView):
     """Render Bootstrap 5 modal displaying details of an Event instance"""
 
     modal_button_submit = None
-    modal_size = "modal-lg"
-    modal_template = "web/partials/modal/event_information.htm"
-    modal_title = "Event Info"
+    modal_size: str = "modal-lg"
+    modal_template: str = "web/partials/modal/event_information.htm"
+    modal_title: str = "Event Info"
     model = Event
 
     def get(self, request, *args, **kwargs):
@@ -88,25 +88,25 @@ class TechGroupView(HtmxOptionDetailView):
     """Render detail page for a TechGroup instance"""
 
     model = TechGroup
-    htmx_template_name = "web/partials/detail/group.htm"
-    template_name = "web/full/detail/group.html"
+    htmx_template_name: str = "web/partials/detail/group.htm"
+    template_name: str = "web/full/detail/group.html"
 
 
 class TechGroupsView(HtmxOptionMultiFilterView):
     """Render a list of TechGroup instances"""
 
-    htmx_list_template_name = "web/partials/list/groups.htm"
-    htmx_list_wrapper_template_name = "web/partials/list/wrapper_list.htm"
-    htmx_template_name = "web/partials/marquee/groups.htm"
+    htmx_list_template_name: str = "web/partials/list/groups.htm"
+    htmx_list_wrapper_template_name: str = "web/partials/list/wrapper_list.htm"
+    htmx_template_name: str = "web/partials/marquee/groups.htm"
     queryset = TechGroup.objects.filter(enabled=True)
-    template_name = "web/full/list/groups.html"
+    template_name: str = "web/full/list/groups.html"
 
 
 class TechGroupModalView(ModelDetailBootstrapModalView):
     """Render Bootstrap 5 modal displaying get details of a TechGroup instance"""
 
     modal_button_submit = None
-    modal_size = "modal-lg"
-    modal_template = "web/partials/modal/group_information.htm"
-    modal_title = "Group Info"
+    modal_size: str = "modal-lg"
+    modal_template: str = "web/partials/modal/group_information.htm"
+    modal_title: str = "Group Info"
     model = TechGroup

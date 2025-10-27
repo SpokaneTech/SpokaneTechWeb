@@ -5,8 +5,36 @@
                 <span class="fst-italic" style="color: #0074d9;">Your </span>Inland Northwest Tech Community
             </h1>
             <p class="lead text-light fw-bold fs-4 pb-5 animate__animated animate__fadeIn text-opacity-50" style="animation-duration: 0.3s;">Innovate, Connect, Thrive.</p>
-            <button class="btn btn-primary btn-lg mx-2 animate__animated animate__fadeIn" style="animation-duration: 0.4s;" hx-get="{% url 'web:about' %}" hx-target="#body_main" hx-push-url="{% url 'web:about' %}">Learn More</button>
-            <button class="btn btn-secondary btn-lg mx-2 animate__animated animate__fadeIn" style="animation-duration: 0.5s;" hx-get="{% url 'web:develop' %}" hx-target="#body_main" hx-push-url="{% url 'web:develop' %}">Develop with us</button>
+            <div class="d-flex justify-content-center"></div>
+                <button id="hero-btn-1" class="btn btn-primary btn-lg m-2 animate__animated animate__fadeIn" style="animation-duration: 0.4s;" hx-get="{% url 'web:about' %}" hx-target="#body_main" hx-push-url="{% url 'web:about' %}">Learn More</button>
+                <button id="hero-btn-2" class="btn btn-secondary btn-lg m-2 animate__animated animate__fadeIn" style="animation-duration: 0.5s;" hx-get="{% url 'web:develop' %}" hx-target="#body_main" hx-push-url="{% url 'web:develop' %}">Develop with us</button>
+            </div>
+            <script>
+            (function(){
+                function equalize() {
+                    var b1 = document.getElementById('hero-btn-1'),
+                        b2 = document.getElementById('hero-btn-2');
+                    if (!b1 || !b2) return;
+                    // clear any previously set minWidth so measurement is accurate
+                    b1.style.minWidth = '';
+                    b2.style.minWidth = '';
+                    // measure widths
+                    var w1 = Math.ceil(b1.getBoundingClientRect().width),
+                        w2 = Math.ceil(b2.getBoundingClientRect().width),
+                        max = Math.max(w1, w2);
+                    // apply equal min-width so both match the widest
+                    b1.style.minWidth = b2.style.minWidth = max + 'px';
+                }
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', equalize);
+                } else {
+                    equalize();
+                }
+                // adjust on resize and when webfonts finish loading
+                window.addEventListener('resize', function(){ requestAnimationFrame(equalize); });
+                if (document.fonts && document.fonts.ready) document.fonts.ready.then(equalize);
+            })();
+            </script>
         </div>
     </div>
 </section>

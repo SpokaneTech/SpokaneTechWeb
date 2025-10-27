@@ -1,9 +1,8 @@
-<section class="text-center my-5 mx-3">
-    <h1 class="h1 text-primary fw-bold animate__animated animate__fadeIn" style="animation-duration: 0.2s;">{{ object.name }}</h1>
+<section class="text-center my-4 mx-3">
+    <div class="h2 text-primary fw-bold animate__animated animate__fadeIn" style="animation-duration: 0.2s;">{{ object.name }}</div>
 </section>
 
-<section class="text-center m-4 animate__fadeIn" style="animation-duration: 0.3s;">
-    <div class="mb-4">{{ object.date_time }}</div>
+<section class="text-center m-3 animate__fadeIn" style="animation-duration: 0.3s;">
     <div>
         {% if object.group %}
         Hosted by:<br/>
@@ -31,15 +30,14 @@
         {% endif %}
     </div>
     <div class="mt-3 mb-2"><b>{{ object.location_name }}</b></div>
-    <div class="my-2">{{ object.location_address }}</div>
-    
-    {% if object.map_link %}
     <div class="my-2">
-        <a href="{{ object.map_link }}" title="google map" target="_blank">
-            <i class="fa-solid fa-location-dot"></i>
-        </a>
+        {% if object.map_link %}
+        <a href="{{ object.map_link }}" title="google map" target="_blank">{{ object.location_address }}</a>
+        {% else %}
+        {{ object.location_address }}
+        {% endif %}
     </div>
-    {% endif %}
+
 </section>
 
 <section class="text-center m-4 animate__fadeIn" style="animation-duration: 0.5s;">
