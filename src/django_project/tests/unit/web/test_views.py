@@ -130,10 +130,10 @@ class TestGetTechEventsView(TestCase):
 
     def test_get_htmx_index(self):
         """verify call to GetTechEvents view with a htmx call"""
-        url = reverse("web:get_events", kwargs={"display": "marquee"})
+        url = reverse("web:get_events", kwargs={"display": "li"})
         response = self.client.get(url, **self.headers)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "web/partials/marquee/events.htm")
+        self.assertTemplateUsed(response, "web/partials/li/events.htm")
         self.assertIn(self.instance.name, response.content.decode("utf-8"))
 
     def test_get_htmx_list(self):
