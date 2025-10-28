@@ -1,0 +1,143 @@
+// Override default Bootstrap theme colors
+$primary: #3776AB;
+$warning: #FFD343;
+$secondary: #646464;
+$success: #4CAF50;
+$info: #8B5CF6;
+$danger: #D9534F;
+$light: #F8F9FA;
+$dark: #1E1E1E;
+
+// Then import Bootstrap
+@import "../../node_modules/bootstrap/scss/bootstrap.scss";
+
+:root {
+  --gradient-primary: linear-gradient(315deg, #b8d4ff 0%, #e6f0ff 20%, #e6f0ff 100%);
+  --gradient-secondary: linear-gradient(315deg, #c9c9c9 0%, #f1f1f1 20%, #f1f1f1 100%);
+  --gradient-info: linear-gradient(315deg, #d8ccfc 0%, #f0eaff 20%, #f0eaff 100%);
+  --gradient-success: linear-gradient(315deg, #c3e6cb 0%, #eafaf0 20%, #eafaf0 100%);
+  --gradient-warning: linear-gradient(315deg, #ffe88a 0%, #fff9db 20%, #fff9db 100%);
+  --gradient-danger: linear-gradient(315deg, #f5b8b5 0%, #fdecea 20%, #fdecea 100%);
+}
+
+
+.social-icon-link .social-icon {
+    background-color: var(--bs-primary);
+    width: 32px;
+    height: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.social-icon-link:hover .social-icon {
+    background-color: darken($primary, 10%);
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25); 
+}
+
+.navbar-nav .nav-link:hover {
+  color: $primary !important;
+  text-shadow: 0 1px 2px rgba(55, 118, 171, 0.15);
+}
+
+.spaced-bordered-items .list-group-item {
+  margin-bottom: 0.75rem;                // space between items
+  border-radius: 0.375rem;               // optional rounding
+  padding: .5rem;                         // optional padding for spacing inside
+  background-color: #fff;                // make sure background is set
+  width: 95%;
+}
+
+.hover-grow {
+  transition: transform 0.3s ease, background-color 0.3s ease;
+
+  &:hover {
+    transform: scale(1.02);
+  }
+}
+
+.hover-bg-light {
+  // We don't need to repeat the transition here unless used standalone
+  &:hover {
+    background-color: $light;
+  }
+}
+
+
+// Themed link styles using Bootstrap emphasis text colors
+$link-colors: (
+  "primary": var(--bs-primary-text-emphasis),
+  "secondary": var(--bs-secondary-text-emphasis),
+  "success": var(--bs-success-text-emphasis),
+  "danger": var(--bs-danger-text-emphasis),
+  "warning": var(--bs-warning-text-emphasis),
+  "info": var(--bs-info-text-emphasis),
+  "light": var(--bs-light-text-emphasis),
+  "dark": var(--bs-dark-text-emphasis)
+);
+
+@each $name, $color in $link-colors {
+  .note-link-#{$name} {
+    color: #{$color};
+    text-decoration: none;
+    transition: color 0.2s ease;
+
+    &:hover,
+    &:focus {
+      color: rgba($color, 0.85); // subtle darken effect
+      text-decoration: none;
+    }
+  }
+}
+
+
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap');
+
+
+html, body {
+  font-family: 'Ubuntu', Arial, sans-serif;
+  height: 100%;
+  background-color: #f1f1f1
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+footer {
+  margin-top: auto;
+  width: 100%;
+  background-color: $dark;
+  color: $light;
+  padding: 1rem 0;
+  text-align: center;
+}
+
+
+.hero {
+    display: flex;
+    align-items: center;
+    text-align: left;
+    color: var(--light);
+    background: linear-gradient(135deg, rgba(0, 76, 138, 0.92) 0%, rgba(0, 12, 32, 0.92) 100%),
+                url('/static/spokanetech/img/hero.jpg') center/cover no-repeat;
+    background-attachment: fixed;
+    width: 100vw;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
+    position: relative;
+    padding-top: 5rem;
+    padding-bottom: 5rem;
+}
+.hero h1 {
+  font-size: 4rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: $light;
+}

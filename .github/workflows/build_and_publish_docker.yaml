@@ -49,8 +49,13 @@ jobs:
 
           if [[ "$TAG_NAME" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             echo "latest=true" >> $GITHUB_OUTPUT
+            echo "dev=false" >> $GITHUB_OUTPUT
+          elif [[ "$TAG_NAME" =~ ^[0-9]+\.[0-9]+\.[0-9]+-dev(\.[0-9]+)?$ ]]; then
+            echo "dev=true" >> $GITHUB_OUTPUT
+            echo "latest=false" >> $GITHUB_OUTPUT
           else
             echo "latest=false" >> $GITHUB_OUTPUT
+            echo "dev=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Build and push Docker image
@@ -64,6 +69,7 @@ jobs:
           tags: |
             ghcr.io/${{ steps.vars.outputs.image_name }}:${{ steps.vars.outputs.tag }}
             ${{ steps.vars.outputs.latest == 'true' && format('ghcr.io/{0}:latest', steps.vars.outputs.image_name) || '' }}
+            ${{ steps.vars.outputs.dev == 'true' && format('ghcr.io/{0}:dev', steps.vars.outputs.image_name) || '' }}
           labels: |
             org.opencontainers.image.source=${{ github.repositoryUrl }}
             org.opencontainers.image.version=${{ steps.vars.outputs.tag }}
@@ -76,4 +82,7 @@ jobs:
           echo "Published ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.vars.outputs.tag }}"
           if [ "${{ steps.vars.outputs.latest }}" = "true" ]; then
             echo "Also tagged as :latest"
+          fi
+          if [ "${{ steps.vars.outputs.dev }}" = "true" ]; then
+            echo "Also tagged as :dev"
           fi

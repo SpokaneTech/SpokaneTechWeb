@@ -94,12 +94,6 @@ def create_groups() -> None:
             "platform page": "https://www.meetup.com/spokane-net-user-group/",
         },
         {
-            "name": "spokaneOS",
-            "icon": """<i class="fa-brands fa-apple"></i>""",
-            "platform": "Discord",
-            "platform page": "",
-        },
-        {
             "name": "Spokane Python User Group",
             "icon": """<i class="fa-brands fa-python"></i>""",
             "platform": "Meetup",
@@ -124,22 +118,10 @@ def create_groups() -> None:
             "platform page": "https://www.meetup.com/Spokane-UX/",
         },
         {
-            "name": "Spokane Linux User Group",
-            "icon": """<i class="fa-brands fa-linux"></i>""",
-            "platform": "Meetup",
-            "platform page": "https://www.meetup.com/spolug/",
-        },
-        {
             "name": "What is Crypto Currency",
             "icon": """<i class="fa-brands fa-bitcoin"></i>""",
             "platform": "Meetup",
             "platform page": "https://www.meetup.com/what-is-crypto-currency/",
-        },
-        {
-            "name": "Inland NW 3d Printing",
-            "icon": """<i class="fa-solid fa-print"></i>""",
-            "platform": "Meetup",
-            "platform page": "https://www.meetup.com/inland-nw-3d-printing/",
         },
         {
             "name": "Spokane WordPress Meetup",

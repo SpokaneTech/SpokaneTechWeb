@@ -1,37 +1,53 @@
-<section class="hero fade-in-blur" style="--fade-duration: .25s;">
-    <div class="container hero-content text-center">
-        <h1><strong class="accent highlight">Your </strong>Inland Northwest Tech Community</h1>
-    </div>
-</section>
-
-<section class="text-center py-3 fade-in-blur" style="--fade-duration: .35s;">
-    <div class="container">
-        <p class="fs-4 fw-semibold">Find groups, events, and resources to help support your tech career.</p>
-        <div class="row justify-content-center mt-4">
-            <div class="col-12 col-md-5 text-center text-md-end pe-md-3 py-1">
-                <h5 class="fw-semibold hx-link" 
-                hx-get="{% url 'web:get_techgroups' display='list' %}" 
-                hx-target="#body_main" 
-                hx-push-url="{% url 'web:get_techgroups' display='list' %}">
-                    {{ group_count }} groups strong
-                </h5>
+<section class="hero animate__animated animate__fadeIn" style="animation-duration: 0.1s;">
+    <div class="container text-center">
+        <div class="my-4">
+            <h1 class="animate__animated animate__fadeIn" style="animation-duration: 0.2s;">
+                <span class="fst-italic" style="color: #0074d9;">Your </span>Inland Northwest Tech Community
+            </h1>
+            <p class="lead text-light fw-bold fs-4 pb-5 animate__animated animate__fadeIn text-opacity-50" style="animation-duration: 0.3s;">Innovate, Connect, Thrive.</p>
+            <div class="d-flex justify-content-center"></div>
+                <button id="hero-btn-1" class="btn btn-primary btn-lg m-2 animate__animated animate__fadeIn" style="animation-duration: 0.4s;" hx-get="{% url 'web:about' %}" hx-target="#body_main" hx-push-url="{% url 'web:about' %}">Learn More</button>
+                <button id="hero-btn-2" class="btn btn-secondary btn-lg m-2 animate__animated animate__fadeIn" style="animation-duration: 0.5s;" hx-get="{% url 'web:develop' %}" hx-target="#body_main" hx-push-url="{% url 'web:develop' %}">Develop with us</button>
             </div>
-            <div class="col-12 col-md-5 text-center text-md-start ps-md-3 py-1">
-                <h5 class="fw-semibold hx-link"
-                hx-get="{% url 'web:get_events' display='list' %}" 
-                hx-target="#body_main" 
-                hx-push-url="{% url 'web:get_events' display='list' %}"
-                >
-                    {{ event_count }} upcoming events
-                </h5>
-            </div>
+            <script>
+            (function(){
+                function equalize() {
+                    var b1 = document.getElementById('hero-btn-1'),
+                        b2 = document.getElementById('hero-btn-2');
+                    if (!b1 || !b2) return;
+                    // clear any previously set minWidth so measurement is accurate
+                    b1.style.minWidth = '';
+                    b2.style.minWidth = '';
+                    // measure widths
+                    var w1 = Math.ceil(b1.getBoundingClientRect().width),
+                        w2 = Math.ceil(b2.getBoundingClientRect().width),
+                        max = Math.max(w1, w2);
+                    // apply equal min-width so both match the widest
+                    b1.style.minWidth = b2.style.minWidth = max + 'px';
+                }
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', equalize);
+                } else {
+                    equalize();
+                }
+                // adjust on resize and when webfonts finish loading
+                window.addEventListener('resize', function(){ requestAnimationFrame(equalize); });
+                if (document.fonts && document.fonts.ready) document.fonts.ready.then(equalize);
+            })();
+            </script>
         </div>
     </div>
 </section>
-
-<section class="fade-in-blur mt-5" style="--fade-duration: .45s;">
-    <div class="hero-buttons">
-        <button class="btn btn-outline" hx-get="{% url 'web:about' %}" hx-target="#body_main" hx-push-url="{% url 'web:about' %}">Learn More</button>
-        <button class="btn btn-light" hx-get="{% url 'web:develop' %}" hx-target="#body_main" hx-push-url="{% url 'web:develop' %}">Develop with us</button>
+<section class="pt-3 pb-5 bg-light">
+    <div class="container-fluid my-3 px-3">
+        <h1 class="section-title fw-bold text-center text-primary animate__animated animate__fadeIn" style="animation-duration: 0.6s;">Upcoming Events</h1>
+        <p class="text-center text-secondary fs-5 mb-5 animate__animated animate__fadeIn" style="animation-duration: 0.7s;">meetups, workshops, networking, and more</p>
+        <div id="upcoming-events" class="row justify-content-center animate__animated animate__fadeIn" style="animation-duration: 0.8s;"
+            hx-get="{% url 'web:get_events' display='minimal' %}" 
+            hx-trigger="load"
+            hx-target="#upcoming-events"
+            hx-swap="innerHTML"
+        >
+        </div>
     </div>
 </section>

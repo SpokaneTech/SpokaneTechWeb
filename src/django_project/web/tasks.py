@@ -40,8 +40,9 @@ def test_task() -> str:
 def ingest_meetup_group_details(group_pk, url: str) -> str:
     updated = False
     group = TechGroup.objects.get(pk=group_pk)
-    group = TechGroup.objects.get(pk=group_pk)
     group_details = get_group_description(url)
+    if not group_details:
+        return f"no details found for {group.name}"
     if group.description != group_details:
         group.description = group_details
         group.save()
