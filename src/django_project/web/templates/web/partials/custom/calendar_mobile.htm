@@ -1,83 +1,71 @@
 {% load tz %}
-<section class="about">
-    <h1 class="fade-in-blur mb-2" style="--fade-duration: 0.2s;">{{ title }}</h1>
-    <h4 class="text-primary fade-in-blur" style="--fade-duration: 0.3s;">{{ month_name }} {{ year }}</h1>
-</section>
-
-<div class="text-center nav-links fade-in-blur" style="--fade-duration: 0.4s;">
-    <a 
-    {% if use_htmx %}
-    hx-get="{{ prev_month_url }}" hx-target="#body_main"
-    {% else %}
-    href="{{ prev_month_url }}"
-    {% endif %}
-    class="me-2" title="previous month">
-        <i class="fa-solid fa-angle-left"></i>
-    </a>
-    <a 
-    {% if use_htmx %}
-    hx-get="{{ today_url }}" hx-target="#body_main"
-    {% else %}
-    href="{{ today_url }}" 
-    {% endif %}
-    class="mx-3" style="text-decoration: none">
-        today
-    </a>
-    <a 
-    {% if use_htmx %}
-    hx-get="{{ next_month_url }}" hx-target="#body_main"
-    {% else %}
-    href="{{ next_month_url }}"
-    {% endif %}
-    class="ms-2" title="next month">
-        <i class="fa-solid fa-angle-right"></i>
-    </a>
-</div>
-
 <style>
-.mobile-calendar-container {
-    margin-top: 2rem;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start; /* Align items to the start (left) of the container */
-    justify-content: flex-start; /* Align content to the start (top) of the container */
-    text-align: left; /* Ensure all text inside is left-justified */
-    width: 100%; /* Ensure the container itself takes full width */
-}
-
-.mobile-calendar-container .row {
-    width: 100%; /* Ensure rows take the full width of the container */
-    margin-left: 0; /* Remove default negative margins from Bootstrap */
-    margin-right: 0; /* Remove default negative margins from Bootstrap */
-}
-
-.mobile-calendar-container .row > [class^="col-"] {
-    padding-left: 0; /* Remove default padding from Bootstrap columns */
-    padding-right: 0; /* Remove default padding from Bootstrap columns */
-}
-.event-datetime {
-    font-size: 0.75rem;
-    color: var(--accent-color);
+.dynamic-height {
+  max-height: calc(100vh - 360px);
+  overflow-y: auto;
+  padding: 1rem;
+  border-radius: 6px;
+  box-sizing: border-box;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(var(--bs-primary-rgb), 0.25) transparent;
 }
 </style>
 
-<div id="calendar-wrapper" class="mobile-calendar-container blur-group-container fade-in-blur" style="--fade-duration: .5s;">
-{% for event in event_list %}
-    <div class="row align-items-center my-3"
-    hx-get="{% url event_detail_url event.pk %}"
-    hx-target="#modal_wrapper"
-    data-bs-toggle="modal"
-    data-bs-target="#modal_wrapper"
-    >
-        <div class="col-2 text-center fs-5 fw-bold">
-            {{ event.start_datetime|timezone:"America/Los_Angeles"|date:"M" }}<br/>
-            {{ event.start_datetime|timezone:"America/Los_Angeles"|date:"j" }}
-        </div>
-        <div class="col-10 ps-3">
-            <div class="fw-bold">{{ event.name}}</div>
-            <div class="event-datetime">{{ event.start_datetime|timezone:"America/Los_Angeles"|date:"g:i A" }} - {{ event.end_datetime|timezone:"America/Los_Angeles"|date:"g:i A" }}</div>
-        </div>
+<section class="text-center my-4 mx-3">
+    <h1 class="h1 text-primary fw-bold my-2 animate__animated animate__fadeIn" style="animation-duration: 0.2s;">{{ title }}</h1>
+    <h4 class="text-secondary animate__animated animate__fadeIn" style="animation-duration: 0.3s;">{{ month_name }} {{ year }}</h4>
+
+    <div class="text-center nav-links mt-3 animate__animated animate__fadeIn" style="animation-duration: 0.4s;">
+        <a 
+        {% if use_htmx %}
+        hx-get="{{ prev_month_url }}" hx-target="#body_main"
+        {% else %}
+        href="{{ prev_month_url }}"
+        {% endif %}
+        class="me-2" title="previous month">
+            <i class="fa-solid fa-angle-left"></i>
+        </a>
+        <a 
+        {% if use_htmx %}
+        hx-get="{{ today_url }}" hx-target="#body_main"
+        {% else %}
+        href="{{ today_url }}" 
+        {% endif %}
+        class="mx-3 fw-bold" style="text-decoration: none">
+            today
+        </a>
+        <a 
+        {% if use_htmx %}
+        hx-get="{{ next_month_url }}" hx-target="#body_main"
+        {% else %}
+        href="{{ next_month_url }}"
+        {% endif %}
+        class="ms-2" title="next month">
+            <i class="fa-solid fa-angle-right"></i>
+        </a>
     </div>
-{% endfor %}
-</div>
-    
+</section>
+
+<section class="text-center m-3 animate__animated animate__fadeIn" style="animation-duration: 0.5s;">
+    <ul class="list-group p-2 mx-auto dynamic-height">
+        {% for event in event_list %}
+            <div class="m-2 list-group-item shadow-sm hover-grow hover-bg-light"
+                hx-get="{% url event_detail_url event.pk %}"
+                hx-target="#modal_wrapper"
+                data-bs-toggle="modal"
+                data-bs-target="#modal_wrapper"
+            >
+                <div class="d-flex align-items-center">
+                    <div class="text-center fs-5 fw-bold text-secondary me-3">
+                        {{ event.start_datetime|timezone:"America/Los_Angeles"|date:"M" }}<br/>
+                        {{ event.start_datetime|timezone:"America/Los_Angeles"|date:"j" }}
+                    </div>
+                    <div class="ms-2 text-start">
+                        <div class="fw-bold text-primary mb-1">{{ event.name }}</div>
+                        <div class="text-secondary" style="font-size: smaller;">{{ event.start_datetime|timezone:"America/Los_Angeles"|date:"g:i A" }} - {{ event.end_datetime|timezone:"America/Los_Angeles"|date:"g:i A" }}</div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </ul>
+</section>
