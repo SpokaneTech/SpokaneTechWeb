@@ -1,13 +1,73 @@
-<section class="text-center my-5 mx-3">
+<style>
+    .scroll-wrapper {
+        position: relative;
+    }
+
+    .scroll-container {
+        overflow-x: auto;
+        scroll-behavior: smooth;
+        padding: 1rem 2.5rem;
+        scrollbar-color: rgba(var(--bs-primary-rgb), 0.25) transparent;
+        scrollbar-width: thin;
+    }
+
+    .scroll-container::-webkit-scrollbar {
+        height: 8px;
+    }
+
+    .scroll-container::-webkit-scrollbar-thumb {
+        background-color: var(--bs-primary);
+        border-radius: 4px;
+    }
+
+    .scroll-container::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .scroll-row {
+        display: flex;
+        gap: 2rem;
+        flex-wrap: nowrap;
+    }
+
+    .scroll-card {
+        flex: 0 0 auto;
+        width: 400px;
+    }
+
+    .scroll-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 1;
+        width: 40px;
+        height: 40px;
+        border: none;
+        background-color: var(--bs-primary);
+        color: white;
+        border-radius: 0.375rem;
+    }
+
+    .scroll-btn.left {
+        left: 0;
+        opacity: 0.5;
+    }
+
+    .scroll-btn.right {
+        right: 0;
+        opacity: 0.5;
+    }
+</style>
+
+<section class="text-center mt-5 mx-3">
     <h1 class="text-primary fw-bold animate__animated animate__fadeIn" style="animation-duration: 0.2s;">Develop With Us</h1>
-    <div class="py-2">
+    <div class="p-3">
         <p class="animate__animated animate__fadeIn" style="animation-duration: 0.3s;">
             <span class="fw-bold text-primary">SpokaneTech.org</span> is not just a website, it's a community driven initiative to foster development, knowledge sharing, and collaboration. 
             Whether you are a seasoned developer, new to the industry, of just a hobbyist, your involvement is welcome.
         </p>
     </div>
-
-    <div class="py-2">
+    <div class="p-3">
         <h2 class="animate__animated animate__fadeIn h1 text-primary fw-bold" style="animation-duration: 0.4s;">Contribute</h1>
         <p class="animate__animated animate__fadeIn" style="animation-duration: 0.5s;">
             We are always looking for contributors to help improve the site. If you have experience with Python, Django, front-end development, databases, devops, (or would like to learn) we would be thrilled to have you on board. <br/>
@@ -15,16 +75,69 @@
             <a href="https://github.com/SpokaneTech/SpokaneTechWeb" target="_blank" class="hvr-grow">https://github.com/SpokaneTech/SpokaneTechWeb</a>
         </p>
     </div>
-
-    <div class="py-2">
+    <div class="p-3">
         <h2 class="animate__animated animate__fadeIn h1 text-primary fw-bold" style="animation-duration: 0.6s;">Follow Development</h1>
         <p class="animate__animated animate__fadeIn" style="animation-duration: 0.7s;">
             We strive to document each phase of development through detailed blog posts, giving you insight into the site's progress and the reasoning behind key decisions. 
-            <br/>
-            Follow along on: 
-            <a href="https://dev.to/spokanetech/building-spokanetechorg-3h18" target="_blank" class="hvr-grow">Dev.to</a>, or 
-            <a href="https://medium.com/@dbslusser/spokane-tech-introduction-0ccf3762112d" target="_blank" class="hvr-grow">Medium</a>.
         </p>
-    </div>
 
+    </div>
 </section>
+
+<section class="text-center mb-5">
+    <div class="scroll-wrapper animate__animated animate__fadeIn" style="animation-duration: 0.8s;">
+        <!-- Scroll Buttons -->
+        <button class="scroll-btn left" id="scrollLeft" aria-label="Scroll left">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        <button class="scroll-btn right" id="scrollRight" aria-label="Scroll right">
+            <i class="fas fa-chevron-right"></i>
+        </button>
+
+        <!-- Scrollable Cards -->
+        <div class="scroll-container" id="cardScrollContainer">
+            <div class="scroll-row" id="blogposts_list_wrapper" 
+                hx-get="{% url 'blogs:blog_posts' %}"
+                hx-trigger="load" 
+                hx-target="#blogposts_list_wrapper" 
+                hx-swap="innerHTML">
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    // Scroll functionality
+    const scrollContainer = document.getElementById("cardScrollContainer");
+    document.getElementById("scrollLeft").addEventListener("click", () => {
+        scrollContainer.scrollBy({ left: -320, behavior: 'smooth' });
+    });
+    document.getElementById("scrollRight").addEventListener("click", () => {
+        scrollContainer.scrollBy({ left: 320, behavior: 'smooth' });
+    });
+
+    // Equal height sync
+    function setEqualHeights() {
+        const cards = document.querySelectorAll('.scroll-card');
+        let maxHeight = 0;
+
+        // Reset all card heights to auto before calculating
+        cards.forEach(card => {
+            card.style.height = 'auto';
+        });
+
+        // Find tallest
+        cards.forEach(card => {
+            const height = card.offsetHeight;
+            if (height > maxHeight) maxHeight = height;
+        });
+
+        // Set all to tallest height
+        cards.forEach(card => {
+            card.style.height = `${maxHeight}px`;
+        });
+    }
+
+    window.addEventListener('load', setEqualHeights);
+    window.addEventListener('resize', setEqualHeights);
+</script>

@@ -1,0 +1,13 @@
+{% for row in queryset %}
+<div class="card scroll-card shadow">
+    <div class="card-body d-flex flex-column">
+        <h4 class="card-title fw-bold text-primary mb-3">{{ row.title }}</h4>
+        <p class="card-text mb-4">
+            {{ row.description}}
+        </p>
+        <div class="mt-auto">
+            <a href="{{ row.url }}" target="_blank" class="mt-2 btn btn-primary w-100">View Article</a>
+        </div>
+    </div>
+</div>
+{% endfor %}
