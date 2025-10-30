@@ -1,4 +1,4 @@
-from blogs.models import BlogPlatform, BlogSeries, BlogPost
+from blogs.models import BlogPlatform, BlogPost, BlogSeries
 
 
 def create_blog_platforms() -> None:

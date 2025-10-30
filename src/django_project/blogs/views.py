@@ -1,9 +1,8 @@
+from blogs.models import BlogPost
 from django.db.models.manager import BaseManager
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.views import View
-
-from blogs.models import BlogPost
 
 
 class BlogPostListView(View):
