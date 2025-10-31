@@ -30,6 +30,7 @@ urlpatterns: list = [
     path("host/", HostView.as_view(), name="host"),
     # app URLs
     path("", include("web.urls", namespace="web")),
+    path("blogs/", include("blogs.urls", namespace="blogs")),
 ]
 
 if settings.DEBUG:

@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     "handyhelpers",
     # project apps
     "web",
+    "blogs",
 ]
 
 
