@@ -149,7 +149,7 @@ def create_blog_posts() -> None:
             "url": "https://dbslusser.medium.com/building-spokane-tech-part-6-6a80e0d65f6e",
             "author": "Spokane Tech Team",
             "series": "Building SpokaneTech",
-            "tags": ["Data Collection", "Scraping", "Playwright", "BeautifulSoup"],
+            "tags": ["Data Collection", "Scraping", "Playwright"],
         },
         # part 7: scheduling tasks
         {
