@@ -98,13 +98,15 @@
         <div class="scroll-container" id="cardScrollContainer">
             <div class="scroll-row" id="blogposts_list_wrapper" 
                 hx-get="{% url 'blogs:blog_posts' %}"
-                hx-trigger="load" 
-                hx-target="#blogposts_list_wrapper" 
-                hx-swap="innerHTML">
+                hx-trigger="load"
+                hx-target="#blogposts_list_wrapper"
+                hx-swap="innerHTML"
+                hx-push-url="false">
             </div>
         </div>
     </div>
 </section>
+
 
 <script>
     // Scroll functionality
@@ -115,29 +117,4 @@
     document.getElementById("scrollRight").addEventListener("click", () => {
         scrollContainer.scrollBy({ left: 320, behavior: 'smooth' });
     });
-
-    // Equal height sync
-    function setEqualHeights() {
-        const cards = document.querySelectorAll('.scroll-card');
-        let maxHeight = 0;
-
-        // Reset all card heights to auto before calculating
-        cards.forEach(card => {
-            card.style.height = 'auto';
-        });
-
-        // Find tallest
-        cards.forEach(card => {
-            const height = card.offsetHeight;
-            if (height > maxHeight) maxHeight = height;
-        });
-
-        // Set all to tallest height
-        cards.forEach(card => {
-            card.style.height = `${maxHeight}px`;
-        });
-    }
-
-    window.addEventListener('load', setEqualHeights);
-    window.addEventListener('resize', setEqualHeights);
 </script>
