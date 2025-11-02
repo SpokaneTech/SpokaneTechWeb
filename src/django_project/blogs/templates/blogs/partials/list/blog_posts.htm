@@ -1,13 +1,32 @@
+<style>
+.blog-card {
+    height: 14rem;
+    transform: scale(1);
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), 
+                box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.blog-card:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.16);
+    background-color: var(--light);
+    transform: scale(1.02);
+}
+</style>
+
 {% for row in queryset %}
-<div class="card scroll-card shadow">
-    <div class="card-body d-flex flex-column">
-        <h4 class="card-title fw-bold text-primary mb-3">{{ row.title }}</h4>
-        <p class="card-text mb-4">
-            {{ row.description}}
-        </p>
-        <div class="mt-auto">
-            <a href="{{ row.url }}" target="_blank" class="mt-2 btn btn-primary w-100">View Article</a>
+<a href="{{ row.url }}" target="_blank">
+    <div class="card blog-card scroll-card shadow">
+        <div class="card-body d-flex flex-column">
+            <h4 class="card-title fw-bold text-primary mb-3">{{ row.title }}</h4>
+            <p class="card-text mb-4" style="font-size: small;">
+                {{ row.description }}
+            </p>
+            <div class="mt-auto">
+                {% for tag in row.tags.all %}
+                <span class="badge m-1" style="color: var(--bs-primary-text-emphasis); background-color: var(--bs-primary-bg-subtle); border-radius: 0.75rem;">{{ tag.value }}</span>
+                {% endfor %}
+            </div>
         </div>
     </div>
-</div>
+</a>
 {% endfor %}
