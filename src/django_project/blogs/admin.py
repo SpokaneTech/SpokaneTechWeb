@@ -1,7 +1,6 @@
 # import models
-from django.contrib import admin
-
 from blogs.models import BlogPlatform, BlogPost, BlogSeries, BlogTag
+from django.contrib import admin
 
 
 class BlogPlatformAdmin(admin.ModelAdmin):
