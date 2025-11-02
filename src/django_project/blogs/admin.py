@@ -1,5 +1,5 @@
 # import models
-from blogs.models import BlogPlatform, BlogPost, BlogSeries
+from blogs.models import BlogPlatform, BlogPost, BlogSeries, BlogTag
 from django.contrib import admin
 
 
@@ -32,7 +32,14 @@ class BlogPostAdmin(admin.ModelAdmin):
     list_filter: list[str] = ["platform", "series"]
 
 
+class BlogTagAdmin(admin.ModelAdmin):
+    list_display: list[str] = ["id", "created_at", "updated_at", "value"]
+    search_fields: list[str] = ["id", "value"]
+    list_filter: list = []
+
+
 # register models
 admin.site.register(BlogPlatform, BlogPlatformAdmin)
 admin.site.register(BlogSeries, BlogSeriesAdmin)
 admin.site.register(BlogPost, BlogPostAdmin)
+admin.site.register(BlogTag, BlogTagAdmin)
