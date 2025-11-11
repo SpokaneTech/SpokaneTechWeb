@@ -11,7 +11,6 @@ from celery import shared_task
 from django.conf import settings
 from django.db.models.manager import BaseManager
 from django.utils import timezone
-
 from web.models import Event, Link, Tag, TechGroup
 from web.utilities.dt_utils import convert_to_pacific
 from web.utilities.notifiers.discord import DiscordNotifier
