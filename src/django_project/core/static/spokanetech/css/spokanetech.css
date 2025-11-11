@@ -200,15 +200,6 @@ body {
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0); }
 
-  /* Make all links have no underline by default */
-  a,
-  a:link,
-  a:visited,
-  a:hover,
-  a:focus {
-    text-decoration: none !important;
-  }
-
 hr {
   margin: 1rem 0;
   color: inherit;
@@ -10430,6 +10421,13 @@ body {
   flex-direction: column;
   min-height: 100vh; }
 
+a {
+  text-decoration: none !important; }
+
+a:hover,
+a:focus {
+  text-decoration: none !important; }
+
 footer {
   margin-top: auto;
   width: 100%;
@@ -10445,11 +10443,7 @@ footer {
   color: var(--light);
   background: linear-gradient(135deg, rgba(0, 76, 138, 0.92) 0%, rgba(0, 12, 32, 0.92) 100%), url("/static/spokanetech/img/hero.jpg") center/cover no-repeat;
   background-attachment: fixed;
-  width: 100vw;
-  left: 50%;
-  right: 50%;
-  margin-left: -50vw;
-  margin-right: -50vw;
+  width: 100%;
   position: relative;
   padding-top: 5rem;
   padding-bottom: 5rem; }

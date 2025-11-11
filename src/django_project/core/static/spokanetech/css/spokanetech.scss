@@ -108,6 +108,16 @@ body {
   min-height: 100vh;
 }
 
+// Remove underlines from all links
+a {
+  text-decoration: none !important;
+}
+
+a:hover,
+a:focus {
+  text-decoration: none !important;
+}
+
 footer {
   margin-top: auto;
   width: 100%;
@@ -126,11 +136,7 @@ footer {
     background: linear-gradient(135deg, rgba(0, 76, 138, 0.92) 0%, rgba(0, 12, 32, 0.92) 100%),
                 url('/static/spokanetech/img/hero.jpg') center/cover no-repeat;
     background-attachment: fixed;
-    width: 100vw;
-    left: 50%;
-    right: 50%;
-    margin-left: -50vw;
-    margin-right: -50vw;
+    width: 100%;
     position: relative;
     padding-top: 5rem;
     padding-bottom: 5rem;
