@@ -134,8 +134,7 @@ def get_event_links(url: str) -> list:
     """
     page_content: str | None = fetch_content_with_playwright(f"{url}/events/?type=upcoming")
     if page_content:
-        event_url_prefix: str = url.rstrip("/") + "/events/"
-        event_urls: list[Any] = re.findall(rf'"eventUrl":"({re.escape(event_url_prefix)}\d+/)"', page_content)
+        event_urls: list[Any] = re.findall(r'"eventUrl":"(https://www\.meetup\.com/[^/]+/events/\d+/)"', page_content)
         return [url for url in event_urls]
     return []
 
