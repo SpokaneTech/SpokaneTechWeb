@@ -5,49 +5,51 @@
     </div>
 </section>
 
-<section class="m-5 animate__fadeIn" style="animation-duration: 0.3s;">
-    <div style="align-items:center; gap:0.5rem; margin-bottom:0.5rem; width:100%;">
-        <h4 class="mb-0 fw-bold text-primary" style="margin:0;">About</h4>
-        <hr style="flex:1; border:none; height:1px; background-color:var(--bs-primary); margin-top:0.25rem;" />
-    </div>
-    <div style="width:100%; height:240px; max-height:240px; overflow-y:auto; padding:1rem; border-radius:6px; box-sizing:border-box; scrollbar-width:thin; scrollbar-color:rgba(var(--bs-primary-rgb), 0.25) transparent;">
-        <div class="about-content">
-            {% if object.description %}
-            {{ object.description|safe }}
-            {% else %}
-            <i>No description</i>
-            {% endif %}
+<div style="display:flex; flex-direction:column; min-height:20vh;">
+    <section id="about_section" class="mx-5 my-3 animate__fadeIn" style="animation-duration: 0.3s; flex:1; min-height:240px;">
+        <div style="align-items:center; gap:0.5rem; margin-bottom:0.5rem; width:100%;">
+            <h4 class="mb-0 fw-bold text-primary" style="margin:0;">About</h4>
+            <hr style="flex:1; border:none; height:1px; background-color:var(--bs-primary); margin-top:0.25rem;" />
         </div>
-    </div>
-</section>
+        <div style="width:100%; height:100%; overflow-y:auto; padding:1rem; border-radius:6px; box-sizing:border-box; scrollbar-width:thin; scrollbar-color:rgba(var(--bs-primary-rgb), 0.25) transparent;">
+            <div class="about-content">
+                {% if object.description %}
+                {{ object.description|safe }}
+                {% else %}
+                <i>No description</i>
+                {% endif %}
+            </div>
+        </div>
+    </section>
 
-<section class="m-5 animate__fadeIn" style="animation-duration: 0.4s;">
-    <div class="row">
-        <div class="col-md-6 mb-4 mb-sm-5">
-            <h4 class="mb-0 fw-bold text-primary">Upcoming Events</h4>
-            <hr class="w-100 border-0" style="height: 1px; background-color: var(--bs-primary); margin-top: 0.25rem;" />
-            <div id="upcoming-events-{{ object.id }}">
-                {% with object.get_upcoming_events as queryset %}
-                {% if queryset %}
-                    {% include "web/partials/li/events.htm" %}
-                {% else %}
-                <i>No upcoming events</i>
-                {% endif %}
-                {% endwith %}
+    <section id="events_section" class="mx-5 my-3 animate__fadeIn" style="animation-duration: 0.4s; flex:0 0 25%;">
+        <div class="row">
+            <div class="col-md-6 mb-5 mb-md-0">
+                <h4 class="mb-0 fw-bold text-primary">Upcoming Events</h4>
+                <hr class="w-100 border-0" style="height: 1px; background-color: var(--bs-primary); margin-top: 0.25rem;" />
+                <div id="upcoming-events-{{ object.id }}">
+                    {% with object.get_upcoming_events as queryset %}
+                    {% if queryset %}
+                        {% include "web/partials/li/events.htm" %}
+                    {% else %}
+                    <i>No upcoming events</i>
+                    {% endif %}
+                    {% endwith %}
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <h4 class="mb-0 fw-bold text-primary">Past Events</h4>
+                <hr class="w-100 border-0" style="height: 1px; background-color: var(--bs-primary); margin-top: 0.25rem;" />
+                <div id="past-events-{{ object.id }}">
+                    {% with object.get_past_events as queryset %}
+                    {% if queryset %}
+                        {% include "web/partials/li/events.htm" %}
+                    {% else %}
+                    <i>No past events</i>
+                    {% endif %}
+                    {% endwith %}
+                </div>
             </div>
         </div>
-        <div class="col-md-6 mb-4">
-            <h4 class="mb-0 fw-bold text-primary">Past Events</h4>
-            <hr class="w-100 border-0" style="height: 1px; background-color: var(--bs-primary); margin-top: 0.25rem;" />
-            <div id="past-events-{{ object.id }}">
-                {% with object.get_past_events as queryset %}
-                {% if queryset %}
-                    {% include "web/partials/li/events.htm" %}
-                {% else %}
-                <i>No past events</i>
-                {% endif %}
-                {% endwith %}
-            </div>
-        </div>
-    </div>
-</section>
+    </section>
+</div>
