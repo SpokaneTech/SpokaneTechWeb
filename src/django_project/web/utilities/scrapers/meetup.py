@@ -5,6 +5,7 @@ from typing import Any
 
 from bs4 import BeautifulSoup, Tag
 from bs4.element import AttributeValueList, NavigableString, PageElement
+
 from web.utilities.html_utils import fetch_content, fetch_content_with_playwright
 
 
@@ -65,7 +66,9 @@ def get_event_information(url: str) -> dict:
         event_info["name"] = soup.find("h1", class_="ds2-b32 text-ds2-text-fill-primary-enabled lg:ds2-b48")
         if event_info["name"]:
             event_info["name"] = event_info["name"].text
-        description_div: PageElement | Tag | NavigableString | None = soup.find("div", class_="break-words")
+        description_div: PageElement | Tag | NavigableString | None = soup.find(
+            "div", class_="w-full break-words transition-all duration-300 line-clamp-[15]"
+        )
         if description_div:
             if isinstance(description_div, Tag):  # Type check for Tag
                 event_info["description"] = "".join(str(child) for child in description_div.children)
