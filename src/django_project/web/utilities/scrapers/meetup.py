@@ -5,7 +5,6 @@ from typing import Any
 
 from bs4 import BeautifulSoup, Tag
 from bs4.element import AttributeValueList, NavigableString, PageElement
-
 from web.utilities.html_utils import fetch_content, fetch_content_with_playwright
 
 
