@@ -14,4 +14,4 @@ jobs:
           pip install -e .[dev]
       - name: Run fawltydeps
         run: |
-          fawltydeps src/django_project
+          fawltydeps
