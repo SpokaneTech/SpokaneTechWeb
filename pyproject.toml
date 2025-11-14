@@ -15,7 +15,6 @@ dependencies = [
     "psycopg2-binary",
     "redis",
     "requests>=2.26.0",
-    "pillow",
     "playwright",
     "whitenoise",
     ]
@@ -35,6 +34,7 @@ dev = [
     "coveralls",
     "django-debug-toolbar",
     "faker",
+    "fawltydeps",
     "isort",
     "model-bakery",
     "mypy",
@@ -116,6 +116,43 @@ exclude = [
     "src/django_project/*/scripts", 
     "src/django_project/*/local_test"
     ]
+
+
+[tool.fawltydeps]
+code = ["src/django_project"]
+deps = ["pyproject.toml"]
+ignore_unused = [
+    "bandit",
+    "black",
+    "coveralls",
+    "django-braces",
+    "django-celery-beat",
+    "django-debug-toolbar",
+    "django-extensions",
+    "django-filter",
+    "gunicorn",
+    "faker",
+    "fawltydeps",
+    "flower",
+    "isort",
+    "model-bakery",
+    "mypy",
+    "mypy-extensions",
+    "ruff",
+    "pillow",
+    "psycopg2-binary",
+    "pytest",
+    "pytest-cov",
+    "pytest-django",
+    "radon",
+    "redis",
+    "safety",
+    "types-python-dateutil",
+    "types-requests",
+    "typing_extensions",
+    "whitenoise"
+    ]
+output_format = "human_detailed"
 
 
 [tool.setuptools.packages.find]

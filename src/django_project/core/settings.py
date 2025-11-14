@@ -55,7 +55,6 @@ INSTALLED_APPS = [
     # third party apps
     "django_celery_beat",
     "django_extensions",
-    "django_filters",
     "handyhelpers",
     # project apps
     "web",

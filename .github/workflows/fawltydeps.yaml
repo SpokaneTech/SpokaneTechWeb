@@ -1,0 +1,17 @@
+on: [push]
+
+jobs:
+  fawltydeps:
+    runs-on: ubuntu-latest
+    name: "fawltydeps"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: |
+          pip install fawltydeps
+      - name: Run fawltydeps
+        run: |
+          fawltydeps src/django_project
