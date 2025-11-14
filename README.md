@@ -13,8 +13,10 @@ https://spokanetech.github.io/blog/building-spokane-tech/intro/
 | Workflow | Description             | Status                                                                       |
 |----------|-------------------------|------------------------------------------------------------------------------|
 |Bandit|security checks|![Bandit](https://github.com/SpokaneTech/SpokaneTechWeb/actions/workflows/bandit.yaml/badge.svg)|
+|FawltyDeps|dependency checks|![FawltyDeps](https://github.com/SpokaneTech/SpokaneTechWeb/actions/workflows/fawltydeps.yaml/badge.svg)|
 |Isort|python import ordering|![Isort](https://github.com/SpokaneTech/SpokaneTechWeb/actions/workflows/isort.yaml/badge.svg)|
 |Mypy|static type checking|![Mypy](https://github.com/SpokaneTech/SpokaneTechWeb/actions/workflows/mypy.yaml/badge.svg)|
+|PyTest|unittest execution|![Pytest](https://github.com/SpokaneTech/SpokaneTechWeb/actions/workflows/pytest.yaml/badge.svg)|
 |Radon|code complexity analysis|![Radon](https://github.com/SpokaneTech/SpokaneTechWeb/actions/workflows/radon.yaml/badge.svg)|
 |Ruff Format|code formatting|![Format](https://github.com/SpokaneTech/SpokaneTechWeb/actions/workflows/ruff_format.yaml/badge.svg)|
 |Ruff Lint|static code analysis|![Lint](https://github.com/SpokaneTech/SpokaneTechWeb/actions/workflows/ruff_lint.yaml/badge.svg)|
