@@ -15,7 +15,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -e .[dev]
+          pip install -e .
 
       - name: Run Django check
         env:
