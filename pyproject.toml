@@ -12,7 +12,7 @@ dependencies = [
     "django-filter==25.1",
     "django-handyhelpers",
     "flower",
-    "pillow",
+    "Pillow",
     "psycopg2-binary",
     "redis",
     "requests>=2.26.0",
