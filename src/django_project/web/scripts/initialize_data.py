@@ -64,6 +64,12 @@ def create_groups() -> None:
             "platform page": "https://www.eventbrite.com/o/intellitect-114361599431",
         },
         {
+            "name": "Spokane ISSA",
+            "icon": """<i class="fa-solid fa-user-secret"></i>""",
+            "platform": "Eventbrite",
+            "platform page": "https://www.eventbrite.com/o/spokane-issa-120762885954",
+        },
+        {
             "name": "Greater Spokane Inc",
             "icon": """<i class="fa-solid fa-city"></i>""",
             "platform": "Other",
