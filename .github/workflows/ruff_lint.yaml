@@ -1,4 +1,9 @@
-on: [push]
+name: Static Code Analysis (ruff)
+
+on:
+  push:
+    branches-ignore:
+      - main
 
 jobs:
   ruff:

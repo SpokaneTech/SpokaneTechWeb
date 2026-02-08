@@ -1,4 +1,8 @@
-on: [push]
+name: Dependency Consistency Check (fawltydeps)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
 
 jobs:
   fawltydeps:
