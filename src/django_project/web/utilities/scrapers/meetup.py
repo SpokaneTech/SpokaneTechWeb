@@ -5,6 +5,7 @@ from typing import Any
 
 from bs4 import BeautifulSoup, Tag
 from bs4.element import AttributeValueList, NavigableString, PageElement
+
 from web.utilities.html_utils import fetch_content, fetch_content_with_playwright
 
 
@@ -150,7 +151,9 @@ def get_event_information(url: str) -> dict:
         if match:
             location_name = match.group(1)
         if not location_name:
-            online_p = soup.find("p", class_="ds2-k16 text-ds2-text-fill-primary-enabled", string="Online event")
+            online_p = soup.find(
+                "p", attrs={"class": "ds2-k16 text-ds2-text-fill-primary-enabled"}, string="Online event"
+            )
             if online_p:
                 location_name = "Online event"
         event_info["location_name"] = location_name
