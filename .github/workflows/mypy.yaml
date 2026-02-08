@@ -1,4 +1,9 @@
-on: [push]
+name: Type Checking (mypy)
+
+on:
+  push:
+    branches-ignore:
+      - main
 
 jobs:
   mypy:

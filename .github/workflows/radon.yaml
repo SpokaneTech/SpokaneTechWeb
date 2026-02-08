@@ -1,4 +1,9 @@
-on: [push]
+name: Code Metrics Analysis (radon)
+
+on:
+  push:
+    branches-ignore:
+      - main
 
 jobs:
   radon:

@@ -1,4 +1,8 @@
-on: [push]
+name: Unittest Execution (pytest)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
 
 jobs:
   pytest:

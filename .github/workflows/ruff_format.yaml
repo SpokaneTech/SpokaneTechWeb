@@ -1,4 +1,9 @@
-on: [push]
+name: Code Consistency Check (ruff format)
+
+on:
+  push:
+    branches-ignore:
+      - main
 
 jobs:
   ruff:

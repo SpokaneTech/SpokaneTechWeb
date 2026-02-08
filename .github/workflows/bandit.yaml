@@ -1,4 +1,9 @@
-on: [push]
+name: Security Analysis (bandit)
+
+on:
+  push:
+    branches-ignore:
+      - main
 
 jobs:
   bandit:

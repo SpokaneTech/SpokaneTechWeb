@@ -1,4 +1,9 @@
-on: [push]
+name: Import Order Validation (isort)
+
+on:
+  push:
+    branches-ignore:
+      - main
 
 jobs:
   isort:

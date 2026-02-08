@@ -1,0 +1,31 @@
+name: Django Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  django-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: |
+          pip install -e .
+
+      - name: Run Django check
+        env:
+          DJANGO_SETTINGS_MODULE: core.settings
+          DB_ENGINE: django.db.backends.sqlite3
+          DB_NAME: test_db.sqlite3
+          SECRET_KEY: test_secret_key
+          DJANGO_DEBUG: False
+        run: |
+          cd src/django_project
+          python manage.py check
