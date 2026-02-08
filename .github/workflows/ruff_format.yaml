@@ -16,4 +16,4 @@ jobs:
         with:
             src: "src/django_project"
             command: ruff format src --check
-            python_version: "3.11"
+            python_version: "3.13"

@@ -16,3 +16,4 @@ jobs:
           src: "src"
           options: "-v"
           pip_install_command: "pip install -e .[dev]"
+          python_version: "3.13"

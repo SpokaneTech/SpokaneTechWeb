@@ -16,4 +16,4 @@ jobs:
           src: "src"
           options: "-c pyproject.toml -r"
           pip_install_command: "pip install .[dev]"
-          python_version: "3.11"
+          python_version: "3.13"

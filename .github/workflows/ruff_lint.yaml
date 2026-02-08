@@ -16,4 +16,4 @@ jobs:
         with:
             src: "src/django_project"
             options: "-v"
-            python_version: "3.11"
+            python_version: "3.13"
