@@ -13,7 +13,7 @@ def get_end_datetime(datetime_string: str, time_string: str) -> datetime | None:
 
     Args:
         datetime_string (str): string representation of a datetime; example: '2025-01-06T07:00:00-08:00'
-        time_string (str): string representation of a time; example: '8:00 AM   PST'
+        time_string (str): string representation of a time; example: '7:00 PM PST'
 
     Returns:
         datetime: datetime object with timezone information
@@ -28,9 +28,21 @@ def get_end_datetime(datetime_string: str, time_string: str) -> datetime | None:
         offset = timedelta(hours=offset_hours, minutes=offset_minutes)
         tz = timezone(offset)
 
-        # Parse the time string
-        time_part: str = time_string.split("   ")[0].strip()  # Get the time part
-        time_obj: datetime = datetime.strptime(time_part.replace("  ", ""), "%I:%M %p")  # Parse 12-hour format
+        # Parse the time string using regex to extract the time part
+        match = re.search(r"(\d{1,2}):(\d{2})\s*([aApP][mM])", time_string)
+        if not match:
+            return None
+        hour = int(match.group(1))
+        minute = int(match.group(2))
+        period = match.group(3).upper()
+
+        # Convert 12-hour format to 24-hour format
+        if period == "PM" and hour != 12:
+            hour += 12
+        elif period == "AM" and hour == 12:
+            hour = 0
+
+        time_obj = datetime.min.replace(hour=hour, minute=minute)
 
         # Combine date and time into a new datetime object
         combined_datetime: datetime = datetime.combine(datetime.strptime(date_part, "%Y-%m-%d").date(), time_obj.time())
@@ -72,25 +84,78 @@ def get_event_information(url: str) -> dict:
             if isinstance(description_div, Tag):  # Type check for Tag
                 event_info["description"] = "".join(str(child) for child in description_div.children)
 
-        time_element: PageElement | Tag | NavigableString | None = soup.find("time")
+        time_element: PageElement | Tag | NavigableString | None = soup.find("time", class_="block")
         if time_element:
             if isinstance(time_element, Tag):  # Check if time_element is a Tag
                 start_time_string: str | AttributeValueList | None = time_element.get("datetime", None)
                 time_text: str = time_element.get_text(separator=" ").strip()
-                end_time_string: str = time_text.split(" to ")[-1]
 
                 if start_time_string:
                     if isinstance(start_time_string, str):  # Check if start_time_string is a str
-                        event_info["start_datetime"] = datetime.fromisoformat(start_time_string)
-                        event_info["end_datetime"] = get_end_datetime(start_time_string, end_time_string)
+                        start_dt = datetime.fromisoformat(start_time_string)
+                        event_info["start_datetime"] = start_dt
+
+                        # Parse duration from the time text which shows times in UTC
+                        # Format: "Friday, Feb 13 · 2:00 AM to 3:00 AM UTC"
+                        # We calculate the duration and add it to start_dt to preserve timezone
+                        if " to " in time_text:
+                            time_parts = time_text.split(" to ")
+                            if len(time_parts) == 2:
+                                # Extract start time from text (in UTC)
+                                start_match = re.search(r"(\d{1,2}):(\d{2})\s*([APap][Mm])", time_parts[0])
+                                # Extract end time from text (in UTC)
+                                end_match = re.search(r"(\d{1,2}):(\d{2})\s*([APap][Mm])", time_parts[1])
+
+                                if start_match and end_match:
+                                    # Parse start time (UTC)
+                                    start_hour = int(start_match.group(1))
+                                    start_minute = int(start_match.group(2))
+                                    start_period = start_match.group(3).upper()
+                                    if start_period == "PM" and start_hour != 12:
+                                        start_hour += 12
+                                    elif start_period == "AM" and start_hour == 12:
+                                        start_hour = 0
+
+                                    # Parse end time (UTC)
+                                    end_hour = int(end_match.group(1))
+                                    end_minute = int(end_match.group(2))
+                                    end_period = end_match.group(3).upper()
+                                    if end_period == "PM" and end_hour != 12:
+                                        end_hour += 12
+                                    elif end_period == "AM" and end_hour == 12:
+                                        end_hour = 0
+
+                                    # Calculate duration in minutes
+                                    start_minutes = start_hour * 60 + start_minute
+                                    end_minutes = end_hour * 60 + end_minute
+
+                                    # Handle overnight events
+                                    if end_minutes <= start_minutes:
+                                        end_minutes += 24 * 60
+
+                                    duration_minutes = end_minutes - start_minutes
+
+                                    # Add duration to start_dt to get end_dt in the same timezone
+                                    end_dt = start_dt + timedelta(minutes=duration_minutes)
+                                    event_info["end_datetime"] = end_dt
+                                else:
+                                    event_info["end_datetime"] = None
+                            else:
+                                event_info["end_datetime"] = None
+                        else:
+                            event_info["end_datetime"] = None
 
         location_name: str | Any = None
         match = re.search(r'"__typename":"Venue","id":"\d+","name":"([^"]+)"', page_content)
         if match:
             location_name = match.group(1)
+        if not location_name:
+            online_p = soup.find("p", class_="ds2-k16 text-ds2-text-fill-primary-enabled", string="Online event")
+            if online_p:
+                location_name = "Online event"
         event_info["location_name"] = location_name
 
-        location_address: str | Any = None
+        location_address: str = ""
         address_match: re.Match[str] | None = re.search(
             r'"__typename":"Venue","id":"\d+","name":"[^"]+","address":"([^"]+)","city":"([^"]+)","state":"([^"]+)","country":"([^"]+)"',
             page_content,
@@ -103,7 +168,7 @@ def get_event_information(url: str) -> dict:
             location_address = f"{street}, {city}, {state}, {country.upper()}"
         event_info["location_address"] = location_address
 
-        map_link: str | Any = None
+        map_link: str = ""
         map_link_match: re.Match[str] | None = re.search(
             r'<a[^>]*data-testid="map-link"[^>]*href="([^"]+)"', page_content
         )

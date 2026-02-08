@@ -9,6 +9,7 @@ jobs:
   bandit:
     runs-on: ubuntu-latest
     name: "bandit"
+    if: github.event.created == false  # Skip if this push created a new branch
     steps:
       - uses: davidslusser/actions_python_bandit@v1.0.1
         with:

@@ -9,6 +9,7 @@ jobs:
   radon:
     runs-on: ubuntu-latest
     name: "radon"
+    if: github.event.created == false  # Skip if this push created a new branch
     steps:
       - uses: actions/checkout@v3
       - uses: davidslusser/actions_python_radon@v1.0.0
