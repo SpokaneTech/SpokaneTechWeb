@@ -9,9 +9,11 @@ jobs:
   mypy:
     runs-on: ubuntu-latest
     name: "mypy"
+    if: github.event.created == false  # Skip if this push created a new branch
     steps:
       - uses: davidslusser/actions_python_mypy@v1.0.1
         with:
           src: "src"
-          options: "-v"
+          options: ""
           pip_install_command: "pip install -e .[dev]"
+          python_version: "3.13"

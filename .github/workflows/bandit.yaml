@@ -9,10 +9,11 @@ jobs:
   bandit:
     runs-on: ubuntu-latest
     name: "bandit"
+    if: github.event.created == false  # Skip if this push created a new branch
     steps:
       - uses: davidslusser/actions_python_bandit@v1.0.1
         with:
           src: "src"
           options: "-c pyproject.toml -r"
           pip_install_command: "pip install .[dev]"
-          python_version: "3.11"
+          python_version: "3.13"
