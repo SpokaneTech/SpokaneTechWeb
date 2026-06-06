@@ -20,11 +20,13 @@ class Event(HandyHelperBaseModel):
     location_name = models.CharField(
         max_length=64,
         blank=True,
+        null=True,
         help_text="name of location where this event is being hosted",
     )
     location_address = models.CharField(
         max_length=256,
         blank=True,
+        null=True,
         help_text="address of location where this event is being hosted",
     )
     map_link = models.URLField(
