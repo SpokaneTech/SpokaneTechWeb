@@ -14,8 +14,9 @@
                         <span class="text-secondary" style="font-size: 75%;">{{ row.group.name }}</span>
                     </div>
                     <div class="col-12 col-sm-4 mb-1 text-secondary text-start text-sm-end">
-                        {{ row.location_name }}<br/>
+                        {% if row.location_address %}{{ row.location_name }}<br/>
                         <span class="text-muted" style="font-size: 75%;">{{ row.location_address }}</span>
+                        {% endif %}
                     </div>
                 </div>
             </li>

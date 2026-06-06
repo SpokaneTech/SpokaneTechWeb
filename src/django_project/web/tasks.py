@@ -100,6 +100,9 @@ def ingest_future_meetup_events(group_pk) -> str:
             event_info = get_event_information(event_link)
             event_info["group"] = group
             if event_info:
+                event_info.setdefault("location_name", "")
+                event_info.setdefault("location_address", "")
+                event_info.setdefault("map_link", "")
                 if not event_info.get("name", None):
                     logging.error(f"error parsing name for event hosted by {group.name}; data = {event_info}")
                     continue

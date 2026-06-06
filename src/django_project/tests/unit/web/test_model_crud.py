@@ -93,6 +93,17 @@ class EventTests(TestCase):
         self.assertEqual(getattr(row, "location_address"), updated_value)
         self.assertNotEqual(getattr(row, "location_address"), original_value)
 
+    def test_create_without_location(self):
+        """verify event can be created without location fields"""
+        row = self.model.objects.create(
+            name="Locationless event",
+            start_datetime="2026-06-24T00:00:00Z",
+            location_name=None,
+            location_address=None,
+        )
+        self.assertIsNone(row.location_name)
+        self.assertIsNone(row.location_address)
+
     def test_update_location_name(self):
         """verify location_name (CharField) can be updated"""
         row = self.bake()
