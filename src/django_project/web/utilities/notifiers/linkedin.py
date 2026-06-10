@@ -96,7 +96,9 @@ class LinkedInOrganizationClient:
         if state:
             query_params["state"] = state
 
-        prepared_request = requests.Request("GET", self.authorization_url, params=query_params).prepare()
+        prepared_request: requests.PreparedRequest = requests.Request(
+            "GET", self.authorization_url, params=query_params
+        ).prepare()
         if prepared_request.url is None:
             raise ValueError("LinkedIn authorization URL could not be generated.")
         return prepared_request.url
