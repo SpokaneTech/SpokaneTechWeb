@@ -206,14 +206,22 @@ def post_event_to_linkedin(event_pk: int, is_new: bool) -> str:
     if not event:
         return f"Event with pk {event_pk} not found."
 
-    # Ensure LinkedIn API credentials are set
-    if not settings.LINKEDIN_ACCESS_TOKEN or not settings.LINKEDIN_ORGANIZATION_URN:
+    if not settings.LINKEDIN_ORGANIZATION_URN:
+        return "LinkedIn organization URN not configured in settings. Skipping post."
+
+    if not settings.LINKEDIN_ACCESS_TOKEN and not (
+        settings.LINKEDIN_REFRESH_TOKEN and settings.LINKEDIN_CLIENT_ID and settings.LINKEDIN_CLIENT_SECRET
+    ):
         return "LinkedIn API credentials not configured in settings. Skipping post."
 
     # Initialize LinkedIn client
     linkedin_client = LinkedInOrganizationClient(
         access_token=settings.LINKEDIN_ACCESS_TOKEN,
         organization_urn=settings.LINKEDIN_ORGANIZATION_URN,
+        client_id=settings.LINKEDIN_CLIENT_ID,
+        client_secret=settings.LINKEDIN_CLIENT_SECRET,
+        refresh_token=settings.LINKEDIN_REFRESH_TOKEN,
+        env_path=getattr(settings, "ENV_PATH", None),
     )
 
     linkedin_client.post_event(

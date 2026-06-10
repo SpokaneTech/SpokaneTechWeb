@@ -1,3 +1,4 @@
+from django.http import HttpRequest, HttpResponse
 from django.utils import timezone
 from handyhelpers.views.calendar import HtmxCalendarView
 from handyhelpers.views.htmx import (
@@ -7,6 +8,43 @@ from handyhelpers.views.htmx import (
     ModelDetailBootstrapModalView,
 )
 from web.models import Event, TechGroup
+
+
+def linkedin_oauth_callback(request: HttpRequest) -> HttpResponse:
+    """Display LinkedIn OAuth callback parameters for manual token exchange flows."""
+    code = request.GET.get("code")
+    state = request.GET.get("state")
+    error = request.GET.get("error")
+    error_description = request.GET.get("error_description")
+
+    if error:
+        body = ["LinkedIn OAuth callback received an error.", "", f"error: {error}"]
+        if error_description:
+            body.append(f"error_description: {error_description}")
+        return HttpResponse("\n".join(body), content_type="text/plain", status=400)
+
+    if not code:
+        return HttpResponse(
+            "LinkedIn OAuth callback did not include a code parameter.",
+            content_type="text/plain",
+            status=400,
+        )
+
+    body = [
+        "LinkedIn OAuth callback received successfully.",
+        "",
+        f"code: {code}",
+    ]
+    if state:
+        body.append(f"state: {state}")
+    body.extend(
+        [
+            "",
+            "Use this code with:",
+            "python manage.py linkedin_oauth --redirect-uri <this exact callback URL> --code '<code>'",
+        ]
+    )
+    return HttpResponse("\n".join(body), content_type="text/plain")
 
 
 class AboutContentView(HtmxOptionView):
