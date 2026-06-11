@@ -35,3 +35,24 @@ class TestHostView(TestCase):
         """verify call to HostView view"""
         response: HttpResponse = self.client.post(reverse("host"))
         self.assertEqual(response.status_code, 405)
+
+
+class LinkedInOAuthCallbackTests(TestCase):
+    def test_get_with_code(self) -> None:
+        response: HttpResponse = self.client.get(
+            reverse("linkedin_oauth_callback"),
+            {"code": "example-code", "state": "example-state"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["content-type"], "text/plain")
+        self.assertIn("code: example-code", response.content.decode("utf-8"))
+        self.assertIn("state: example-state", response.content.decode("utf-8"))
+
+    def test_get_with_error(self) -> None:
+        response: HttpResponse = self.client.get(
+            reverse("linkedin_oauth_callback"),
+            {"error": "access_denied", "error_description": "user denied"},
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response["content-type"], "text/plain")
+        self.assertIn("error: access_denied", response.content.decode("utf-8"))

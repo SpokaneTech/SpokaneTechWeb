@@ -18,10 +18,12 @@ from core.views import HostView, robots_txt
 from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path
+from web.views import linkedin_oauth_callback
 
 urlpatterns: list = [
     # Django provided URLs
     path("console/", admin.site.urls),
+    path("accounts/oidc/linkedin/login/callback/", linkedin_oauth_callback, name="linkedin_oauth_callback"),
     path("accounts/", include("django.contrib.auth.urls")),
     # 3rd party URLs
     path("handyhelpers/", include("handyhelpers.urls")),

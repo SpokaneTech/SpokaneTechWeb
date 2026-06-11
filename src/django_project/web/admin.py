@@ -1,7 +1,14 @@
 from django.contrib import admin
 
 # import models
-from web.models import Event, Link, SocialPlatform, Tag, TechGroup
+from web.models import (
+    Event,
+    IntegrationCredential,
+    Link,
+    SocialPlatform,
+    Tag,
+    TechGroup,
+)
 
 
 class TagAdmin(admin.ModelAdmin):
@@ -18,6 +25,18 @@ class SocialPlatformAdmin(admin.ModelAdmin):
     list_display = ["id", "name", "enabled", "base_url", "created_at", "updated_at"]
     search_fields = ["id", "name", "base_url"]
     list_filter = ["enabled"]
+
+
+class IntegrationCredentialAdmin(admin.ModelAdmin):
+    list_display = [
+        "id",
+        "provider",
+        "access_token_expires_at",
+        "refresh_token_expires_at",
+        "created_at",
+        "updated_at",
+    ]
+    search_fields = ["id", "provider"]
 
 
 class TechGroupAdmin(admin.ModelAdmin):
@@ -61,5 +80,6 @@ class EventAdmin(admin.ModelAdmin):
 admin.site.register(Tag, TagAdmin)
 admin.site.register(Link, LinkAdmin)
 admin.site.register(SocialPlatform, SocialPlatformAdmin)
+admin.site.register(IntegrationCredential, IntegrationCredentialAdmin)
 admin.site.register(TechGroup, TechGroupAdmin)
 admin.site.register(Event, EventAdmin)

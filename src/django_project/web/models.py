@@ -81,6 +81,22 @@ class SocialPlatform(HandyHelperBaseModel):
         return self.name
 
 
+class IntegrationCredential(HandyHelperBaseModel):
+    """Stores third-party integration credentials shared across app processes."""
+
+    provider = models.CharField(max_length=64, unique=True)
+    access_token = EncryptedTextField(blank=True, null=True)
+    refresh_token = EncryptedTextField(blank=True, null=True)
+    access_token_expires_at = models.DateTimeField(blank=True, null=True)
+    refresh_token_expires_at = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        ordering = ["provider"]
+
+    def __str__(self) -> str:
+        return self.provider
+
+
 class Tag(HandyHelperBaseModel):
     """A tag that describes attributes of a Event or a TechGroup"""
 

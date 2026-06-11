@@ -11,7 +11,7 @@ from celery import shared_task
 from django.conf import settings
 from django.db.models.manager import BaseManager
 from django.utils import timezone
-from web.models import Event, Link, Tag, TechGroup
+from web.models import Event, IntegrationCredential, Link, Tag, TechGroup
 from web.utilities.dt_utils import convert_to_pacific
 from web.utilities.notifiers.discord import DiscordNotifier
 from web.utilities.notifiers.linkedin import LinkedInOrganizationClient
@@ -206,14 +206,25 @@ def post_event_to_linkedin(event_pk: int, is_new: bool) -> str:
     if not event:
         return f"Event with pk {event_pk} not found."
 
-    # Ensure LinkedIn API credentials are set
-    if not settings.LINKEDIN_ACCESS_TOKEN or not settings.LINKEDIN_ORGANIZATION_URN:
+    linkedin_credential = IntegrationCredential.objects.filter(provider="linkedin").first()
+    access_token = linkedin_credential.access_token if linkedin_credential else settings.LINKEDIN_ACCESS_TOKEN
+    refresh_token = linkedin_credential.refresh_token if linkedin_credential else settings.LINKEDIN_REFRESH_TOKEN
+
+    if not settings.LINKEDIN_ORGANIZATION_URN:
+        return "LinkedIn organization URN not configured in settings. Skipping post."
+
+    if not access_token and not (refresh_token and settings.LINKEDIN_CLIENT_ID and settings.LINKEDIN_CLIENT_SECRET):
         return "LinkedIn API credentials not configured in settings. Skipping post."
 
     # Initialize LinkedIn client
     linkedin_client = LinkedInOrganizationClient(
-        access_token=settings.LINKEDIN_ACCESS_TOKEN,
+        access_token=access_token,
         organization_urn=settings.LINKEDIN_ORGANIZATION_URN,
+        client_id=settings.LINKEDIN_CLIENT_ID,
+        client_secret=settings.LINKEDIN_CLIENT_SECRET,
+        refresh_token=refresh_token,
+        env_path=getattr(settings, "ENV_PATH", None),
+        credential=linkedin_credential,
     )
 
     linkedin_client.post_event(
