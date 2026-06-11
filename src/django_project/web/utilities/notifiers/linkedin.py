@@ -1,11 +1,13 @@
 import json
 import logging
+from datetime import timedelta
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Optional
 
 import requests
 from bs4 import BeautifulSoup
 from django.conf import settings
+from django.db import transaction
 from django.utils import timezone
 from web.utilities.ai.gemini import generate_post_content
 from web.utilities.ai.prompts import (
@@ -30,6 +32,7 @@ class LinkedInOrganizationClient:
         client_secret: Optional[str] = None,
         refresh_token: Optional[str] = None,
         env_path: Optional[str] = None,
+        credential: Optional[Any] = None,
     ) -> None:
         self.access_token = access_token
         self.organization_urn: str = organization_urn
@@ -37,8 +40,9 @@ class LinkedInOrganizationClient:
         self.client_secret = client_secret
         self.refresh_token = refresh_token
         self.env_path = Path(env_path) if env_path else None
+        self.credential = credential
         self.post_url = "https://api.linkedin.com/rest/posts"
-        self.access_token_url = "https://www.linkedin.com/oauth/v2/accessToken"
+        self.access_token_url = "https://www.linkedin.com/oauth/v2/accessToken"  # nosec B105
         self.authorization_url = "https://www.linkedin.com/oauth/v2/authorization"
         self.set_headers()
 
@@ -61,27 +65,15 @@ class LinkedInOrganizationClient:
         self.refresh_access_token()
 
     def refresh_access_token(self) -> None:
+        if self.credential is not None and getattr(self.credential, "pk", None):
+            self._refresh_access_token_with_credential()
+            return
         if not self.can_refresh_access_token():
             raise ValueError("LinkedIn refresh token flow is not fully configured.")
 
-        response = requests.post(
-            self.access_token_url,
-            data={
-                "grant_type": "refresh_token",
-                "refresh_token": self.refresh_token,
-                "client_id": self.client_id,
-                "client_secret": self.client_secret,
-            },
-            headers={"Content-Type": "application/x-www-form-urlencoded"},
-            timeout=15,
-        )
-        response.raise_for_status()
-        token_data = response.json()
-
-        self.access_token = token_data["access_token"]
-        self.refresh_token = token_data.get("refresh_token", self.refresh_token)
-        self.set_headers()
-        self._persist_tokens()
+        token_data = self._request_token_refresh(self.refresh_token)
+        self._apply_token_data(token_data)
+        self._persist_tokens(token_data)
 
     def build_authorization_url(self, redirect_uri: str, scope: str, state: Optional[str] = None) -> str:
         if not self.client_id:
@@ -122,15 +114,72 @@ class LinkedInOrganizationClient:
         response.raise_for_status()
         token_data = response.json()
 
+        self._apply_token_data(token_data)
+        self._persist_tokens(token_data)
+        return token_data
+
+    def _request_token_refresh(self, refresh_token: Optional[str]) -> dict[str, Any]:
+        response = requests.post(
+            self.access_token_url,
+            data={
+                "grant_type": "refresh_token",
+                "refresh_token": refresh_token,
+                "client_id": self.client_id,
+                "client_secret": self.client_secret,
+            },
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+            timeout=15,
+        )
+        response.raise_for_status()
+        return response.json()
+
+    def _apply_token_data(self, token_data: dict[str, Any]) -> None:
         self.access_token = token_data["access_token"]
         self.refresh_token = token_data.get("refresh_token", self.refresh_token)
         self.set_headers()
-        self._persist_tokens()
-        return token_data
 
-    def _persist_tokens(self) -> None:
+    def _refresh_access_token_with_credential(self) -> None:
+        if self.credential is None or getattr(self.credential, "pk", None) is None:
+            raise ValueError("LinkedIn credential record is missing and cannot be refreshed with locking.")
+
+        credential_model = self.credential.__class__
+        with transaction.atomic():
+            locked_credential = credential_model.objects.select_for_update().get(pk=self.credential.pk)
+            self.access_token = locked_credential.access_token
+            self.refresh_token = locked_credential.refresh_token
+            if not self.can_refresh_access_token():
+                raise ValueError("LinkedIn refresh token flow is not fully configured.")
+            token_data = self._request_token_refresh(self.refresh_token)
+            self._apply_token_data(token_data)
+            self.credential = locked_credential
+            self._persist_tokens(token_data)
+
+    def _persist_tokens(self, token_data: Optional[dict[str, Any]] = None) -> None:
         setattr(settings, "LINKEDIN_ACCESS_TOKEN", self.access_token)
         setattr(settings, "LINKEDIN_REFRESH_TOKEN", self.refresh_token)
+
+        if self.credential is not None:
+            self.credential.access_token = self.access_token
+            self.credential.refresh_token = self.refresh_token
+            if token_data:
+                if token_data.get("expires_in") is not None:
+                    self.credential.access_token_expires_at = timezone.now() + timedelta(
+                        seconds=int(token_data["expires_in"])
+                    )
+                if token_data.get("refresh_token_expires_in") is not None:
+                    self.credential.refresh_token_expires_at = timezone.now() + timedelta(
+                        seconds=int(token_data["refresh_token_expires_in"])
+                    )
+            self.credential.save(
+                update_fields=[
+                    "access_token",
+                    "refresh_token",
+                    "access_token_expires_at",
+                    "refresh_token_expires_at",
+                    "updated_at",
+                ]
+            )
+            return
 
         if not self.env_path:
             logger.info("LinkedIn tokens refreshed in memory only; ENV_PATH is not configured.")

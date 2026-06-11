@@ -1,3 +1,4 @@
+from django.apps import apps
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from web.utilities.notifiers.linkedin import LinkedInOrganizationClient
@@ -35,13 +36,17 @@ class Command(BaseCommand):
         if not client_id or not client_secret:
             raise CommandError("LINKEDIN_CLIENT_ID and LINKEDIN_CLIENT_SECRET must be configured.")
 
+        credential_model = apps.get_model("web", "IntegrationCredential")
+        credential, _ = credential_model.objects.get_or_create(provider="linkedin")
+
         client = LinkedInOrganizationClient(
-            access_token=settings.LINKEDIN_ACCESS_TOKEN,
+            access_token=credential.access_token or settings.LINKEDIN_ACCESS_TOKEN,
             organization_urn=settings.LINKEDIN_ORGANIZATION_URN or "",
             client_id=client_id,
             client_secret=client_secret,
-            refresh_token=settings.LINKEDIN_REFRESH_TOKEN,
+            refresh_token=credential.refresh_token or settings.LINKEDIN_REFRESH_TOKEN,
             env_path=env_path,
+            credential=credential,
         )
 
         redirect_uri = options["redirect_uri"]

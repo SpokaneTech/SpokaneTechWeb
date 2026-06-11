@@ -16,6 +16,7 @@ class LinkedInOAuthCommandTests(unittest.TestCase):
         command.stdout = Mock()
 
         with (
+            patch("web.management.commands.linkedin_oauth.apps.get_model") as mock_get_model,
             patch("web.management.commands.linkedin_oauth.settings") as mock_settings,
             patch("web.management.commands.linkedin_oauth.LinkedInOrganizationClient") as mock_client_class,
         ):
@@ -25,6 +26,9 @@ class LinkedInOAuthCommandTests(unittest.TestCase):
             mock_settings.LINKEDIN_ORGANIZATION_URN = "urn:li:organization:107506588"
             mock_settings.LINKEDIN_REFRESH_TOKEN = None
             mock_settings.ENV_PATH = "/tmp/.env.test"
+
+            mock_credential = Mock(access_token=None, refresh_token=None)
+            mock_get_model.return_value.objects.get_or_create.return_value = (mock_credential, True)
 
             mock_client = mock_client_class.return_value
             mock_client.build_authorization_url.return_value = "https://www.linkedin.com/oauth/v2/authorization?x=1"
@@ -39,6 +43,7 @@ class LinkedInOAuthCommandTests(unittest.TestCase):
         command.stdout = Mock()
 
         with (
+            patch("web.management.commands.linkedin_oauth.apps.get_model") as mock_get_model,
             patch("web.management.commands.linkedin_oauth.settings") as mock_settings,
             patch("web.management.commands.linkedin_oauth.LinkedInOrganizationClient") as mock_client_class,
         ):
@@ -48,6 +53,9 @@ class LinkedInOAuthCommandTests(unittest.TestCase):
             mock_settings.LINKEDIN_ORGANIZATION_URN = "urn:li:organization:107506588"
             mock_settings.LINKEDIN_REFRESH_TOKEN = None
             mock_settings.ENV_PATH = "/tmp/.env.test"
+
+            mock_credential = Mock(access_token=None, refresh_token=None)
+            mock_get_model.return_value.objects.get_or_create.return_value = (mock_credential, True)
 
             mock_client = mock_client_class.return_value
             mock_client.exchange_authorization_code.return_value = {
