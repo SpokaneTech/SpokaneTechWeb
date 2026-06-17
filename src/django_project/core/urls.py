@@ -23,7 +23,6 @@ from web.views import linkedin_oauth_callback
 urlpatterns: list = [
     # Django provided URLs
     path("console/", admin.site.urls),
-    path("accounts/oidc/linkedin/login/callback/", linkedin_oauth_callback, name="linkedin_oauth_callback"),
     path("accounts/", include("django.contrib.auth.urls")),
     # 3rd party URLs
     path("handyhelpers/", include("handyhelpers.urls")),
@@ -34,6 +33,11 @@ urlpatterns: list = [
     path("", include("web.urls", namespace="web")),
     path("blogs/", include("blogs.urls", namespace="blogs")),
 ]
+
+if settings.DEPLOYMENT_ENV in ["local", "dev"]:
+    urlpatterns.append(
+        path("accounts/oidc/linkedin/login/callback/", linkedin_oauth_callback, name="linkedin_oauth_callback"),
+    )
 
 if settings.DEBUG:
     urlpatterns.append(
