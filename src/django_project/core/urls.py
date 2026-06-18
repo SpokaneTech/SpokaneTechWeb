@@ -18,6 +18,7 @@ from core.views import HostView, robots_txt
 from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path
+from web.views import linkedin_oauth_callback
 
 urlpatterns: list = [
     # Django provided URLs
@@ -32,6 +33,11 @@ urlpatterns: list = [
     path("", include("web.urls", namespace="web")),
     path("blogs/", include("blogs.urls", namespace="blogs")),
 ]
+
+if settings.DEPLOYMENT_ENV in ["local", "dev"]:
+    urlpatterns.append(
+        path("accounts/oidc/linkedin/login/callback/", linkedin_oauth_callback, name="linkedin_oauth_callback"),
+    )
 
 if settings.DEBUG:
     urlpatterns.append(
