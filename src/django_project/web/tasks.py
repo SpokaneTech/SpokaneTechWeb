@@ -133,7 +133,8 @@ def ingest_future_eventbrite_events(group_pk) -> str:
         if event_details:
             location_data: dict[str, Any] = event_details.get("primary_venue") or {}
             tag_data: list[dict[str, Any]] = event_details.get("tags") or []
-            location_address: str = location_data.get("address", {}).get("localized_address_display", "")
+            address_data: dict[str, Any] = location_data.get("address") or {}
+            location_address: str = address_data.get("localized_address_display", "")
 
             event_data: dict[str, Any] = {
                 "group": group,

@@ -49,3 +49,29 @@ class TestIngestFutureEventbriteEvents(TestCase):
         self.assertEqual(event.location_address, "")
         self.assertEqual(event.map_link, "")
         self.assertEqual(list(event.tags.values_list("value", flat=True)), ["Python"])
+
+    @patch("web.tasks.get_event_details")
+    @patch("web.tasks.get_events_for_organization")
+    def test_ingests_event_with_null_primary_venue_address(self, mock_get_events_for_organization, mock_get_event_details):
+        mock_get_events_for_organization.return_value = [
+            {
+                "id": "evt_456",
+                "name": {"text": "Null Address Event"},
+                "description": {"text": "Venue present, address missing."},
+                "url": "https://example.com/events/evt_456",
+                "start": {"utc": "2026-07-11T18:00:00Z"},
+                "end": {"utc": "2026-07-11T19:00:00Z"},
+            }
+        ]
+        mock_get_event_details.return_value = {
+            "primary_venue": {"name": "Online", "address": None},
+            "tags": [],
+        }
+
+        result = ingest_future_eventbrite_events(self.group.pk)
+
+        self.assertEqual(result, f"added 1 new events for {self.group.name}")
+        event = Event.objects.get(social_platform_id="evt_456")
+        self.assertEqual(event.location_name, "Online")
+        self.assertEqual(event.location_address, "")
+        self.assertEqual(event.map_link, "")
