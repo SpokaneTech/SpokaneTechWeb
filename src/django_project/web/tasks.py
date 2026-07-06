@@ -131,8 +131,9 @@ def ingest_future_eventbrite_events(group_pk) -> str:
     for item in event_list:
         event_details: dict = get_event_details(item["id"])
         if event_details:
-            location_data: dict = event_details["primary_venue"]
-            tag_data: list[dict[str, Any]] = event_details["tags"]
+            location_data: dict[str, Any] = event_details.get("primary_venue") or {}
+            tag_data: list[dict[str, Any]] = event_details.get("tags") or []
+            location_address: str = location_data.get("address", {}).get("localized_address_display", "")
 
             event_data: dict[str, Any] = {
                 "group": group,
@@ -142,15 +143,9 @@ def ingest_future_eventbrite_events(group_pk) -> str:
                 "social_platform_id": item.get("id", ""),
                 "start_datetime": item["start"].get("utc", "") if item.get("start") else "",
                 "end_datetime": item["end"].get("utc", "") if item.get("end") else "",
-                "location_name": location_data.get("name", "") if location_data else "",
-                "location_address": (
-                    location_data.get("address", {}).get("localized_address_display", "") if location_data else ""
-                ),
-                "map_link": (
-                    create_google_map_link(location_data.get("address", {}).get("localized_address_display", ""))
-                    if location_data
-                    else ""
-                ),
+                "location_name": location_data.get("name", ""),
+                "location_address": location_address,
+                "map_link": create_google_map_link(location_address) if location_address else "",
             }
 
             event, is_new = Event.objects.update_or_create(
