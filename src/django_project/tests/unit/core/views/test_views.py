@@ -17,9 +17,24 @@ class RobotsTxtTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response["content-type"], "text/plain")
         self.assertTrue(response.content.startswith(b"User-Agent: *\n"))
+        self.assertIn("/sitemap.xml", response.content.decode("utf-8"))
 
     def test_post_disallowed(self) -> None:
         response: HttpResponse = self.client.post("/robots.txt")
+        self.assertEqual(response.status_code, 405)
+
+
+class SitemapXmlTests(TestCase):
+    def test_get(self) -> None:
+        response: HttpResponse = self.client.get(reverse("sitemap"))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["content-type"], "application/xml")
+        content = response.content.decode("utf-8")
+        self.assertIn("<urlset", content)
+        self.assertIn(reverse("web:index"), content)
+
+    def test_post_disallowed(self) -> None:
+        response: HttpResponse = self.client.post(reverse("sitemap"))
         self.assertEqual(response.status_code, 405)
 
 

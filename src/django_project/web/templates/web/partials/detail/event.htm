@@ -6,7 +6,7 @@
     <div>
         {% if object.group %}
         Hosted by:<br/>
-        <a href="#" 
+        <a href="{{ object.group.get_absolute_url }}" 
         hx-get="{{ object.group.get_absolute_url }}" 
         hx-target="#body_main" hx-push-url="{{ object.group.get_absolute_url }}"
         >{{ object.group }}</a> 
@@ -46,5 +46,7 @@
         <span class="tag">{{ tag.value }}</span>
         {% endfor %}
     </div>
-    <div><a href="{{ event.url }}" target="_blank">RSVP here</a></div>
+    {% if object.url %}
+    <div><a href="{{ object.url }}" target="_blank" rel="noopener">RSVP here</a></div>
+    {% endif %}
 </section>

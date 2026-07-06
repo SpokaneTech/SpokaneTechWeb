@@ -84,18 +84,20 @@ class TestIndexView(TestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "web/full/custom/index.html")
+        self.assertContains(response, 'meta name="robots"')
 
     def test_default_htmx(self):
         """verify call to GetIndexContent view via 'default' with a htmx call"""
         response = self.client.get(self.url, **self.headers)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "web/partials/custom/index.htm")
+        self.assertContains(response, f'href="{reverse("web:about")}"')
 
 
 class TestGetTechEventView(TestCase):
     def setUp(self):
         super(TestGetTechEventView, self).setUp()
-        self.instance = baker.make("web.Event")
+        self.instance = baker.make("web.Event", url="https://example.com/rsvp")
         self.headers = dict(HTTP_HX_REQUEST="true")
         self.url = reverse("web:get_event", kwargs={"pk": self.instance.pk})
 
@@ -111,6 +113,7 @@ class TestGetTechEventView(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "web/partials/detail/event.htm")
         self.assertIn(self.instance.name, response.content.decode("utf-8"))
+        self.assertContains(response, 'href="https://example.com/rsvp"')
 
 
 class TestGetTechEventsView(TestCase):
@@ -135,6 +138,7 @@ class TestGetTechEventsView(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "web/partials/li/events.htm")
         self.assertIn(self.instance.name, response.content.decode("utf-8"))
+        self.assertContains(response, f'href="{self.instance.get_absolute_url()}"')
 
     def test_get_htmx_list(self):
         """verify call to GetTechEvents view with a htmx call"""

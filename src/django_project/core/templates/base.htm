@@ -20,7 +20,7 @@
     <meta name="keywords" content="spokane, spokanetech, tech, technology">
     <meta property="og:title" content="Spokane Tech">
     <meta property="og:description" content="Home of the Spokane and Inland Northwest tech community">
-    <meta name="robots" content="noindex, nofollow">
+    <meta name="robots" content="{% if DEPLOYMENT_ENV == 'local' or DEPLOYMENT_ENV == 'dev' %}noindex, nofollow{% else %}index, follow{% endif %}">
 
     <link rel="apple-touch-icon" sizes="180x180" href="{% static 'spokanetech/img/apple-touch-icon.png' %}">
     <link rel="icon" type="image/png" sizes="32x32" href="{% static 'spokanetech/img/favicon-32x32.png' %}">
@@ -37,7 +37,7 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light animate__animated animate__fadeIn" style="animation-duration: 0.1s;">
         <div class="container-fluid mx-2 my-2">
-            <a class="navbar-brand fw-bold text-primary" href="#" hx-get="{% url 'web:index' %}" hx-target="#body_main" hx-push-url="{% url 'web:index' %}" title="SpokaneTech.org home">
+            <a class="navbar-brand fw-bold text-primary" href="{% url 'web:index' %}" hx-get="{% url 'web:index' %}" hx-target="#body_main" hx-push-url="{% url 'web:index' %}" title="SpokaneTech.org home">
                 SpokaneTech
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -45,9 +45,9 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="#" hx-get="{% url 'web:get_events' display='list' %}" hx-target="#body_main" hx-push-url="{% url 'web:get_events' display='list' %}">Events</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#" hx-get="{% url 'web:get_techgroups' display='list' %}" hx-target="#body_main" hx-push-url="{% url 'web:get_techgroups' display='list' %}">Groups</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#" hx-get="{% url 'web:event_calendar' year=0 month=0 %}" hx-target="#body_main" hx-push-url="{% url 'web:event_calendar' year=0 month=0 %}">Calendar</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'web:get_events' display='list' %}" hx-get="{% url 'web:get_events' display='list' %}" hx-target="#body_main" hx-push-url="{% url 'web:get_events' display='list' %}">Events</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'web:get_techgroups' display='list' %}" hx-get="{% url 'web:get_techgroups' display='list' %}" hx-target="#body_main" hx-push-url="{% url 'web:get_techgroups' display='list' %}">Groups</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'web:event_calendar' year=0 month=0 %}" hx-get="{% url 'web:event_calendar' year=0 month=0 %}" hx-target="#body_main" hx-push-url="{% url 'web:event_calendar' year=0 month=0 %}">Calendar</a></li>
                 </ul>
             </div>
         </div>

@@ -14,7 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
-from core.views import HostView, robots_txt
+from core.views import HostView, robots_txt, sitemap_xml
 from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path
@@ -28,6 +28,7 @@ urlpatterns: list = [
     path("handyhelpers/", include("handyhelpers.urls")),
     # Local
     path("robots.txt", robots_txt),
+    path("sitemap.xml", sitemap_xml, name="sitemap"),
     path("host/", HostView.as_view(), name="host"),
     # app URLs
     path("", include("web.urls", namespace="web")),

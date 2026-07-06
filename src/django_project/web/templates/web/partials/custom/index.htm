@@ -6,8 +6,8 @@
             </h1>
             <p class="lead text-light fw-bold fs-4 pb-5 animate__animated animate__fadeIn text-opacity-50" style="animation-duration: 0.3s;">Innovate, Connect, Thrive.</p>
             <div class="d-flex justify-content-center">
-                <button id="hero-btn-1" class="btn btn-primary btn-lg m-2 animate__animated animate__fadeIn" style="animation-duration: 0.4s;" hx-get="{% url 'web:about' %}" hx-target="#body_main" hx-push-url="{% url 'web:about' %}">Learn More</button>
-                <button id="hero-btn-2" class="btn btn-secondary btn-lg m-2 animate__animated animate__fadeIn" style="animation-duration: 0.5s;" hx-get="{% url 'web:develop' %}" hx-target="#body_main" hx-push-url="{% url 'web:develop' %}">Develop with us</button>
+                <a id="hero-btn-1" class="btn btn-primary btn-lg m-2 animate__animated animate__fadeIn" style="animation-duration: 0.4s;" href="{% url 'web:about' %}" hx-get="{% url 'web:about' %}" hx-target="#body_main" hx-push-url="{% url 'web:about' %}">Learn More</a>
+                <a id="hero-btn-2" class="btn btn-secondary btn-lg m-2 animate__animated animate__fadeIn" style="animation-duration: 0.5s;" href="{% url 'web:develop' %}" hx-get="{% url 'web:develop' %}" hx-target="#body_main" hx-push-url="{% url 'web:develop' %}">Develop with us</a>
             </div>
             <script>
             (function(){
