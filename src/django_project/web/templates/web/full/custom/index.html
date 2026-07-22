@@ -1,12 +1,11 @@
 {% extends BASE_TEMPLATE|default:"base.htm" %}
 
+{% block title %}Spokane Tech | Spokane Events, Meetups, and Tech Groups{% endblock title %}
+{% block meta_description %}Discover Spokane tech events, local meetups, community groups, and ways to connect with the Inland Northwest technology community.{% endblock meta_description %}
+{% block meta_keywords %}spokane tech, spokane events, meetups, inland northwest, technology groups{% endblock meta_keywords %}
+
 {% block main_content %}
-    <main 
-        id="body_main" 
-        hx-get="{% url 'web:index' %}" 
-        hx-push-url="{% url 'web:index' %}" 
-        hx-trigger="load" 
-        hx-swap="innerHTML settle:cache" 
-        hx-history-elt="true">
+    <main id="body_main" hx-history-elt="true">
+        {% include "web/partials/custom/index.htm" %}
     </main>
 {% endblock main_content %}

@@ -1,12 +1,10 @@
 {% extends BASE_TEMPLATE|default:"base.htm" %}
 
+{% block title %}Develop With Spokane Tech | Open Source Community Project{% endblock title %}
+{% block meta_description %}Contribute to Spokane Tech, follow project development, and explore community-written articles about building the site.{% endblock meta_description %}
+
 {% block main_content %}
-    <main 
-        id="body_main" 
-        hx-get="{% url 'web:develop' %}" 
-        hx-push-url="{% url 'web:develop' %}" 
-        hx-trigger="load"
-        hx-swap="innerHTML settle:cache" 
-        hx-history-elt="true"> 
+    <main id="body_main" hx-history-elt="true">
+        {% include "web/partials/custom/develop.htm" %}
     </main>
 {% endblock main_content %}

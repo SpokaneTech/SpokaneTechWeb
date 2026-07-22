@@ -1,12 +1,10 @@
 {% extends BASE_TEMPLATE|default:"base.htm" %}
 
+{% block title %}Spokane Tech Event Calendar | Spokane Tech{% endblock title %}
+{% block meta_description %}Browse the Spokane Tech calendar for upcoming meetups, workshops, talks, and networking events.{% endblock meta_description %}
+
 {% block main_content %}
-    <main 
-        id="body_main" 
-        hx-get="{% url 'web:event_calendar' year=0 month=0 %}" 
-        hx-push-url="{% url 'web:event_calendar' year=0 month=0 %}" 
-        hx-trigger="load"
-        hx-swap="innerHTML settle:cache" 
-        hx-history-elt="true">
+    <main id="body_main" hx-history-elt="true">
+        {% include "web/partials/custom/calendar.htm" %}
     </main>
 {% endblock main_content %}

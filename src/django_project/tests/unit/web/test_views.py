@@ -26,6 +26,8 @@ class TestAboutView(TestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "web/full/custom/about.html")
+        self.assertContains(response, "<title>About Spokane Tech | Inland Northwest Tech Community</title>", html=True)
+        self.assertContains(response, "About SpokaneTech.org")
 
     def test_get_htmx(self):
         """verify call to GetAboutContent view with a htmx call"""
@@ -46,6 +48,7 @@ class TestCalendarView(TestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "web/full/custom/calendar.html")
+        self.assertContains(response, "<title>Spokane Tech Event Calendar | Spokane Tech</title>", html=True)
 
     def test_get_htmx(self):
         """verify call to EventCalendarView view with a htmx call"""
@@ -65,6 +68,8 @@ class TestDevelopView(TestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "web/full/custom/develop.html")
+        self.assertContains(response, "<title>Develop With Spokane Tech | Open Source Community Project</title>", html=True)
+        self.assertContains(response, "Develop With Us")
 
     def test_get_htmx(self):
         """verify call to DevelopContentView view with a htmx call"""
@@ -85,6 +90,8 @@ class TestIndexView(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "web/full/custom/index.html")
         self.assertContains(response, 'meta name="robots"')
+        self.assertContains(response, "<title>Spokane Tech | Spokane Events, Meetups, and Tech Groups</title>", html=True)
+        self.assertContains(response, "Upcoming Events")
 
     def test_default_htmx(self):
         """verify call to GetIndexContent view via 'default' with a htmx call"""
@@ -106,6 +113,8 @@ class TestGetTechEventView(TestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "web/full/detail/event.html")
+        self.assertContains(response, self.instance.name)
+        self.assertContains(response, '"@type": "Event"')
 
     def test_get_htmx(self):
         """verify call to GetTechEvent view with a htmx call"""
@@ -130,6 +139,8 @@ class TestGetTechEventsView(TestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "web/full/list/events.html")
+        self.assertContains(response, "<title>Upcoming Spokane Tech Events | Spokane Tech</title>", html=True)
+        self.assertContains(response, self.instance.name)
 
     def test_get_htmx_index(self):
         """verify call to GetTechEvents view with a htmx call"""
@@ -176,6 +187,8 @@ class TestGetTechGroupView(TestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "web/full/detail/group.html")
+        self.assertContains(response, self.instance.name)
+        self.assertContains(response, '"@type": "Organization"')
 
     def test_get_htmx(self):
         """verify call to GetTechGroup view with a htmx call"""
@@ -197,6 +210,8 @@ class TestGetTechGroupsView(TestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "web/full/list/groups.html")
+        self.assertContains(response, "<title>Spokane Tech Groups | Inland Northwest Meetups and Communities</title>", html=True)
+        self.assertContains(response, self.instance.name)
 
     def test_get_htmx_index(self):
         """verify call to GetTechGroups view with a htmx call"""

@@ -1,7 +1,12 @@
 {% extends BASE_TEMPLATE|default:"base.htm" %}
 
+{% block title %}Spokane Tech Groups | Inland Northwest Meetups and Communities{% endblock title %}
+{% block meta_description %}Explore Spokane-area tech groups, communities, and meetup organizers across the Inland Northwest.{% endblock meta_description %}
+{% block meta_keywords %}spokane tech groups, meetups, community, inland northwest, technology{% endblock meta_keywords %}
+
 {% block main_content %}
-    <main id="body_main" hx-get="{% url 'web:get_techgroups' display='list' %}" hx-push-url="{% url 'web:get_techgroups' display='list' %}" hx-trigger="load"> 
+    <main id="body_main" hx-history-elt="true">
+        {% include "web/partials/list/groups.htm" %}
     </main>  
 {% endblock main_content %}
 

@@ -1,7 +1,12 @@
 {% extends BASE_TEMPLATE|default:"base.htm" %}
 
+{% block title %}Upcoming Spokane Tech Events | Spokane Tech{% endblock title %}
+{% block meta_description %}Browse upcoming Spokane-area tech events, including meetups, talks, workshops, and networking sessions.{% endblock meta_description %}
+{% block meta_keywords %}spokane events, tech meetup, workshops, networking, inland northwest{% endblock meta_keywords %}
+
 {% block main_content %}
-    <main id="body_main" hx-get="{% url 'web:get_events' display='list' %}" hx-push-url="{% url 'web:get_events' display='list' %}" hx-trigger="load"> 
+    <main id="body_main" hx-history-elt="true">
+        {% include "web/partials/list/events.htm" %}
     </main>    
 {% endblock main_content %}
 

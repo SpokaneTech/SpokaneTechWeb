@@ -54,13 +54,14 @@
             <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
                 {% for row in queryset %}
                 <div class="col">
-                    <div class="event-card h-100"
+                    <a class="event-card h-100 text-decoration-none"
+                         href="{% url 'web:get_techgroup' row.pk %}"
                          hx-get="{% url 'web:get_techgroup' row.pk %}"
                          hx-target="#body_main"
                          hx-push-url="{% url 'web:get_techgroup' row.pk %}">
                         <div class="icon">{{ row.icon|safe }}</div>
                         <div class="title">{{ row.name }}</div>
-                    </div>
+                    </a>
                 </div>
                 {% endfor %}
             </div>

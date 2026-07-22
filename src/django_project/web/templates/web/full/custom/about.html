@@ -1,12 +1,10 @@
 {% extends BASE_TEMPLATE|default:"base.htm" %}
 
+{% block title %}About Spokane Tech | Inland Northwest Tech Community{% endblock title %}
+{% block meta_description %}Learn about Spokane Tech, a community hub for Inland Northwest tech events, meetups, workshops, and collaboration.{% endblock meta_description %}
+
 {% block main_content %}
-    <main 
-        id="body_main" 
-        hx-get="{% url 'web:about' %}" 
-        hx-push-url="{% url 'web:about' %}" 
-        hx-trigger="load"
-        hx-swap="innerHTML settle:cache" 
-        hx-history-elt="true"> 
+    <main id="body_main" hx-history-elt="true">
+        {% include "web/partials/custom/about.htm" %}
     </main>
 {% endblock main_content %}
