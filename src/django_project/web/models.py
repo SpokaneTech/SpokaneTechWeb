@@ -2,8 +2,9 @@ from __future__ import annotations
 
 from django.db import models
 from django.urls import reverse
-from encrypted_fields.fields import EncryptedTextField
 from handyhelpers.models import HandyHelperBaseModel
+
+from encrypted_fields.fields import EncryptedTextField
 
 
 class Event(HandyHelperBaseModel):
