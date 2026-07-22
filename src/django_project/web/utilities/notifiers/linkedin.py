@@ -33,6 +33,7 @@ class LinkedInOrganizationClient:
         refresh_token: Optional[str] = None,
         env_path: Optional[str] = None,
         credential: Optional[Any] = None,
+        api_version: Optional[str] = None,
     ) -> None:
         self.access_token = access_token
         self.organization_urn: str = organization_urn
@@ -41,6 +42,9 @@ class LinkedInOrganizationClient:
         self.refresh_token = refresh_token
         self.env_path = Path(env_path) if env_path else None
         self.credential = credential
+        self.api_version = api_version or getattr(settings, "LINKEDIN_API_VERSION", "") or timezone.now().strftime(
+            "%Y%m"
+        )
         self.post_url = "https://api.linkedin.com/rest/posts"
         self.access_token_url = "https://www.linkedin.com/oauth/v2/accessToken"  # nosec B105
         self.authorization_url = "https://www.linkedin.com/oauth/v2/authorization"
@@ -50,7 +54,7 @@ class LinkedInOrganizationClient:
         self.headers: dict[str, str] = {
             "Authorization": f"Bearer {self.access_token}",
             "Content-Type": "application/json",
-            "LinkedIn-Version": "202506",
+            "Linkedin-Version": self.api_version,
             "X-Restli-Protocol-Version": "2.0.0",
         }
 
