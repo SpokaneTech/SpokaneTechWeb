@@ -1,11 +1,12 @@
 import time
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import requests
 from bs4 import BeautifulSoup, Tag
 from bs4.element import NavigableString, PageElement
-from playwright.sync_api import sync_playwright
-from playwright.sync_api._generated import Browser, BrowserContext, Page
+
+if TYPE_CHECKING:
+    from playwright.sync_api._generated import Browser, BrowserContext, Page
 
 
 def fetch_content(url, timeout=30) -> bytes | Any:
@@ -31,6 +32,11 @@ def fetch_content(url, timeout=30) -> bytes | Any:
 
 def fetch_content_with_playwright(url, retries=3, timeout=30000) -> str:
     """Fetch HTML content from a URL using Playwright"""
+    try:
+        from playwright.sync_api import sync_playwright
+    except ModuleNotFoundError as exc:
+        raise RuntimeError("Playwright is required for fetch_content_with_playwright but is not installed.") from exc
+
     attempt = 0
     while attempt < retries:
         try:

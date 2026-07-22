@@ -1,5 +1,6 @@
-import encrypted_fields.fields
 from django.db import migrations, models
+
+import encrypted_fields.fields
 
 
 class Migration(migrations.Migration):

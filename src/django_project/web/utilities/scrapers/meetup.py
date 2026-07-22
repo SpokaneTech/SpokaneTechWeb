@@ -4,7 +4,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from bs4 import BeautifulSoup, Tag
-from bs4.element import AttributeValueList, NavigableString, PageElement
+from bs4.element import NavigableString, PageElement
 from web.utilities.html_utils import fetch_content, fetch_content_with_playwright
 
 
@@ -87,7 +87,7 @@ def get_event_information(url: str) -> dict:
         time_element: PageElement | Tag | NavigableString | None = soup.find("time", class_="block")
         if time_element:
             if isinstance(time_element, Tag):  # Check if time_element is a Tag
-                start_time_string: str | AttributeValueList | None = time_element.get("datetime", None)
+                start_time_string: Any = time_element.get("datetime", None)
                 time_text: str = time_element.get_text(separator=" ").strip()
 
                 if start_time_string:
