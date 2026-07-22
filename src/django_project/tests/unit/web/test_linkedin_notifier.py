@@ -108,23 +108,21 @@ class LinkedInOrganizationClientTests(unittest.TestCase):
         self.assertEqual(mock_post.call_count, 3)
 
     def test_uses_configured_api_version_header(self):
-        with patch("web.utilities.notifiers.linkedin.settings") as mock_settings:
-            mock_settings.LINKEDIN_API_VERSION = "202607"
+        with patch("web.utilities.notifiers.linkedin.settings.LINKEDIN_API_VERSION", "202607", create=True):
             client = self.build_client()
 
-        self.assertEqual(client.headers["Linkedin-Version"], "202607")
+        self.assertEqual(client.headers["LinkedIn-Version"], "202607")
 
     def test_defaults_api_version_header_to_current_year_month(self):
         frozen_now = datetime(2026, 7, 22, tzinfo=UTC)
 
         with (
-            patch("web.utilities.notifiers.linkedin.settings") as mock_settings,
+            patch("web.utilities.notifiers.linkedin.settings.LINKEDIN_API_VERSION", "", create=True),
             patch("web.utilities.notifiers.linkedin.timezone.now", return_value=frozen_now),
         ):
-            mock_settings.LINKEDIN_API_VERSION = ""
             client = self.build_client()
 
-        self.assertEqual(client.headers["Linkedin-Version"], "202607")
+        self.assertEqual(client.headers["LinkedIn-Version"], "202607")
 
     def test_refresh_access_token_updates_db_credential_when_present(self):
         credential = DummyCredential()
