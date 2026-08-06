@@ -114,7 +114,7 @@ class LinkedInOrganizationClientTests(unittest.TestCase):
         self.assertEqual(client.headers["LinkedIn-Version"], "202607")
 
     def test_defaults_api_version_header_to_current_year_month(self):
-        frozen_now = datetime(2026, 7, 22, tzinfo=UTC)
+        frozen_now = datetime(2026, 8, 6, tzinfo=UTC)
 
         with (
             patch("web.utilities.notifiers.linkedin.settings.LINKEDIN_API_VERSION", "", create=True),
@@ -123,6 +123,36 @@ class LinkedInOrganizationClientTests(unittest.TestCase):
             client = self.build_client()
 
         self.assertEqual(client.headers["LinkedIn-Version"], "202607")
+
+    def test_post_retries_once_after_default_version_426(self):
+        future_version_response = Mock(status_code=426)
+        future_version_response.raise_for_status.side_effect = requests.HTTPError(response=future_version_response)  # type: ignore[name-defined]
+        future_version_response.json.return_value = {
+            "error": "Unsupported API version",
+            "message": "The API version you are using has been sunset. Please upgrade to a supported version.",
+        }
+
+        success_response = Mock(status_code=201)
+        success_response.raise_for_status.return_value = None
+
+        frozen_now = datetime(2026, 8, 6, tzinfo=UTC)
+
+        with (
+            patch("web.utilities.notifiers.linkedin.settings.LINKEDIN_API_VERSION", "", create=True),
+            patch("web.utilities.notifiers.linkedin.timezone.now", return_value=frozen_now),
+            patch(
+                "web.utilities.notifiers.linkedin.requests.post",
+                side_effect=[future_version_response, success_response],
+            ) as mock_post,
+        ):
+            client = self.build_client()
+            client.api_version = "202608"
+            client.set_headers()
+            response = client.post_organization_post("hello world")
+
+        self.assertIs(response, success_response)
+        self.assertEqual(client.headers["LinkedIn-Version"], "202607")
+        self.assertEqual(mock_post.call_count, 2)
 
     def test_refresh_access_token_updates_db_credential_when_present(self):
         credential = DummyCredential()

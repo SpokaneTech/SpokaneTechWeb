@@ -42,13 +42,17 @@ class LinkedInOrganizationClient:
         self.refresh_token = refresh_token
         self.env_path = Path(env_path) if env_path else None
         self.credential = credential
-        self.api_version = (
-            api_version or getattr(settings, "LINKEDIN_API_VERSION", "") or timezone.now().strftime("%Y%m")
-        )
+        configured_api_version = api_version or getattr(settings, "LINKEDIN_API_VERSION", "")
+        self.api_version = configured_api_version or self._default_api_version()
+        self.uses_default_api_version = not configured_api_version
         self.post_url = "https://api.linkedin.com/rest/posts"
         self.access_token_url = "https://www.linkedin.com/oauth/v2/accessToken"  # nosec B105
         self.authorization_url = "https://www.linkedin.com/oauth/v2/authorization"
         self.set_headers()
+
+    def _default_api_version(self) -> str:
+        previous_month = (timezone.now().replace(day=1) - timedelta(days=1)).strftime("%Y%m")
+        return previous_month
 
     def set_headers(self) -> None:
         self.headers: dict[str, str] = {
@@ -57,6 +61,19 @@ class LinkedInOrganizationClient:
             "LinkedIn-Version": self.api_version,
             "X-Restli-Protocol-Version": "2.0.0",
         }
+
+    def _is_version_failure(self, response: Optional[requests.Response]) -> bool:
+        if response is None or response.status_code != 426:
+            return False
+        try:
+            response_json = response.json()
+        except ValueError:
+            return False
+        message_parts = [
+            str(response_json.get("message", "")),
+            str(response_json.get("error", "")),
+        ]
+        return "version" in " ".join(message_parts).lower()
 
     def can_refresh_access_token(self) -> bool:
         return bool(self.refresh_token and self.client_id and self.client_secret)
@@ -246,14 +263,28 @@ class LinkedInOrganizationClient:
             response.raise_for_status()
             return response
         except requests.HTTPError:
-            if not self._is_auth_failure(response) or not self.can_refresh_access_token():
-                raise
+            if self._is_auth_failure(response) and self.can_refresh_access_token():
+                logger.info("LinkedIn post received %s; refreshing access token and retrying once.", response.status_code)
+                self.refresh_access_token()
+                retry_response = requests.post(self.post_url, headers=self.headers, data=payload_json, timeout=15)
+                retry_response.raise_for_status()
+                return retry_response
 
-        logger.info("LinkedIn post received %s; refreshing access token and retrying once.", response.status_code)
-        self.refresh_access_token()
-        retry_response = requests.post(self.post_url, headers=self.headers, data=payload_json, timeout=15)
-        retry_response.raise_for_status()
-        return retry_response
+            if self.uses_default_api_version and self._is_version_failure(response):
+                fallback_version = self._default_api_version()
+                if fallback_version != self.api_version:
+                    logger.info(
+                        "LinkedIn post received 426 for version %s; retrying once with fallback version %s.",
+                        self.api_version,
+                        fallback_version,
+                    )
+                    self.api_version = fallback_version
+                    self.set_headers()
+                    retry_response = requests.post(self.post_url, headers=self.headers, data=payload_json, timeout=15)
+                    retry_response.raise_for_status()
+                    return retry_response
+
+            raise
 
     def build_event_commentary(
         self,
