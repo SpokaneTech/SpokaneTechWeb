@@ -107,6 +107,22 @@ class LinkedInOrganizationClientTests(unittest.TestCase):
         self.assertEqual(client.access_token, "new-token")
         self.assertEqual(mock_post.call_count, 3)
 
+    def test_post_does_not_retry_after_forbidden_response(self):
+        client = self.build_client()
+
+        forbidden_response = Mock(status_code=403)
+        forbidden_response.raise_for_status.side_effect = requests.HTTPError(response=forbidden_response)  # type: ignore[name-defined]
+
+        with (
+            patch("web.utilities.notifiers.linkedin.requests.post", return_value=forbidden_response) as mock_post,
+            patch("web.utilities.notifiers.linkedin.settings"),
+            self.assertRaises(requests.HTTPError),
+        ):
+            client.post_organization_post("hello world")
+
+        self.assertEqual(client.access_token, "old-token")
+        self.assertEqual(mock_post.call_count, 1)
+
     def test_uses_configured_api_version_header(self):
         with patch("web.utilities.notifiers.linkedin.settings.LINKEDIN_API_VERSION", "202607", create=True):
             client = self.build_client()
@@ -125,9 +141,11 @@ class LinkedInOrganizationClientTests(unittest.TestCase):
         self.assertEqual(client.headers["LinkedIn-Version"], "202607")
 
     def test_post_retries_once_after_default_version_426(self):
-        future_version_response = Mock(status_code=426)
-        future_version_response.raise_for_status.side_effect = requests.HTTPError(response=future_version_response)  # type: ignore[name-defined]
-        future_version_response.json.return_value = {
+        unsupported_version_response = Mock(status_code=426)
+        unsupported_version_response.raise_for_status.side_effect = requests.HTTPError(  # type: ignore[name-defined]
+            response=unsupported_version_response
+        )
+        unsupported_version_response.json.return_value = {
             "error": "Unsupported API version",
             "message": "The API version you are using has been sunset. Please upgrade to a supported version.",
         }
@@ -142,16 +160,14 @@ class LinkedInOrganizationClientTests(unittest.TestCase):
             patch("web.utilities.notifiers.linkedin.timezone.now", return_value=frozen_now),
             patch(
                 "web.utilities.notifiers.linkedin.requests.post",
-                side_effect=[future_version_response, success_response],
+                side_effect=[unsupported_version_response, success_response],
             ) as mock_post,
         ):
             client = self.build_client()
-            client.api_version = "202608"
-            client.set_headers()
             response = client.post_organization_post("hello world")
 
         self.assertIs(response, success_response)
-        self.assertEqual(client.headers["LinkedIn-Version"], "202607")
+        self.assertEqual(client.headers["LinkedIn-Version"], "202606")
         self.assertEqual(mock_post.call_count, 2)
 
     def test_refresh_access_token_updates_db_credential_when_present(self):

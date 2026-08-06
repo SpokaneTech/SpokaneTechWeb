@@ -54,6 +54,13 @@ class LinkedInOrganizationClient:
         previous_month = (timezone.now().replace(day=1) - timedelta(days=1)).strftime("%Y%m")
         return previous_month
 
+    def _previous_api_version(self, api_version: str) -> str:
+        year = int(api_version[:4])
+        month = int(api_version[4:])
+        if month == 1:
+            return f"{year - 1}12"
+        return f"{year}{month - 1:02d}"
+
     def set_headers(self) -> None:
         self.headers: dict[str, str] = {
             "Authorization": f"Bearer {self.access_token}",
@@ -226,10 +233,10 @@ class LinkedInOrganizationClient:
 
         self.env_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
-    def _is_auth_failure(self, response: Optional[requests.Response]) -> bool:
+    def _is_retryable_token_failure(self, response: Optional[requests.Response]) -> bool:
         if response is None:
             return False
-        return response.status_code in {401, 403}
+        return response.status_code == 401
 
     def post_organization_post(
         self,
@@ -263,26 +270,27 @@ class LinkedInOrganizationClient:
             response.raise_for_status()
             return response
         except requests.HTTPError:
-            if self._is_auth_failure(response) and self.can_refresh_access_token():
-                logger.info("LinkedIn post received %s; refreshing access token and retrying once.", response.status_code)
+            if self._is_retryable_token_failure(response) and self.can_refresh_access_token():
+                logger.info(
+                    "LinkedIn post received %s; refreshing access token and retrying once.", response.status_code
+                )
                 self.refresh_access_token()
                 retry_response = requests.post(self.post_url, headers=self.headers, data=payload_json, timeout=15)
                 retry_response.raise_for_status()
                 return retry_response
 
             if self.uses_default_api_version and self._is_version_failure(response):
-                fallback_version = self._default_api_version()
-                if fallback_version != self.api_version:
-                    logger.info(
-                        "LinkedIn post received 426 for version %s; retrying once with fallback version %s.",
-                        self.api_version,
-                        fallback_version,
-                    )
-                    self.api_version = fallback_version
-                    self.set_headers()
-                    retry_response = requests.post(self.post_url, headers=self.headers, data=payload_json, timeout=15)
-                    retry_response.raise_for_status()
-                    return retry_response
+                fallback_version = self._previous_api_version(self.api_version)
+                logger.info(
+                    "LinkedIn post received 426 for version %s; retrying once with fallback version %s.",
+                    self.api_version,
+                    fallback_version,
+                )
+                self.api_version = fallback_version
+                self.set_headers()
+                retry_response = requests.post(self.post_url, headers=self.headers, data=payload_json, timeout=15)
+                retry_response.raise_for_status()
+                return retry_response
 
             raise
 
