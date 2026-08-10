@@ -1,6 +1,7 @@
 from django.apps import apps
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
+
 from web.utilities.notifiers.linkedin import LinkedInOrganizationClient
 
 

@@ -48,7 +48,7 @@ class Event(HandyHelperBaseModel):
     image = models.ImageField(upload_to="tech_events/", blank=True, null=True)
 
     class Meta:
-        ordering = ["start_datetime"]
+        ordering = ("start_datetime",)
 
     def __str__(self) -> str:
         return self.name
@@ -76,7 +76,7 @@ class SocialPlatform(HandyHelperBaseModel):
     base_url = models.URLField(blank=True, help_text="base url of provider")
 
     class Meta:
-        ordering = ["name"]
+        ordering = ("name",)
 
     def __str__(self) -> str:
         return self.name
@@ -92,7 +92,7 @@ class IntegrationCredential(HandyHelperBaseModel):
     refresh_token_expires_at = models.DateTimeField(blank=True, null=True)
 
     class Meta:
-        ordering = ["provider"]
+        ordering = ("provider",)
 
     def __str__(self) -> str:
         return self.provider
@@ -104,7 +104,7 @@ class Tag(HandyHelperBaseModel):
     value = models.CharField(max_length=64, unique=True, null=False)
 
     class Meta:
-        ordering = ["value"]
+        ordering = ("value",)
 
     def __str__(self) -> str:
         return self.value
@@ -128,7 +128,7 @@ class TechGroup(HandyHelperBaseModel):
     discord_webhook_url = EncryptedTextField(blank=True, null=True)
 
     class Meta:
-        ordering = ["name"]
+        ordering = ("name",)
 
     def __str__(self) -> str:
         return self.name

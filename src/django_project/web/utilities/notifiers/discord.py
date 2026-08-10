@@ -1,9 +1,12 @@
+from __future__ import annotations
+
 import json
 from multiprocessing.managers import BaseManager
 from typing import Any
 
 import requests
 from django.utils import timezone
+
 from web.models import Event
 from web.utilities.ai.gemini import generate_post_content
 from web.utilities.ai.prompts import (

@@ -12,41 +12,41 @@ from web.models import (
 
 
 class TagAdmin(admin.ModelAdmin):
-    list_display = ["id", "value", "created_at", "updated_at"]
-    search_fields = ["id", "value"]
+    list_display = ("id", "value", "created_at", "updated_at")
+    search_fields = ("id", "value")
 
 
 class LinkAdmin(admin.ModelAdmin):
-    list_display = ["id", "name", "description", "url", "created_at", "updated_at"]
-    search_fields = ["id", "name", "description", "url"]
+    list_display = ("id", "name", "description", "url", "created_at", "updated_at")
+    search_fields = ("id", "name", "description", "url")
 
 
 class SocialPlatformAdmin(admin.ModelAdmin):
-    list_display = ["id", "name", "enabled", "base_url", "created_at", "updated_at"]
-    search_fields = ["id", "name", "base_url"]
-    list_filter = ["enabled"]
+    list_display = ("id", "name", "enabled", "base_url", "created_at", "updated_at")
+    search_fields = ("id", "name", "base_url")
+    list_filter = ("enabled",)
 
 
 class IntegrationCredentialAdmin(admin.ModelAdmin):
-    list_display = [
+    list_display = (
         "id",
         "provider",
         "access_token_expires_at",
         "refresh_token_expires_at",
         "created_at",
         "updated_at",
-    ]
-    search_fields = ["id", "provider"]
+    )
+    search_fields = ("id", "provider")
 
 
 class TechGroupAdmin(admin.ModelAdmin):
-    list_display = ["id", "name", "description", "enabled", "platform", "icon", "image", "created_at", "updated_at"]
-    search_fields = ["id", "name", "description", "icon", "image"]
-    list_filter = ["enabled", "platform"]
+    list_display = ("id", "name", "description", "enabled", "platform", "icon", "image", "created_at", "updated_at")
+    search_fields = ("id", "name", "description", "icon", "image")
+    list_filter = ("enabled", "platform")
 
 
 class EventAdmin(admin.ModelAdmin):
-    list_display = [
+    list_display = (
         "id",
         "name",
         "description",
@@ -61,8 +61,8 @@ class EventAdmin(admin.ModelAdmin):
         "image",
         "created_at",
         "updated_at",
-    ]
-    search_fields = [
+    )
+    search_fields = (
         "id",
         "name",
         "description",
@@ -72,8 +72,8 @@ class EventAdmin(admin.ModelAdmin):
         "url",
         "social_platform_id",
         "image",
-    ]
-    list_filter = ["group"]
+    )
+    list_filter = ("group",)
 
 
 # register models

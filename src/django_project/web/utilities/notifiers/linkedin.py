@@ -1,14 +1,17 @@
+from __future__ import annotations
+
 import json
 import logging
 from datetime import timedelta
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 import requests
 from bs4 import BeautifulSoup
 from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
+
 from web.utilities.ai.gemini import generate_post_content
 from web.utilities.ai.prompts import (
     create_event_reminder_prompt,
@@ -26,14 +29,14 @@ logger = logging.getLogger(__name__)
 class LinkedInOrganizationClient:
     def __init__(
         self,
-        access_token: Optional[str],
+        access_token: str | None,
         organization_urn: str,
-        client_id: Optional[str] = None,
-        client_secret: Optional[str] = None,
-        refresh_token: Optional[str] = None,
-        env_path: Optional[str] = None,
-        credential: Optional[Any] = None,
-        api_version: Optional[str] = None,
+        client_id: str | None = None,
+        client_secret: str | None = None,
+        refresh_token: str | None = None,
+        env_path: str | None = None,
+        credential: Any | None = None,
+        api_version: str | None = None,
     ) -> None:
         self.access_token = access_token
         self.organization_urn: str = organization_urn
@@ -42,13 +45,24 @@ class LinkedInOrganizationClient:
         self.refresh_token = refresh_token
         self.env_path = Path(env_path) if env_path else None
         self.credential = credential
-        self.api_version = (
-            api_version or getattr(settings, "LINKEDIN_API_VERSION", "") or timezone.now().strftime("%Y%m")
-        )
+        configured_api_version = api_version or getattr(settings, "LINKEDIN_API_VERSION", "")
+        self.api_version = configured_api_version or self._default_api_version()
+        self.uses_default_api_version = not configured_api_version
         self.post_url = "https://api.linkedin.com/rest/posts"
         self.access_token_url = "https://www.linkedin.com/oauth/v2/accessToken"  # nosec B105
         self.authorization_url = "https://www.linkedin.com/oauth/v2/authorization"
         self.set_headers()
+
+    def _default_api_version(self) -> str:
+        previous_month = (timezone.now().replace(day=1) - timedelta(days=1)).strftime("%Y%m")
+        return previous_month
+
+    def _previous_api_version(self, api_version: str) -> str:
+        year = int(api_version[:4])
+        month = int(api_version[4:])
+        if month == 1:
+            return f"{year - 1}12"
+        return f"{year}{month - 1:02d}"
 
     def set_headers(self) -> None:
         self.headers: dict[str, str] = {
@@ -57,6 +71,19 @@ class LinkedInOrganizationClient:
             "LinkedIn-Version": self.api_version,
             "X-Restli-Protocol-Version": "2.0.0",
         }
+
+    def _is_version_failure(self, response: requests.Response | None) -> bool:
+        if response is None or response.status_code != 426:
+            return False
+        try:
+            response_json = response.json()
+        except ValueError:
+            return False
+        message_parts = [
+            str(response_json.get("message", "")),
+            str(response_json.get("error", "")),
+        ]
+        return "version" in " ".join(message_parts).lower()
 
     def can_refresh_access_token(self) -> bool:
         return bool(self.refresh_token and self.client_id and self.client_secret)
@@ -79,7 +106,7 @@ class LinkedInOrganizationClient:
         self._apply_token_data(token_data)
         self._persist_tokens(token_data)
 
-    def build_authorization_url(self, redirect_uri: str, scope: str, state: Optional[str] = None) -> str:
+    def build_authorization_url(self, redirect_uri: str, scope: str, state: str | None = None) -> str:
         if not self.client_id:
             raise ValueError("LinkedIn client ID is required to build the authorization URL.")
 
@@ -122,7 +149,7 @@ class LinkedInOrganizationClient:
         self._persist_tokens(token_data)
         return token_data
 
-    def _request_token_refresh(self, refresh_token: Optional[str]) -> dict[str, Any]:
+    def _request_token_refresh(self, refresh_token: str | None) -> dict[str, Any]:
         response = requests.post(
             self.access_token_url,
             data={
@@ -158,9 +185,9 @@ class LinkedInOrganizationClient:
             self.credential = locked_credential
             self._persist_tokens(token_data)
 
-    def _persist_tokens(self, token_data: Optional[dict[str, Any]] = None) -> None:
-        setattr(settings, "LINKEDIN_ACCESS_TOKEN", self.access_token)
-        setattr(settings, "LINKEDIN_REFRESH_TOKEN", self.refresh_token)
+    def _persist_tokens(self, token_data: dict[str, Any] | None = None) -> None:
+        settings.LINKEDIN_ACCESS_TOKEN = self.access_token
+        settings.LINKEDIN_REFRESH_TOKEN = self.refresh_token
 
         if self.credential is not None:
             self.credential.access_token = self.access_token
@@ -209,17 +236,17 @@ class LinkedInOrganizationClient:
 
         self.env_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
-    def _is_auth_failure(self, response: Optional[requests.Response]) -> bool:
+    def _is_retryable_token_failure(self, response: requests.Response | None) -> bool:
         if response is None:
             return False
-        return response.status_code in {401, 403}
+        return response.status_code == 401
 
     def post_organization_post(
         self,
         commentary: str,
-        article_url: Optional[str] = None,
-        article_title: Optional[str] = None,
-        article_description: Optional[str] = None,
+        article_url: str | None = None,
+        article_title: str | None = None,
+        article_description: str | None = None,
     ) -> requests.Response:
         self.ensure_access_token()
         payload: dict[str, Any] = {
@@ -246,18 +273,33 @@ class LinkedInOrganizationClient:
             response.raise_for_status()
             return response
         except requests.HTTPError:
-            if not self._is_auth_failure(response) or not self.can_refresh_access_token():
-                raise
+            if self._is_retryable_token_failure(response) and self.can_refresh_access_token():
+                logger.info(
+                    "LinkedIn post received %s; refreshing access token and retrying once.", response.status_code
+                )
+                self.refresh_access_token()
+                retry_response = requests.post(self.post_url, headers=self.headers, data=payload_json, timeout=15)
+                retry_response.raise_for_status()
+                return retry_response
 
-        logger.info("LinkedIn post received %s; refreshing access token and retrying once.", response.status_code)
-        self.refresh_access_token()
-        retry_response = requests.post(self.post_url, headers=self.headers, data=payload_json, timeout=15)
-        retry_response.raise_for_status()
-        return retry_response
+            if self.uses_default_api_version and self._is_version_failure(response):
+                fallback_version = self._previous_api_version(self.api_version)
+                logger.info(
+                    "LinkedIn post received 426 for version %s; retrying once with fallback version %s.",
+                    self.api_version,
+                    fallback_version,
+                )
+                self.api_version = fallback_version
+                self.set_headers()
+                retry_response = requests.post(self.post_url, headers=self.headers, data=payload_json, timeout=15)
+                retry_response.raise_for_status()
+                return retry_response
+
+            raise
 
     def build_event_commentary(
         self,
-        event: "Event",
+        event: Event,
         is_new: bool = True,
     ) -> str:
         """
@@ -304,7 +346,7 @@ class LinkedInOrganizationClient:
 
     def post_event(
         self,
-        event: "Event",
+        event: Event,
         is_new: bool = True,
     ) -> requests.Response:
         """

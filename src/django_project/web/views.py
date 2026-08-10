@@ -7,6 +7,7 @@ from handyhelpers.views.htmx import (
     HtmxOptionView,
     ModelDetailBootstrapModalView,
 )
+
 from web.models import Event, TechGroup
 
 

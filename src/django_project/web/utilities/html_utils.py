@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import time
 from typing import TYPE_CHECKING, Any
 
@@ -9,6 +11,14 @@ if TYPE_CHECKING:
     from playwright.sync_api._generated import Browser, BrowserContext, Page
 
 
+class FetchContentError(RuntimeError):
+    pass
+
+
+class TargetNotFoundError(RuntimeError):
+    pass
+
+
 def fetch_content(url, timeout=30) -> bytes | Any:
     """fetch html content from a url using requests
 
@@ -17,7 +27,7 @@ def fetch_content(url, timeout=30) -> bytes | Any:
         timeout (int, optional): timeout in seconds. Defaults to 30.
 
     Raises:
-        Exception: if the response status code is not 200
+        FetchContentError: if the response status code is not 200
 
     Returns:
         str: response text from the url
@@ -27,7 +37,7 @@ def fetch_content(url, timeout=30) -> bytes | Any:
     if response.status_code == 200:
         return response.content
     else:
-        raise Exception(f"Failed to fetch content from {url}: {response.status_code}")
+        raise FetchContentError(f"Failed to fetch content from {url}: {response.status_code}")
 
 
 def fetch_content_with_playwright(url, retries=3, timeout=30000) -> str:
@@ -57,7 +67,7 @@ def fetch_content_with_playwright(url, retries=3, timeout=30000) -> str:
                 html_content: str = page.content()
                 browser.close()
             return html_content
-        except Exception as e:
+        except (RuntimeError, requests.RequestException) as e:
             print(f"Error: {e}. Retrying... ({attempt + 1}/{retries})")
             attempt += 1
             time.sleep(2 + attempt)
@@ -77,7 +87,7 @@ def find_target(
         max_retries (int, optional): max count of retries to attempt. Defaults to 3.
 
     Raises:
-        Exception: if the target element is not found after max_retries
+        TargetNotFoundError: if the target element is not found after max_retries
 
     Returns:
         str: html content of the target element
@@ -94,7 +104,7 @@ def find_target(
         print(f"Retry {retries}/{max_retries}: target_ul not found. Retrying in {1 + retries} seconds...")
         time.sleep(1 + retries)
 
-    raise Exception("target_ul not found after maximum retries")
+    raise TargetNotFoundError("target_ul not found after maximum retries")
 
 
 def convert_html_to_text(html_content: str) -> str:

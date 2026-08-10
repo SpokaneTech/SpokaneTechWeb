@@ -21,4 +21,4 @@ celery_app.autodiscover_tasks()
 
 @celery_app.task(bind=True)
 def debug_task(self, *args, **kwargs):
-    print("Request: {0!r}".format(self.request))
+    print(f"Request: {self.request!r}")
