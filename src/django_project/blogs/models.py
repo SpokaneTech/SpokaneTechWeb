@@ -65,7 +65,7 @@ class BlogTag(HandyHelperBaseModel):
     value = models.CharField(max_length=64, unique=True, null=False)
 
     class Meta:
-        ordering = ["value"]
+        ordering = ("value",)
 
     def __str__(self) -> str:
         return self.value

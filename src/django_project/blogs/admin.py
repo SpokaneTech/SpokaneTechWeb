@@ -1,22 +1,25 @@
 # import models
-from blogs.models import BlogPlatform, BlogPost, BlogSeries, BlogTag
+from __future__ import annotations
+
 from django.contrib import admin
+
+from blogs.models import BlogPlatform, BlogPost, BlogSeries, BlogTag
 
 
 class BlogPlatformAdmin(admin.ModelAdmin):
-    list_display: list[str] = ["id", "created_at", "updated_at", "enabled", "name", "website_url"]
-    search_fields: list[str] = ["id", "name", "website_url"]
-    list_filter: list[str] = ["enabled"]
+    list_display: tuple[str, ...] = ("id", "created_at", "updated_at", "enabled", "name", "website_url")
+    search_fields: tuple[str, ...] = ("id", "name", "website_url")
+    list_filter: tuple[str, ...] = ("enabled",)
 
 
 class BlogSeriesAdmin(admin.ModelAdmin):
-    list_display: list[str] = ["id", "created_at", "updated_at", "name", "description"]
-    search_fields: list[str] = ["id", "name", "description"]
-    list_filter: list = []
+    list_display: tuple[str, ...] = ("id", "created_at", "updated_at", "name", "description")
+    search_fields: tuple[str, ...] = ("id", "name", "description")
+    list_filter: tuple[()] = ()
 
 
 class BlogPostAdmin(admin.ModelAdmin):
-    list_display: list[str] = [
+    list_display: tuple[str, ...] = (
         "id",
         "created_at",
         "updated_at",
@@ -27,15 +30,15 @@ class BlogPostAdmin(admin.ModelAdmin):
         "image",
         "author",
         "series",
-    ]
-    search_fields: list[str] = ["id", "title", "description", "url", "image", "author"]
-    list_filter: list[str] = ["platform", "series"]
+    )
+    search_fields: tuple[str, ...] = ("id", "title", "description", "url", "image", "author")
+    list_filter: tuple[str, ...] = ("platform", "series")
 
 
 class BlogTagAdmin(admin.ModelAdmin):
-    list_display: list[str] = ["id", "created_at", "updated_at", "value"]
-    search_fields: list[str] = ["id", "value"]
-    list_filter: list = []
+    list_display: tuple[str, ...] = ("id", "created_at", "updated_at", "value")
+    search_fields: tuple[str, ...] = ("id", "value")
+    list_filter: tuple[()] = ()
 
 
 # register models

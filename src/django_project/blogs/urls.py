@@ -1,6 +1,9 @@
-from blogs import views
+from __future__ import annotations
+
 from django.urls import path
 from django.urls.resolvers import URLPattern
+
+from blogs import views
 
 app_name = "blogs"
 

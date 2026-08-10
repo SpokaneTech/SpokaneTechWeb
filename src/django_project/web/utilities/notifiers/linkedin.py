@@ -1,14 +1,17 @@
+from __future__ import annotations
+
 import json
 import logging
 from datetime import timedelta
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 import requests
 from bs4 import BeautifulSoup
 from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
+
 from web.utilities.ai.gemini import generate_post_content
 from web.utilities.ai.prompts import (
     create_event_reminder_prompt,
@@ -26,14 +29,14 @@ logger = logging.getLogger(__name__)
 class LinkedInOrganizationClient:
     def __init__(
         self,
-        access_token: Optional[str],
+        access_token: str | None,
         organization_urn: str,
-        client_id: Optional[str] = None,
-        client_secret: Optional[str] = None,
-        refresh_token: Optional[str] = None,
-        env_path: Optional[str] = None,
-        credential: Optional[Any] = None,
-        api_version: Optional[str] = None,
+        client_id: str | None = None,
+        client_secret: str | None = None,
+        refresh_token: str | None = None,
+        env_path: str | None = None,
+        credential: Any | None = None,
+        api_version: str | None = None,
     ) -> None:
         self.access_token = access_token
         self.organization_urn: str = organization_urn
@@ -69,7 +72,7 @@ class LinkedInOrganizationClient:
             "X-Restli-Protocol-Version": "2.0.0",
         }
 
-    def _is_version_failure(self, response: Optional[requests.Response]) -> bool:
+    def _is_version_failure(self, response: requests.Response | None) -> bool:
         if response is None or response.status_code != 426:
             return False
         try:
@@ -103,7 +106,7 @@ class LinkedInOrganizationClient:
         self._apply_token_data(token_data)
         self._persist_tokens(token_data)
 
-    def build_authorization_url(self, redirect_uri: str, scope: str, state: Optional[str] = None) -> str:
+    def build_authorization_url(self, redirect_uri: str, scope: str, state: str | None = None) -> str:
         if not self.client_id:
             raise ValueError("LinkedIn client ID is required to build the authorization URL.")
 
@@ -146,7 +149,7 @@ class LinkedInOrganizationClient:
         self._persist_tokens(token_data)
         return token_data
 
-    def _request_token_refresh(self, refresh_token: Optional[str]) -> dict[str, Any]:
+    def _request_token_refresh(self, refresh_token: str | None) -> dict[str, Any]:
         response = requests.post(
             self.access_token_url,
             data={
@@ -182,9 +185,9 @@ class LinkedInOrganizationClient:
             self.credential = locked_credential
             self._persist_tokens(token_data)
 
-    def _persist_tokens(self, token_data: Optional[dict[str, Any]] = None) -> None:
-        setattr(settings, "LINKEDIN_ACCESS_TOKEN", self.access_token)
-        setattr(settings, "LINKEDIN_REFRESH_TOKEN", self.refresh_token)
+    def _persist_tokens(self, token_data: dict[str, Any] | None = None) -> None:
+        settings.LINKEDIN_ACCESS_TOKEN = self.access_token
+        settings.LINKEDIN_REFRESH_TOKEN = self.refresh_token
 
         if self.credential is not None:
             self.credential.access_token = self.access_token
@@ -233,7 +236,7 @@ class LinkedInOrganizationClient:
 
         self.env_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
-    def _is_retryable_token_failure(self, response: Optional[requests.Response]) -> bool:
+    def _is_retryable_token_failure(self, response: requests.Response | None) -> bool:
         if response is None:
             return False
         return response.status_code == 401
@@ -241,9 +244,9 @@ class LinkedInOrganizationClient:
     def post_organization_post(
         self,
         commentary: str,
-        article_url: Optional[str] = None,
-        article_title: Optional[str] = None,
-        article_description: Optional[str] = None,
+        article_url: str | None = None,
+        article_title: str | None = None,
+        article_description: str | None = None,
     ) -> requests.Response:
         self.ensure_access_token()
         payload: dict[str, Any] = {
@@ -296,7 +299,7 @@ class LinkedInOrganizationClient:
 
     def build_event_commentary(
         self,
-        event: "Event",
+        event: Event,
         is_new: bool = True,
     ) -> str:
         """
@@ -343,7 +346,7 @@ class LinkedInOrganizationClient:
 
     def post_event(
         self,
-        event: "Event",
+        event: Event,
         is_new: bool = True,
     ) -> requests.Response:
         """

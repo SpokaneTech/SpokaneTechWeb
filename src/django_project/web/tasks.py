@@ -11,6 +11,7 @@ from celery import shared_task
 from django.conf import settings
 from django.db.models.manager import BaseManager
 from django.utils import timezone
+
 from web.models import Event, IntegrationCredential, Link, Tag, TechGroup
 from web.utilities.dt_utils import convert_to_pacific
 from web.utilities.notifiers.discord import DiscordNotifier
@@ -27,12 +28,14 @@ from web.utilities.scrapers.meetup import (
     get_group_description,
 )
 
+logger = logging.getLogger(__name__)
+
 
 @shared_task(time_limit=30, max_retries=0, name="web.test_task")
 def test_task() -> str:
-    logging.info("test task starting")
+    logger.info("test task starting")
     time.sleep(3)
-    logging.info("test task completed")
+    logger.info("test task completed")
     return "test task completed!"
 
 
@@ -62,10 +65,9 @@ def ingest_eventbrite_organization_details(group_pk) -> str:
 
     organization_details = get_organization_details(eb_group_id)
     description = organization_details["long_description"]["text"]
-    if description:
-        if group.description != description:
-            group.update(description=description)
-            updated = True
+    if description and group.description != description:
+        group.update(description=description)
+        updated = True
     if organization_details.get("website"):
         website = organization_details["website"]
         if website and not group.links.filter(url=website):
@@ -104,7 +106,7 @@ def ingest_future_meetup_events(group_pk) -> str:
                 event_info.setdefault("location_address", "")
                 event_info.setdefault("map_link", "")
                 if not event_info.get("name", None):
-                    logging.error(f"error parsing name for event hosted by {group.name}; data = {event_info}")
+                    logger.error("error parsing name for event hosted by %s; data = %s", group.name, event_info)
                     continue
                 if event_info["social_platform_id"]:
                     _, is_new = Event.objects.update_or_create(

@@ -9,6 +9,10 @@ from django.utils import timezone
 from requests.exceptions import HTTPError, RequestException
 
 
+class EventbriteRateLimitError(RuntimeError):
+    pass
+
+
 def create_google_map_link(address: str) -> str:
     """create a link to a Google map for a provided address
 
@@ -37,8 +41,7 @@ def filter_events_by_date(events: list, date_filter: timezone) -> list:
     """
     filtered_events: list = []
     for event in events:
-        created_date: datetime = datetime.strptime(event["created"], "%Y-%m-%dT%H:%M:%SZ")
-        created_date = timezone.make_aware(created_date, timezone.utc)
+        created_date = datetime.fromisoformat(event["created"].replace("Z", "+00:00"))
         if created_date > date_filter:
             filtered_events.append(event)
     return filtered_events
@@ -144,7 +147,7 @@ def get_event_details(event_id: str) -> dict:
                     continue  # Skip the rest of the loop and retry
                 else:
                     print(f"Max retries ({MAX_RETRIES}) for 429 reached. Raising the last error.")
-                    raise Exception(f"Max retries ({MAX_RETRIES})) reached for 429 Too Many Requests.")
+                    raise EventbriteRateLimitError(f"Max retries ({MAX_RETRIES}) reached for 429 Too Many Requests.")
 
             # If not a 429, raise for other status codes
             resp.raise_for_status()
@@ -161,7 +164,7 @@ def get_event_details(event_id: str) -> dict:
                 time.sleep(sleep_for)
             else:
                 print(f"Max retries ({MAX_RETRIES}) reached for non-429 HTTP error. Raising the last error.")
-                raise err  # Re-raise the specific HTTP error on the last attempt
+                raise  # Re-raise the specific HTTP error on the last attempt
 
         except RequestException as err:
             # Catch other request-related errors (e.g., ConnectionError, Timeout)
@@ -172,7 +175,7 @@ def get_event_details(event_id: str) -> dict:
                 time.sleep(sleep_for)
             else:
                 print(f"Max retries ({MAX_RETRIES}) reached for request error. Raising the last error.")
-                raise err  # Re-raise the error on the last attempt
+                raise  # Re-raise the error on the last attempt
 
     # This part should ideally not be reached if MAX_RETRIES is set up correctly
     # and errors are always re-raised on the last attempt.
