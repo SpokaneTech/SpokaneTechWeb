@@ -6,7 +6,7 @@ from web.tasks import ingest_future_eventbrite_events, ingest_future_meetup_even
 
 
 def get_eventbright_events():
-    tech_group_list = TechGroup.objects.filter(enabled=True, platform__name="Eventbrite")
+    tech_group_list = TechGroup.objects.filter(enabled=True, platform__name="Eventbrite", name__icontains="launchpad")
     for group in tech_group_list:
         print("INFO: getting upcoming events for ", group.name)
         job = ingest_future_eventbrite_events.s(group.pk)
@@ -24,4 +24,4 @@ def get_meetup_events() -> None:
 
 def run():
     get_eventbright_events()
-    get_meetup_events()
+    # get_meetup_events()

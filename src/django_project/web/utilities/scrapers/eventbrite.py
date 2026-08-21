@@ -63,20 +63,21 @@ def get_organization_details(organization_id: str) -> dict:
     return response.json()["organizers"][0]
 
 
-def get_events_for_organization(organization_id: str, age: int = 14) -> list:
+def get_events_for_organization(organization_id: str, age: int | None = None) -> list:
     """get a list of events for a given Eventbrite organization
 
     Args:
         organization_id (str): Eventbrite organization identifier
-        age (int): number of days ago when events were created
+        age (int | None): number of days ahead to search for upcoming events
 
     Returns:
-        list: list of Eventbrite events created in the past <age> days
+        list: list of Eventbrite events starting in the next <age> days
     """
     api_token: str | None = getattr(settings, "EVENTBRITE_API_KEY", None)
     if not api_token:
         return []
-    start_date_range_end: str = (timezone.now() + timedelta(days=age)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    lookahead_days = age if age is not None else getattr(settings, "EVENTBRITE_EVENT_LOOKAHEAD_DAYS", 60)
+    start_date_range_end: str = (timezone.now() + timedelta(days=lookahead_days)).strftime("%Y-%m-%dT%H:%M:%SZ")
     start_date_range_start: str = timezone.now().strftime("%Y-%m-%dT%H:%M:%SZ")
     url: str = f"https://www.eventbriteapi.com/v3/organizers/{organization_id}/events/?start_date.range_start={start_date_range_start}&start_date.range_end={start_date_range_end}"
     headers: dict[str, str] = {"Authorization": f"Bearer {api_token}"}

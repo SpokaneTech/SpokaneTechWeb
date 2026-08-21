@@ -12,7 +12,7 @@ os.environ.setdefault("ENV_PATH", f"{BASE_DIR}/envs/.env.test")
 django.setup()
 from model_bakery import baker
 from web.models import Event
-from web.tasks import ingest_future_eventbrite_events
+from web.tasks import ingest_future_eventbrite_events, post_event_to_linkedin
 
 
 class TestIngestFutureEventbriteEvents(TestCase):
@@ -75,3 +75,17 @@ class TestIngestFutureEventbriteEvents(TestCase):
         self.assertEqual(event.location_name, "Online")
         self.assertEqual(event.location_address, "")
         self.assertEqual(event.map_link, "")
+
+
+class TestPostEventToLinkedIn(TestCase):
+    def test_skips_when_post_to_linkedin_setting_is_false(self):
+        event = baker.make("web.Event")
+
+        with (
+            patch("web.tasks.settings.POST_TO_LINKEDIN", False),
+            patch("web.tasks.LinkedInOrganizationClient") as mock_linkedin_client,
+        ):
+            result = post_event_to_linkedin(event.pk, is_new=True)
+
+        self.assertEqual(result, f"POST_TO_LINKEDIN is False. Skipping LinkedIn post for event with pk {event.pk}.")
+        mock_linkedin_client.assert_not_called()
