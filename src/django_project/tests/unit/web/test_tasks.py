@@ -76,6 +76,38 @@ class TestIngestFutureEventbriteEvents(TestCase):
         self.assertEqual(event.location_address, "")
         self.assertEqual(event.map_link, "")
 
+    @patch("web.tasks.get_event_details")
+    @patch("web.tasks.get_events_for_organization")
+    def test_truncates_eventbrite_fields_to_model_limits(self, mock_get_events_for_organization, mock_get_event_details):
+        long_location_name = "LaunchPad INW Eventbrite Venue Name That Is Much Longer Than Sixty Four Characters"
+        long_location_address = "123 Long Address Lane, Spokane, WA 99201, United States, Building 7, Floor 12, Suite 1200"
+
+        mock_get_events_for_organization.return_value = [
+            {
+                "id": "evt_789",
+                "name": {"text": "A" * 300},
+                "description": {"text": "Oversized venue metadata."},
+                "url": "https://example.com/events/evt_789",
+                "start": {"utc": "2026-09-16T18:00:00Z"},
+                "end": {"utc": "2026-09-16T19:00:00Z"},
+            }
+        ]
+        mock_get_event_details.return_value = {
+            "primary_venue": {
+                "name": long_location_name,
+                "address": {"localized_address_display": long_location_address},
+            },
+            "tags": [],
+        }
+
+        result = ingest_future_eventbrite_events(self.group.pk)
+
+        self.assertEqual(result, f"added 1 new events for {self.group.name}")
+        event = Event.objects.get(social_platform_id="evt_789")
+        self.assertEqual(event.name, "A" * 255)
+        self.assertEqual(event.location_name, long_location_name[:64])
+        self.assertEqual(event.location_address, long_location_address[:256])
+
 
 class TestPostEventToLinkedIn(TestCase):
     def test_skips_when_post_to_linkedin_setting_is_false(self):
