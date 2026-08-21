@@ -204,12 +204,15 @@ def post_event_to_linkedin(event_pk: int, is_new: bool) -> str:
     if not event:
         return f"Event with pk {event_pk} not found."
 
+    if not settings.POST_TO_LINKEDIN:
+        return f"POST_TO_LINKEDIN is False. Skipping LinkedIn post for event with pk {event_pk}."
+
     linkedin_credential = IntegrationCredential.objects.filter(provider="linkedin").first()
     access_token = linkedin_credential.access_token if linkedin_credential else settings.LINKEDIN_ACCESS_TOKEN
     refresh_token = linkedin_credential.refresh_token if linkedin_credential else settings.LINKEDIN_REFRESH_TOKEN
 
     if not settings.LINKEDIN_ORGANIZATION_URN:
-        return "LinkedIn organization URN not configured in settings. Skipping post."
+        return f"LinkedIn organization URN not configured in settings. Skipping post for event with pk {event_pk}."
 
     if not access_token and not (refresh_token and settings.LINKEDIN_CLIENT_ID and settings.LINKEDIN_CLIENT_SECRET):
         return "LinkedIn API credentials not configured in settings. Skipping post."
