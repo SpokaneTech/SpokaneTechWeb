@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import random
 import re
@@ -29,6 +31,15 @@ from web.utilities.scrapers.meetup import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+def _truncate_for_model(model: type[Event], field_name: str, value: str | None) -> str:
+    if not value:
+        return ""
+    max_length = model._meta.get_field(field_name).max_length
+    if max_length is None:
+        return value
+    return value[:max_length]
 
 
 @shared_task(time_limit=30, max_retries=0, name="web.test_task")
@@ -140,19 +151,21 @@ def ingest_future_eventbrite_events(group_pk) -> str:
 
             event_data: dict[str, Any] = {
                 "group": group,
-                "name": item["name"].get("text", "") if item.get("name") else "",
+                "name": _truncate_for_model(Event, "name", item["name"].get("text", "") if item.get("name") else ""),
                 "description": item["description"].get("text", "") if item.get("description") else "",
                 "url": item.get("url", ""),
-                "social_platform_id": item.get("id", ""),
+                "social_platform_id": _truncate_for_model(Event, "social_platform_id", item.get("id", "")),
                 "start_datetime": item["start"].get("utc", "") if item.get("start") else "",
                 "end_datetime": item["end"].get("utc", "") if item.get("end") else "",
-                "location_name": location_data.get("name", ""),
-                "location_address": location_address,
+                "location_name": _truncate_for_model(Event, "location_name", location_data.get("name", "")),
+                "location_address": _truncate_for_model(Event, "location_address", location_address),
                 "map_link": create_google_map_link(location_address) if location_address else "",
             }
 
             event, is_new = Event.objects.update_or_create(
-                group=group, social_platform_id=item["id"], defaults=event_data
+                group=group,
+                social_platform_id=_truncate_for_model(Event, "social_platform_id", item.get("id", "")),
+                defaults=event_data,
             )
             if is_new:
                 event_count += 1
