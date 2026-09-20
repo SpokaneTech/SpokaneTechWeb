@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import html
+import json
 import re
 from datetime import datetime, timedelta, timezone
 from typing import Any
@@ -9,6 +10,55 @@ from bs4 import BeautifulSoup, Tag
 from bs4.element import NavigableString, PageElement
 
 from web.utilities.html_utils import fetch_content, fetch_content_with_playwright
+
+_TBD_LOCATION_NAMES = {"tbd", "tdb", "to be determined"}
+
+
+def _iter_mappings(value: Any):
+    """Yield every dictionary contained in a decoded Meetup data payload."""
+    if isinstance(value, dict):
+        yield value
+        for child in value.values():
+            yield from _iter_mappings(child)
+    elif isinstance(value, list):
+        for child in value:
+            yield from _iter_mappings(child)
+
+
+def _get_venue(page_content: str, soup: BeautifulSoup) -> dict[str, Any] | None:
+    """Find Meetup's Venue object without depending on JSON field order."""
+    for script in soup.find_all("script"):
+        if not script.string:
+            continue
+        try:
+            payload = json.loads(script.string)
+        except json.JSONDecodeError:
+            continue
+        for item in _iter_mappings(payload):
+            if item.get("__typename") == "Venue":
+                return item
+
+    # Meetup sometimes embeds serialized JSON in its page data rather than a
+    # standalone JSON script. Decode the Venue object when it is available.
+    venue_match = re.search(r'\{[^{}]*"__typename"\s*:\s*"Venue"[^{}]*\}', page_content)
+    if venue_match:
+        try:
+            return json.loads(venue_match.group())
+        except json.JSONDecodeError:
+            pass
+    return None
+
+
+def _format_venue_address(venue: dict[str, Any]) -> str:
+    """Return the display address supplied by Meetup, or an empty string."""
+    address = venue.get("address")
+    if isinstance(address, dict):
+        return str(address.get("localized_address_display") or address.get("display") or "")
+    if address:
+        country = venue.get("country")
+        parts = [address, venue.get("city"), venue.get("state"), country.upper() if isinstance(country, str) else country]
+        return ", ".join(str(part) for part in parts if part)
+    return ""
 
 
 def get_end_datetime(datetime_string: str, time_string: str) -> datetime | None:
@@ -142,27 +192,25 @@ def get_event_information(url: str) -> dict:
                     else:
                         event_info["end_datetime"] = None
 
-        location_name: str | Any = None
-        match = re.search(r'"__typename":"Venue","id":"\d+","name":"([^"]+)"', page_content)
-        if match:
-            location_name = match.group(1)
-        if not location_name:
+        venue = _get_venue(page_content, soup)
+        location_name: str = ""
+        location_address: str = ""
+        is_tbd_location = False
+        if venue:
+            location_name = str(venue.get("name") or "").strip()
+            location_address = _format_venue_address(venue)
+
+            # Meetup uses TBD for events whose physical location is not yet
+            # announced. Treat it as no location rather than displaying it.
+            if location_name.casefold() in _TBD_LOCATION_NAMES:
+                is_tbd_location = True
+                location_name = ""
+                location_address = ""
+        if not location_name and not is_tbd_location:
             online_p = soup.find("p", class_="ds2-k16 text-ds2-text-fill-primary-enabled")
             if online_p and online_p.get_text(strip=True) == "Online event":
                 location_name = "Online event"
         event_info["location_name"] = location_name
-
-        location_address: str = ""
-        address_match: re.Match[str] | None = re.search(
-            r'"__typename":"Venue","id":"\d+","name":"[^"]+","address":"([^"]+)","city":"([^"]+)","state":"([^"]+)","country":"([^"]+)"',
-            page_content,
-        )
-        if address_match:
-            street: str | Any = address_match.group(1)
-            city: str | Any = address_match.group(2)
-            state: str | Any = address_match.group(3)
-            country: str | Any = address_match.group(4)
-            location_address = f"{street}, {city}, {state}, {country.upper()}"
         event_info["location_address"] = location_address
 
         map_link: str = ""

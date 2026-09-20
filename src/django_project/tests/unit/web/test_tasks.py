@@ -13,6 +13,7 @@ django.setup()
 from model_bakery import baker
 from web.models import Event
 from web.tasks import ingest_future_eventbrite_events, post_event_to_linkedin
+from web.utilities.scrapers.meetup import get_event_information
 
 
 class TestIngestFutureEventbriteEvents(TestCase):
@@ -107,6 +108,45 @@ class TestIngestFutureEventbriteEvents(TestCase):
         self.assertEqual(event.name, "A" * 255)
         self.assertEqual(event.location_name, long_location_name[:64])
         self.assertEqual(event.location_address, long_location_address[:256])
+
+
+class TestMeetupEventInformation(TestCase):
+    @patch("web.utilities.scrapers.meetup.fetch_content_with_playwright")
+    def test_reads_venue_when_meetup_json_field_order_changes(self, mock_fetch_content):
+        mock_fetch_content.return_value = """
+            <script type="application/json">
+              {"event":{"venue":{"country":"us","city":"Spokane","__typename":"Venue",
+              "name":"Startup Spokane","state":"WA","address":"25 W Main Ave","id":"123"}}}
+            </script>
+        """
+
+        event = get_event_information("https://www.meetup.com/example/events/123456/")
+
+        self.assertEqual(event["location_name"], "Startup Spokane")
+        self.assertEqual(event["location_address"], "25 W Main Ave, Spokane, WA, US")
+
+    @patch("web.utilities.scrapers.meetup.fetch_content_with_playwright")
+    def test_leaves_missing_or_tbd_venue_blank(self, mock_fetch_content):
+        mock_fetch_content.return_value = """
+            <script type="application/json">
+              {"event":{"venue":{"__typename":"Venue","name":"TBD","address":"123 Main St",
+              "city":"Spokane","state":"WA","country":"US"}}}
+            </script>
+        """
+
+        event = get_event_information("https://www.meetup.com/example/events/123456/")
+
+        self.assertEqual(event["location_name"], "")
+        self.assertEqual(event["location_address"], "")
+
+    @patch("web.utilities.scrapers.meetup.fetch_content_with_playwright")
+    def test_leaves_location_blank_when_venue_is_absent(self, mock_fetch_content):
+        mock_fetch_content.return_value = '<script type="application/json">{"event":{}}</script>'
+
+        event = get_event_information("https://www.meetup.com/example/events/123456/")
+
+        self.assertEqual(event["location_name"], "")
+        self.assertEqual(event["location_address"], "")
 
 
 class TestPostEventToLinkedIn(TestCase):
