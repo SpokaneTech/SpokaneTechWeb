@@ -116,6 +116,10 @@ def ingest_future_meetup_events(group_pk) -> str:
                 event_info.setdefault("location_name", "")
                 event_info.setdefault("location_address", "")
                 event_info.setdefault("map_link", "")
+                event_info["location_name"] = _truncate_for_model(Event, "location_name", event_info["location_name"])
+                event_info["location_address"] = _truncate_for_model(
+                    Event, "location_address", event_info["location_address"]
+                )
                 if not event_info.get("name", None):
                     logger.error("error parsing name for event hosted by %s; data = %s", group.name, event_info)
                     continue
