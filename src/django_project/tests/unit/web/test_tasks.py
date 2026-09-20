@@ -12,7 +12,7 @@ os.environ.setdefault("ENV_PATH", f"{BASE_DIR}/envs/.env.test")
 django.setup()
 from model_bakery import baker
 from web.models import Event
-from web.tasks import ingest_future_eventbrite_events, post_event_to_linkedin
+from web.tasks import ingest_future_eventbrite_events, ingest_future_meetup_events, post_event_to_linkedin
 from web.utilities.scrapers.meetup import get_event_information
 
 
@@ -147,6 +147,37 @@ class TestMeetupEventInformation(TestCase):
 
         self.assertEqual(event["location_name"], "")
         self.assertEqual(event["location_address"], "")
+
+
+class TestIngestFutureMeetupEvents(TestCase):
+    def setUp(self):
+        self.platform = baker.make("web.SocialPlatform", name="Meetup")
+        self.group = baker.make("web.TechGroup", name="Test Meetup Group", platform=self.platform)
+        self.link = baker.make(
+            "web.Link",
+            name=f"{self.group.name} {self.group.platform.name} page",
+            url="https://www.meetup.com/test-meetup-group",
+        )
+        self.group.links.add(self.link)
+
+    @patch("web.tasks.get_event_information")
+    @patch("web.tasks.get_event_links")
+    def test_truncates_venue_fields_before_saving(self, mock_get_event_links, mock_get_event_information):
+        mock_get_event_links.return_value = ["https://www.meetup.com/test-meetup-group/events/123456/"]
+        mock_get_event_information.return_value = {
+            "name": "Test event",
+            "url": "https://www.meetup.com/test-meetup-group/events/123456/",
+            "social_platform_id": "123456",
+            "start_datetime": "2026-09-20T18:00:00Z",
+            "location_name": "N" * 65,
+            "location_address": "A" * 257,
+        }
+
+        ingest_future_meetup_events(self.group.pk)
+
+        event = Event.objects.get(social_platform_id="123456")
+        self.assertEqual(event.location_name, "N" * 64)
+        self.assertEqual(event.location_address, "A" * 256)
 
 
 class TestPostEventToLinkedIn(TestCase):

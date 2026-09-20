@@ -56,7 +56,12 @@ def _format_venue_address(venue: dict[str, Any]) -> str:
         return str(address.get("localized_address_display") or address.get("display") or "")
     if address:
         country = venue.get("country")
-        parts = [address, venue.get("city"), venue.get("state"), country.upper() if isinstance(country, str) else country]
+        parts = [
+            address,
+            venue.get("city"),
+            venue.get("state"),
+            country.upper() if isinstance(country, str) else country,
+        ]
         return ", ".join(str(part) for part in parts if part)
     return ""
 
