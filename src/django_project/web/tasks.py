@@ -142,7 +142,9 @@ def ingest_future_eventbrite_events(group_pk) -> str:
     if not group:
         return f"group with pk {group_pk} not found"
     event_count = 0
-    link: Any = group.links.filter(name=f"{group.name} {group.platform.name} page").distinct()[0]
+    link: Any = group.links.filter(name=f"{group.name} {group.platform.name} page").distinct().first()
+    if not link:
+        return f"no {group.platform.name} links found for {group.name}"
     eb_group_id: str = link.url.split("-")[-1]
     event_list: list = get_events_for_organization(eb_group_id)
     for item in event_list:

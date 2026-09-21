@@ -27,6 +27,15 @@ class TestIngestFutureEventbriteEvents(TestCase):
         )
         self.group.links.add(self.link)
 
+    @patch("web.tasks.get_events_for_organization")
+    def test_returns_clear_result_when_platform_link_is_missing(self, mock_get_events_for_organization):
+        self.group.links.remove(self.link)
+
+        result = ingest_future_eventbrite_events(self.group.pk)
+
+        self.assertEqual(result, f"no Eventbrite links found for {self.group.name}")
+        mock_get_events_for_organization.assert_not_called()
+
     @patch("web.tasks.get_event_details")
     @patch("web.tasks.get_events_for_organization")
     def test_ingests_event_without_primary_venue(self, mock_get_events_for_organization, mock_get_event_details):
