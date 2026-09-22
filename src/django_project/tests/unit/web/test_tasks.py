@@ -36,6 +36,37 @@ class TestIngestFutureEventbriteEvents(TestCase):
         self.assertEqual(result, f"no Eventbrite links found for {self.group.name}")
         mock_get_events_for_organization.assert_not_called()
 
+    @patch("web.tasks.get_events_for_organization")
+    def test_reads_organizer_id_from_numeric_only_eventbrite_url(self, mock_get_events_for_organization):
+        self.link.url = "https://www.eventbrite.com/o/26948291755"
+        self.link.save()
+        mock_get_events_for_organization.return_value = []
+
+        result = ingest_future_eventbrite_events(self.group.pk)
+
+        self.assertEqual(result, f"added 0 new events for {self.group.name}")
+        mock_get_events_for_organization.assert_called_once_with("26948291755")
+
+    @patch("web.tasks.get_events_for_organization")
+    def test_rejects_non_eventbrite_urls(self, mock_get_events_for_organization):
+        self.link.url = "https://example.com/o/spokane-angel-alliance-26948291755"
+        self.link.save()
+
+        result = ingest_future_eventbrite_events(self.group.pk)
+
+        self.assertEqual(result, f"invalid Eventbrite organization URL for {self.group.name}")
+        mock_get_events_for_organization.assert_not_called()
+
+    @patch("web.tasks.get_events_for_organization")
+    def test_rejects_non_organization_eventbrite_urls(self, mock_get_events_for_organization):
+        self.link.url = "https://www.eventbrite.com/e/spokane-angel-alliance-26948291755"
+        self.link.save()
+
+        result = ingest_future_eventbrite_events(self.group.pk)
+
+        self.assertEqual(result, f"invalid Eventbrite organization URL for {self.group.name}")
+        mock_get_events_for_organization.assert_not_called()
+
     @patch("web.tasks.get_event_details")
     @patch("web.tasks.get_events_for_organization")
     def test_ingests_event_without_primary_venue(self, mock_get_events_for_organization, mock_get_event_details):
