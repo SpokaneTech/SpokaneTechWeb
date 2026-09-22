@@ -6,6 +6,7 @@ import re
 import time
 from datetime import timedelta
 from typing import Any
+from urllib.parse import urlparse
 
 import requests
 from bs4 import BeautifulSoup
@@ -42,6 +43,13 @@ def _truncate_for_model(model: type[Event], field_name: str, value: str | None) 
     return value[:max_length]
 
 
+def _get_eventbrite_organization_id(url: str) -> str | None:
+    """Extract the numeric organizer ID from an Eventbrite organization URL."""
+    organization_slug = urlparse(url).path.rstrip("/").rsplit("/", maxsplit=1)[-1]
+    organization_id = organization_slug.rsplit("-", maxsplit=1)[-1]
+    return organization_id if organization_id.isdigit() else None
+
+
 @shared_task(time_limit=30, max_retries=0, name="web.test_task")
 def test_task() -> str:
     logger.info("test task starting")
@@ -72,7 +80,9 @@ def ingest_eventbrite_organization_details(group_pk) -> str:
     updated = False
     group = TechGroup.objects.get(pk=group_pk)
     link = group.links.filter(name=f"{group.name} {group.platform.name} page").distinct()[0]
-    eb_group_id = link.url.split("-")[-1]
+    eb_group_id = _get_eventbrite_organization_id(link.url)
+    if not eb_group_id:
+        return f"invalid Eventbrite organization URL for {group.name}"
 
     organization_details = get_organization_details(eb_group_id)
     description = organization_details["long_description"]["text"]
@@ -145,7 +155,9 @@ def ingest_future_eventbrite_events(group_pk) -> str:
     link: Any = group.links.filter(name=f"{group.name} {group.platform.name} page").distinct().first()
     if not link:
         return f"no {group.platform.name} links found for {group.name}"
-    eb_group_id: str = link.url.split("-")[-1]
+    eb_group_id = _get_eventbrite_organization_id(link.url)
+    if not eb_group_id:
+        return f"invalid Eventbrite organization URL for {group.name}"
     event_list: list = get_events_for_organization(eb_group_id)
     for item in event_list:
         event_details: dict = get_event_details(item["id"])
