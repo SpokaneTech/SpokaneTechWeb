@@ -45,7 +45,13 @@ def _truncate_for_model(model: type[Event], field_name: str, value: str | None) 
 
 def _get_eventbrite_organization_id(url: str) -> str | None:
     """Extract the numeric organizer ID from an Eventbrite organization URL."""
-    organization_slug = urlparse(url).path.rstrip("/").rsplit("/", maxsplit=1)[-1]
+    parsed_url = urlparse(url)
+    if parsed_url.hostname not in {"eventbrite.com", "www.eventbrite.com"}:
+        return None
+    path_parts = parsed_url.path.rstrip("/").split("/")
+    if len(path_parts) != 3 or path_parts[1] != "o":
+        return None
+    organization_slug = path_parts[2]
     organization_id = organization_slug.rsplit("-", maxsplit=1)[-1]
     return organization_id if organization_id.isdigit() else None
 
