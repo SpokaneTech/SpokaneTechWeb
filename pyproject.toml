@@ -142,6 +142,7 @@ ignore_unused = [
     "mypy",
     "mypy-extensions",
     "ruff",
+    "packaging",
     "Pillow",
     "psycopg2-binary",
     "pytest",
