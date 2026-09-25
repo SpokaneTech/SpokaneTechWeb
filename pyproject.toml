@@ -1,7 +1,7 @@
 [project]
 dependencies = [
     "beautifulsoup4",
-    "celery",
+    "celery[redis]",
     "django~=4.2",
     "django-braces",
     "django-celery-beat",
@@ -13,6 +13,7 @@ dependencies = [
     "django-handyhelpers",
     "flower",
     "Pillow",
+    "packaging",
     "psycopg2-binary",
     "redis",
     "requests>=2.26.0",
@@ -141,6 +142,7 @@ ignore_unused = [
     "mypy",
     "mypy-extensions",
     "ruff",
+    "packaging",
     "Pillow",
     "psycopg2-binary",
     "pytest",
