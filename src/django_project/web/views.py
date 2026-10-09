@@ -1,3 +1,4 @@
+from django.db.models import Count, Q
 from django.http import HttpRequest, HttpResponse
 from django.utils import timezone
 from handyhelpers.views.calendar import HtmxCalendarView
@@ -8,7 +9,9 @@ from handyhelpers.views.htmx import (
     ModelDetailBootstrapModalView,
 )
 
-from web.models import Event, TechGroup
+from web.models import Event, Tag, TechGroup
+from web.utilities.html_utils import convert_html_to_text
+from web.utilities.icons import get_icon_classes
 
 
 def linkedin_oauth_callback(request: HttpRequest) -> HttpResponse:
@@ -85,6 +88,31 @@ class IndexContentView(HtmxOptionView):
     htmx_template_name: str = "web/partials/custom/index.htm"
     template_name: str = "web/full/custom/index.html"
 
+    def get(self, request, *args, **kwargs):
+        now = timezone.now()
+        upcoming = Event.objects.filter(start_datetime__gte=now)
+        groups = TechGroup.objects.filter(enabled=True)
+        self.context = {
+            "upcoming_events": list(
+                upcoming.select_related("group").prefetch_related("tags").order_by("start_datetime", "pk")[:4]
+            ),
+            "homepage_groups": list(
+                groups.annotate(upcoming_event_count=Count("event", filter=Q(event__start_datetime__gte=now)))
+                .prefetch_related("tags")
+                .order_by("name", "pk")
+            ),
+            "upcoming_event_count": upcoming.count(),
+            "active_group_count": groups.count(),
+            "community_tags": list(
+                Tag.objects.filter(Q(techgroup__enabled=True) | Q(event__start_datetime__gte=now))
+                .distinct()
+                .order_by("value")[:12]
+            ),
+        }
+        for group in self.context["homepage_groups"]:
+            group.homepage_icon = get_icon_classes(group.icon)
+        return super().get(request, *args, **kwargs)
+
 
 class TechEventView(HtmxOptionDetailView):
     """Render detail page for an Event instance"""
@@ -99,11 +127,14 @@ class TechEventsView(HtmxOptionMultiFilterView):
 
     htmx_minimal_wrapper_template_name: str = "web/partials/li/events.htm"
     htmx_list_wrapper_template_name: str = "web/partials/list/events.htm"
+    htmx_list_template_name: str = "web/partials/list/events.htm"
     htmx_template_name: str = "web/partials/li/events.htm"
     template_name: str = "web/full/list/events.html"
 
     def get(self, request, *args, **kwargs):
         self.queryset = Event.objects.filter(start_datetime__gte=timezone.now())
+        if kwargs.get("display") == "li" or (not kwargs.get("display") and request.GET.get("display") == "li"):
+            kwargs["display"] = "minimal"
         return super().get(request, *args, **kwargs)
 
 
@@ -137,8 +168,34 @@ class TechGroupsView(HtmxOptionMultiFilterView):
     htmx_list_template_name: str = "web/partials/list/groups.htm"
     htmx_list_wrapper_template_name: str = "web/partials/list/wrapper_list.htm"
     htmx_template_name: str = "web/partials/marquee/groups.htm"
+    htmx_minimal_template_name: str = "web/partials/marquee/groups.htm"
+    htmx_minimal_wrapper_template_name: str = "web/partials/marquee/groups.htm"
     queryset = TechGroup.objects.filter(enabled=True)
+    default_display = "list"
     template_name: str = "web/full/list/groups.html"
+
+    def get(self, request, *args, **kwargs):
+        self.queryset = (
+            TechGroup.objects.filter(enabled=True)
+            .annotate(
+                upcoming_event_count=Count("event", filter=Q(event__start_datetime__gte=timezone.now()), distinct=True)
+            )
+            .prefetch_related("tags")
+            .order_by("name", "pk")
+        )
+        if kwargs.get("display") == "marquee" or (
+            not kwargs.get("display") and request.GET.get("display") == "marquee"
+        ):
+            kwargs["display"] = "minimal"
+        return super().get(request, *args, **kwargs)
+
+    def filter_by_query_params(self, parameters=None):
+        """Normalize icons on the same cached results used by the directory and HTMX partials."""
+        queryset = super().filter_by_query_params(parameters)
+        for group in queryset:
+            group.homepage_icon = get_icon_classes(group.icon)
+            group.directory_description = convert_html_to_text(group.description, block_separator=" ")
+        return queryset
 
 
 class TechGroupModalView(ModelDetailBootstrapModalView):

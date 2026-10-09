@@ -2,7 +2,7 @@
 dependencies = [
     "beautifulsoup4",
     "celery[redis]",
-    "django~=4.2",
+    "django~=5.2.0",
     "django-braces",
     "django-celery-beat",
     "django-debug-toolbar",
@@ -26,7 +26,11 @@ keywords = ["django"]
 license = {file = "LICENSE"}
 name = "SpokaneTech"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
+
+
+[project.scripts]
+spokanetech-manage = "manage:main"
 
 
 [project.optional-dependencies]
@@ -159,8 +163,19 @@ ignore_unused = [
 output_format = "human_detailed"
 
 
+[tool.setuptools]
+package-dir = {"" = "src/django_project"}
+py-modules = ["manage"]
+
+
 [tool.setuptools.packages.find]
-where = ["."]
-include = ["src/django_project"]
+where = ["src/django_project"]
+include = ["core", "core.*", "web", "web.*", "blogs", "blogs.*"]
 exclude = []
 namespaces = false
+
+
+[tool.setuptools.package-data]
+core = ["templates/**/*.htm", "templates/**/*.html", "static/**/*"]
+web = ["templates/**/*.htm", "templates/**/*.html"]
+blogs = ["templates/**/*.htm", "templates/**/*.html"]

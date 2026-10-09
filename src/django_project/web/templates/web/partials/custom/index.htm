@@ -1,54 +1,123 @@
-<section class="hero animate__animated animate__fadeIn" style="animation-duration: 0.1s;">
-    <div class="container text-center">
-        <div class="my-4">
-            <h1 class="animate__animated animate__fadeIn" style="animation-duration: 0.2s;">
-                <span class="fst-italic" style="color: #0074d9;">Your </span>Inland Northwest Tech Community
-            </h1>
-            <p class="lead text-light fw-bold fs-4 pb-5 animate__animated animate__fadeIn text-opacity-50" style="animation-duration: 0.3s;">Innovate, Connect, Thrive.</p>
-            <div class="d-flex justify-content-center">
-                <button id="hero-btn-1" class="btn btn-primary btn-lg m-2 animate__animated animate__fadeIn" style="animation-duration: 0.4s;" hx-get="{% url 'web:about' %}" hx-target="#body_main" hx-push-url="{% url 'web:about' %}">Learn More</button>
-                <button id="hero-btn-2" class="btn btn-secondary btn-lg m-2 animate__animated animate__fadeIn" style="animation-duration: 0.5s;" hx-get="{% url 'web:develop' %}" hx-target="#body_main" hx-push-url="{% url 'web:develop' %}">Develop with us</button>
+{% load static %}
+<div class="st-home">
+    <section class="st-hero" aria-labelledby="home-title">
+        <div class="st-container">
+            <div class="st-hero-content">
+                <!-- <p class="st-eyebrow">Spokane's tech community</p> -->
+                <h1 id="home-title">Connect with <span>Spokane's tech</span> community.</h1>
+                <p class="st-hero-description">Discover local developer groups, meetups, workshops, and opportunities to
+                    connect with people building technology in the Inland Northwest.</p>
+                <div class="st-actions">
+                    <a class="st-button st-button-primary" href="#upcoming-events"><i class="far fa-calendar"
+                            aria-hidden="true"></i> Explore Upcoming Events <span aria-hidden="true">&rarr;</span></a>
+                    <a class="st-button st-button-outline" href="{% url 'web:get_techgroups' display='list' %}"><i
+                            class="fas fa-users" aria-hidden="true"></i> Find a Tech Group</a>
+                </div>
+                {% if community_discord_url %}<a class="st-hero-discord" href="{{ community_discord_url }}"
+                    target="_blank" rel="noopener"><i class="fab fa-discord" aria-hidden="true"></i> Join the community
+                    on Discord <span aria-hidden="true">&rarr;</span><span class="visually-hidden"> (opens in a new
+                        tab)</span></a>{% endif %}
             </div>
-            <script>
-            (function(){
-                function equalize() {
-                    var b1 = document.getElementById('hero-btn-1'),
-                        b2 = document.getElementById('hero-btn-2');
-                    if (!b1 || !b2) return;
-                    // clear any previously set minWidth so measurement is accurate
-                    b1.style.minWidth = '';
-                    b2.style.minWidth = '';
-                    // measure widths
-                    var w1 = Math.ceil(b1.getBoundingClientRect().width),
-                        w2 = Math.ceil(b2.getBoundingClientRect().width),
-                        max = Math.max(w1, w2);
-                    // apply equal min-width so both match the widest
-                    b1.style.minWidth = b2.style.minWidth = max + 'px';
-                }
-                if (document.readyState === 'loading') {
-                    document.addEventListener('DOMContentLoaded', equalize);
-                } else {
-                    equalize();
-                }
-                // adjust on resize and when webfonts finish loading
-                window.addEventListener('resize', function(){ requestAnimationFrame(equalize); });
-                if (document.fonts && document.fonts.ready) document.fonts.ready.then(equalize);
-            })();
-            </script>
         </div>
-    </div>
-</section>
-<section class="pt-3 pb-5 bg-light">
-    <div class="container-fluid my-3 px-3">
-        <h1 class="section-title fw-bold text-center text-primary animate__animated animate__fadeIn" style="animation-duration: 0.6s;">Upcoming Events</h1>
-        <p class="text-center text-secondary fs-5 mb-5 animate__animated animate__fadeIn" style="animation-duration: 0.7s;">meetups, workshops, networking, and more</p>
-        <div id="upcoming-events" class="row justify-content-center animate__animated animate__fadeIn" style="animation-duration: 0.8s;"
-            hx-get="{% url 'web:get_events' display='minimal' %}" 
-            hx-trigger="load"
-            hx-target="#upcoming-events"
-            hx-swap="innerHTML"
-            hx-push-url="false"
-        >
+    </section>
+
+    <section class="st-section st-events" id="upcoming-events" aria-labelledby="events-title">
+        <div class="st-container">
+            <div class="st-section-heading">
+                <div>
+                    <!-- <p class="st-eyebrow">What's happening</p> -->
+                    <h2 id="events-title">Next up in Spokane Tech</h2>
+                </div>
+                <a class="st-text-link" href="{% url 'web:get_events' display='list' %}">View all upcoming events <span
+                        aria-hidden="true">&rarr;</span></a>
+            </div>
+            {% if upcoming_events %}
+            <div class="st-event-grid">
+                {% for event in upcoming_events %}
+                {% include "web/partials/home/event_card.htm" with featured=forloop.first %}
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="st-empty-state">
+                <h3>More connections are on the way.</h3>
+                <p>There are no upcoming events listed right now. Find a local group or check the calendar for more ways
+                    to connect.</p>
+                <div class="st-actions"><a class="st-text-link"
+                        href="{% url 'web:get_techgroups' display='list' %}">Explore local groups &rarr;</a><a
+                        class="st-text-link" href="{% url 'web:event_calendar' year=0 month=0 %}">View the calendar
+                        &rarr;</a></div>
+            </div>
+            {% endif %}
         </div>
-    </div>
-</section>
+    </section>
+
+    <section class="st-section st-groups" aria-labelledby="groups-title">
+        <div class="st-container">
+            <div class="st-section-heading">
+                <div>
+                    <h2 id="groups-title">Explore Spokane's tech communities</h2>
+                    <p class="st-section-description">Local groups. Real people. All are welcome.</p>
+                </div>
+                <div class="st-group-navigation">
+                    <!-- <a class="st-text-link" href="{% url 'web:get_techgroups' display='list' %}">View all groups <span aria-hidden="true">&rarr;</span></a> -->
+                    <div class="st-carousel-controls" hidden>
+                        <button class="st-carousel-button" type="button" aria-label="Scroll groups left"
+                            aria-controls="group-carousel" data-group-scroll="-1"><svg viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                aria-hidden="true" focusable="false">
+                                <path d="M15 6 9 12 15 18" />
+                            </svg></button>
+                        <button class="st-carousel-button" type="button" aria-label="Scroll groups right"
+                            aria-controls="group-carousel" data-group-scroll="1"><svg viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                aria-hidden="true" focusable="false">
+                                <path d="M9 6 15 12 9 18" />
+                            </svg></button>
+                    </div>
+                </div>
+            </div>
+            {% if homepage_groups %}
+            <div class="st-group-carousel" id="group-carousel" tabindex="0" role="region" aria-labelledby="groups-title"
+                aria-describedby="group-carousel-help">
+                <p class="visually-hidden" id="group-carousel-help">Scroll left or right to explore all groups. Use the
+                    arrow keys when this region is focused.</p>
+                {% for group in homepage_groups %}
+                {% include "web/partials/home/group_card.htm" %}
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="st-empty-state">Local groups will appear here as they join the directory. <a class="st-text-link"
+                    href="{% url 'web:about' %}">Learn about SpokaneTech</a>.</p>
+            {% endif %}
+        </div>
+    </section>
+
+    <section class="st-community" aria-labelledby="community-title">
+        <div class="st-container st-community-grid">
+            <div class="st-community-intro">
+                <picture class="st-community-art">
+                    <source srcset="{% static 'spokanetech/img/spokane-community-illustration.webp' %}" type="image/webp">
+                    <img src="{% static 'spokanetech/img/spokane-community-illustration.jpg' %}" width="1100" height="367"
+                        alt="" loading="lazy" decoding="async">
+                </picture>
+                <div class="st-community-copy">
+                    <p class="st-eyebrow">One community. Many technologies.</p>
+                    <h2 id="community-title">Whatever you build with, there's a place for you here.</h2>
+                </div>
+            </div>
+            <div class="st-community-join">
+                <h3>Don't just browse. Join us.</h3>
+                <p>Meet developers, share projects, learn something new, or help organize the next event.</p>
+                <div class="st-actions">
+                    {% if community_discord_url %}
+                    <a class="st-button st-button-primary" href="{{ community_discord_url }}" target="_blank" rel="noopener">
+                        <i class="fab fa-discord" aria-hidden="true"></i> Join Discord
+                        <span class="visually-hidden">(opens in a new tab)</span>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+</div>

@@ -1,3 +1,5 @@
+from typing import ClassVar
+
 from django.db import models
 from handyhelpers.models import HandyHelperBaseModel
 
@@ -65,7 +67,7 @@ class BlogTag(HandyHelperBaseModel):
     value = models.CharField(max_length=64, unique=True, null=False)
 
     class Meta:
-        ordering = ("value",)
+        ordering: ClassVar[list[str]] = ["value"]
 
     def __str__(self) -> str:
         return self.value

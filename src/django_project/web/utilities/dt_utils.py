@@ -1,5 +1,6 @@
-from django.utils import timezone
 from zoneinfo import ZoneInfo
+
+from django.utils import timezone
 
 PACIFIC = ZoneInfo("America/Los_Angeles")
 

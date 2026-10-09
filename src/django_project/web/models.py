@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import ClassVar
+
 from django.db import models
 from django.urls import reverse
 from handyhelpers.models import HandyHelperBaseModel
@@ -48,7 +50,7 @@ class Event(HandyHelperBaseModel):
     image = models.ImageField(upload_to="tech_events/", blank=True, null=True)
 
     class Meta:
-        ordering = ("start_datetime",)
+        ordering: ClassVar[list[str]] = ["start_datetime"]
 
     def __str__(self) -> str:
         return self.name
@@ -76,7 +78,7 @@ class SocialPlatform(HandyHelperBaseModel):
     base_url = models.URLField(blank=True, help_text="base url of provider")
 
     class Meta:
-        ordering = ("name",)
+        ordering: ClassVar[list[str]] = ["name"]
 
     def __str__(self) -> str:
         return self.name
@@ -92,7 +94,7 @@ class IntegrationCredential(HandyHelperBaseModel):
     refresh_token_expires_at = models.DateTimeField(blank=True, null=True)
 
     class Meta:
-        ordering = ("provider",)
+        ordering: ClassVar[list[str]] = ["provider"]
 
     def __str__(self) -> str:
         return self.provider
@@ -104,7 +106,7 @@ class Tag(HandyHelperBaseModel):
     value = models.CharField(max_length=64, unique=True, null=False)
 
     class Meta:
-        ordering = ("value",)
+        ordering: ClassVar[list[str]] = ["value"]
 
     def __str__(self) -> str:
         return self.value
@@ -128,7 +130,7 @@ class TechGroup(HandyHelperBaseModel):
     discord_webhook_url = EncryptedTextField(blank=True, null=True)
 
     class Meta:
-        ordering = ("name",)
+        ordering: ClassVar[list[str]] = ["name"]
 
     def __str__(self) -> str:
         return self.name

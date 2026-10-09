@@ -1,0 +1,18 @@
+{% load tz %}
+<article class="st-event-card{% if featured %} st-event-featured{% endif %}">
+    <div class="st-event-art" aria-hidden="true">
+        {% if event.image %}<img src="{{ event.image.url }}" alt="" width="600" height="300" loading="lazy" decoding="async">
+        {% elif event.group.image %}<img class="st-event-group-image" src="{{ event.group.image.url }}" alt="" width="600" height="300" loading="lazy" decoding="async">
+        {% else %}<i class="fas fa-code" aria-hidden="true"></i><span>{{ event.group.name|default:"SpokaneTech" }}</span>{% endif %}
+        {% if featured %}<span class="st-next-label">Next event</span>{% endif %}
+    </div>
+    <div class="st-event-content">
+        <div class="st-event-title-row">
+            <time class="st-date-badge" datetime="{{ event.start_datetime|localtime|date:'c' }}"><span>{{ event.start_datetime|date:"M" }}</span><strong>{{ event.start_datetime|date:"j" }}</strong></time>
+            <div><h3><a class="st-card-link" href="{{ event.get_absolute_url }}">{{ event.name }}</a></h3>{% if event.group %}<p class="st-event-group">{{ event.group.name }}</p>{% endif %}</div>
+        </div>
+        <p class="st-event-detail"><i class="far fa-calendar" aria-hidden="true"></i><time datetime="{{ event.start_datetime|localtime|date:'c' }}">{{ event.start_datetime|date:"D, M j, Y" }} &middot; {{ event.start_datetime|time:"g:i A" }} {{ event.start_datetime|date:"T" }}{% if event.end_datetime %} &ndash; {{ event.end_datetime|time:"g:i A" }}{% if event.end_datetime|date:"Y-m-d" != event.start_datetime|date:"Y-m-d" %} ({{ event.end_datetime|date:"M j, Y" }}){% endif %}{% endif %}</time></p>
+        {% if event.location_name or event.location_address %}<p class="st-event-detail"><i class="fas fa-map-marker-alt" aria-hidden="true"></i><span>{{ event.location_name|default:event.location_address }}</span></p>{% endif %}
+        <div class="st-card-bottom"><div class="st-tags">{% include "web/partials/home/tags.htm" with tags=event.tags.all|slice:":3" %}</div><span class="st-card-arrow" aria-hidden="true">&rarr;</span></div>
+    </div>
+</article>

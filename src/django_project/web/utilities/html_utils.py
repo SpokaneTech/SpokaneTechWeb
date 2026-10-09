@@ -107,13 +107,22 @@ def find_target(
     raise TargetNotFoundError("target_ul not found after maximum retries")
 
 
-def convert_html_to_text(html_content: str) -> str:
+def convert_html_to_text(html_content: str, *, block_separator: str | None = None) -> str:
     """convert html content to plain text
 
     Args:
         html_content (str): html content to convert
+        block_separator (str | None): join block elements with this separator for a compact excerpt
 
     Returns:
         str: plain text content
     """
-    return BeautifulSoup(html_content, "html.parser").get_text()
+    soup = BeautifulSoup(html_content, "html.parser")
+    if block_separator is None:
+        return soup.get_text()
+    for element in soup.find_all(
+        ("p", "div", "li", "br", "h1", "h2", "h3", "h4", "h5", "h6", "blockquote", "section", "article", "td", "th")
+    ):
+        element.insert_before(block_separator)
+        element.insert_after(block_separator)
+    return block_separator.join(soup.get_text().split())
