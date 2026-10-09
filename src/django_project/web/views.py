@@ -130,9 +130,15 @@ class TechEventsView(HtmxOptionMultiFilterView):
     htmx_list_template_name: str = "web/partials/list/events.htm"
     htmx_template_name: str = "web/partials/li/events.htm"
     template_name: str = "web/full/list/events.html"
+    default_display = "list"
 
     def get(self, request, *args, **kwargs):
-        self.queryset = Event.objects.filter(start_datetime__gte=timezone.now())
+        self.queryset = (
+            Event.objects.filter(start_datetime__gte=timezone.now())
+            .select_related("group")
+            .prefetch_related("tags")
+            .order_by("start_datetime", "pk")
+        )
         if kwargs.get("display") == "li" or (not kwargs.get("display") and request.GET.get("display") == "li"):
             kwargs["display"] = "minimal"
         return super().get(request, *args, **kwargs)
@@ -160,6 +166,25 @@ class TechGroupView(HtmxOptionDetailView):
     model = TechGroup
     htmx_template_name: str = "web/partials/detail/group.htm"
     template_name: str = "web/full/detail/group.html"
+
+    def get_queryset(self):
+        return super().get_queryset().prefetch_related("tags", "links")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        now = timezone.now()
+        events = list(
+            Event.objects.filter(group=self.object)
+            .select_related("group")
+            .prefetch_related("tags")
+            .order_by("start_datetime", "pk")
+        )
+        context.update(
+            group_icon=get_icon_classes(self.object.icon),
+            upcoming_events=[event for event in events if event.start_datetime >= now],
+            past_events=[event for event in reversed(events) if event.start_datetime < now],
+        )
+        return context
 
 
 class TechGroupsView(HtmxOptionMultiFilterView):

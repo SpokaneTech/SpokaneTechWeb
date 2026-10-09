@@ -223,3 +223,78 @@ JavaScript errors or failed requests were observed.
 
 Previews: [desktop directory](qa/group-directory-1280.png),
 [mobile directory](qa/group-directory-390.png).
+
+## Event directory redesign
+
+The event list now shares the directory introduction, live result count, subtle
+blue palette, and homepage event cards. Events remain chronological, with a
+three/two/one-column responsive grid. Cards show stored event imagery, group
+imagery or the existing fallback, date badges, organizers, start/end times in
+the application's timezone, available locations, and up to three stored topics.
+The directory variant uses h2 titles and real detail links enhanced with HTMX;
+the homepage keeps its featured card and h3 titles. No mock content was added.
+
+Affected files: `web/views.py`, `web/templates/web/full/list/events.html`,
+`web/templates/web/partials/list/events.htm`, shared `home/event_card.htm`,
+`homepage.css`, and new `tests/unit/web/test_event_directory.py`. Initial pages
+render their content directly. Existing query filters, minimal list display,
+detail routes, HTMX headers, and history are preserved. Group joins and tag
+prefetching bound the directory data to two queries as the list grows. The
+empty state links to the groups directory. No migrations or dependencies.
+
+Validation: **142 tests passed, 12 subtests passed**. Event regression coverage
+checks full/partial rendering, real event metadata, ordering, past-event
+exclusion, filters, minimal display, missing-data fallbacks, empty results, and
+query growth. `mypy src` passes for all 68 files. Ruff, formatting, isort, and
+`git diff --check` pass.
+
+Chromium checks passed at 360, 390, 430, 768, 1024, 1280, and 1440px using the
+copied application's two upcoming events. Verified grid columns, no overflow,
+chronological dates, keyboard detail links, back history, homepage card reuse,
+HTMX Events navigation, empty-state group navigation, and initial rendering
+with JavaScript disabled. No JavaScript errors or failed requests occurred.
+
+Previews: [desktop events](qa/event-directory-1280.png),
+[mobile events](qa/event-directory-390.png).
+
+## Tech group detail redesign
+
+Group detail pages now share the directory palette, typography, spacing, and
+cards. A group logo/icon/initial header includes stored topics and a link back
+to all groups. About content retains the existing rich description; a Connect
+panel displays stored community links when available. Missing descriptions and
+events have explicit empty states. No mock community or event data was added.
+
+Upcoming events reuse the homepage cards with date badges, images or existing
+fallbacks, times, locations and addresses, topics, and internal detail links.
+Original event website links remain separately available. Past events use a
+compact newest-first list with dates, times, locations, detail links, and source
+websites. All upcoming and past records remain available, with no nested scroll
+areas. Semantic headings and keyboard focus styles replace click-only content.
+
+Affected files: `web/views.py`, `web/templates/web/full/detail/group.html`,
+`web/templates/web/partials/detail/group.htm`, shared `home/event_card.htm`,
+`homepage.css`, and new `tests/unit/web/test_group_detail.py`. Initial content
+renders directly; HTMX detail navigation and browser history are preserved.
+Legacy icons use the same normalized class parser as the directory. Related
+group links/topics and event topics are prefetched, and a single timestamp
+separates upcoming and past events. Rendering takes five data queries regardless
+of event/link count. No migrations or dependencies were added.
+
+Validation: **147 tests passed, 14 subtests passed**. Tests cover full and HTMX
+content, retained rich descriptions and real links, icon normalization, event
+ordering and isolation, empty sections, logo images, missing groups, and query
+growth. `mypy src` passes for all 69 files. Ruff, formatting, isort, and diff
+checks pass.
+
+Chromium verified the Python group at 360, 390, 430, 768, 1024, 1280, and 1440px,
+including its full description, community links, and all 21 past events. A
+second real group verified upcoming cards at desktop, tablet, and mobile widths.
+Checks cover no overflow, date ordering, keyboard event navigation, HTMX
+directory/detail navigation, back history, and rendering without JavaScript.
+No JavaScript errors or unexpected request failures; font requests canceled by
+navigation are excluded from request-failure assertions.
+
+Previews: [desktop group detail](qa/group-detail-1280.png),
+[mobile group detail](qa/group-detail-390.png),
+[group with upcoming events](qa/group-detail-upcoming-1280.png).
