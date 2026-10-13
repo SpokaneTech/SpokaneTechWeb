@@ -1,139 +1,56 @@
 {% load tz %}
-<section class="text-center my-5 mx-3">
-    <h1 class="h1 text-primary fw-bold animate__animated animate__fadeIn" style="animation-duration: 0.2s;">{{ title }}</h1>
-    <h4 class="text-secondary fw-bold animate__animated animate__fadeIn" style="animation-duration: 0.3s;">{{ month_name }} {{ year }}</h4>
-</section>
-
-<section class="text-center m-5 animate__fadeIn" style="animation-duration: 0.3s;">
-
-    <div id="calendar-wrapper" class="calendar-container">
-        <style>
-            .calendar-table {
-                box-shadow: 0rem 0.25rem 1rem -0.25rem var(--bs-primary);
-                width: 100%;
-                border-collapse: collapse;
-                table-layout: fixed; 
-            }
-            .calendar-table th,
-            .calendar-table td {
-            border: 1px solid var(--bs-primary);
-            padding: .5rem;
-            }
-
-            .calendar-table thead {
-                background-color: var(--bs-primary);
-                color: var(--bs-light);
-            }
-            .calendar-table thead tr {
-                height: 3rem;
-            }
-            .calendar-table tbody {
-                background-color: #f1f1f1;
-            }
-            .calendar-table tbody tr {
-                height: 4rem;
-            }
-            .calendar-table tbody tr td {
-                vertical-align: top;
-            }
-            .today {
-                color: var(--bs-primary);
-                font-weight: bold;
-                text-decoration: underline;
-            }
-            .cursor-pointer {
-                cursor: pointer;
-            }
-            .event {
-                border: 1px solid var(--bs-primary);
-                margin: .75rem;
-                padding: .25rem;
-                border-radius: .25rem;
-                background-color: var(--bs-primary-bg-subtle);
-                color: var(--bs-primary);
-                transition: transform 0.3s ease;
-                font-size: smaller;
-            }
-            .event:hover {
-                transform: scale(1.1);
-            }
-            .nav-links {
-                margin-bottom: .5rem;
-            }
-        </style>  
-
-        <div class="container-fluid fade-in-blur" style="--fade-duration: .5s;">
-            <div class="text-end nav-links">
-                <a 
-                {% if use_htmx %}
-                hx-get="{{ today_url }}" hx-target="#body_main"
-                {% else %}
-                href="{{ today_url }}" 
-                {% endif %}
-                class="me-3" style="text-decoration: none">
-                    today
-                </a>
-                <a 
-                {% if use_htmx %}
-                hx-get="{{ prev_month_url }}" hx-target="#body_main"
-                {% else %}
-                href="{{ prev_month_url }}"
-                {% endif %}
-                class="me-2" title="previous month">
-                    <i class="fa-solid fa-angle-left"></i>
-                </a>
-                <a 
-                {% if use_htmx %}
-                hx-get="{{ next_month_url }}" hx-target="#body_main"
-                {% else %}
-                href="{{ next_month_url }}"
-                {% endif %}
-                class="ms-2" title="next month">
-                    <i class="fa-solid fa-angle-right"></i>
-                </a>
+{% timezone "America/Los_Angeles" %}
+<div class="st-directory st-calendar">
+    <section class="st-container" aria-labelledby="calendar-title">
+        <div class="st-directory-header">
+            <div>
+                <h1 id="calendar-title">{{ title }}</h1>
+                <p class="st-section-description">Meetups, workshops, and connections across Spokane's tech community.</p>
+                <p class="st-calendar-timezone">All times are Pacific.</p>
             </div>
-            <table class="calendar-table">
-                <thead>
-                    <tr class="">
-                        <th class="" scope="col">Mon</th>
-                        <th class="" scope="col">Tue</th>
-                        <th class="" scope="col">Wed</th>
-                        <th class="" scope="col">Thu</th>
-                        <th class="" scope="col">Fri</th>
-                        <th class="" scope="col">Sat</th>
-                        <th class="" scope="col">Sun</th>
-                    </tr>
-                </thead>
+            <a class="st-text-link" href="{% url 'web:get_events' display='list' %}" hx-get="{% url 'web:get_events' display='list' %}" hx-target="#body_main" hx-push-url="true">View upcoming events &rarr;</a>
+        </div>
+        <div class="st-calendar-toolbar">
+            <div class="st-calendar-month"><h2 id="calendar-month">{{ month_name }} {{ year }}</h2><span class="st-directory-total">{{ event_list|length }} event{{ event_list|length|pluralize }}</span></div>
+            <nav class="st-calendar-navigation" aria-label="Calendar month navigation">
+                <a class="st-calendar-today" href="{{ today_url }}" hx-get="{{ today_url }}" hx-target="#body_main" hx-push-url="true">Today</a>
+                {% if prev_month_url %}<a class="st-carousel-button" href="{{ prev_month_url }}" hx-get="{{ prev_month_url }}" hx-target="#body_main" hx-push-url="true" aria-label="Previous month"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 6 9 12 15 18" /></svg></a>{% endif %}
+                {% if next_month_url %}<a class="st-carousel-button" href="{{ next_month_url }}" hx-get="{{ next_month_url }}" hx-target="#body_main" hx-push-url="true" aria-label="Next month"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6 15 12 9 18" /></svg></a>{% endif %}
+            </nav>
+        </div>
+        <div id="calendar-wrapper" class="st-calendar-grid">
+            <table class="st-calendar-table">
+                <caption class="visually-hidden">{{ month_name }} {{ year }} events, Pacific time</caption>
+                <thead><tr><th scope="col">Mon</th><th scope="col">Tue</th><th scope="col">Wed</th><th scope="col">Thu</th><th scope="col">Fri</th><th scope="col">Sat</th><th scope="col">Sun</th></tr></thead>
                 <tbody>
-                    {% for week in cal_data_str %}
-                        <tr>
+                    {% for week in calendar_weeks %}
+                    <tr>
                         {% for day in week %}
-                            <td>
-                                {% if day %}
-                                <div class="text-end {% if day == today|timezone:"America/Los_Angeles"|date:"j" %}today{% endif %}">
-                                    {{ day }}
-                                </div>
-                                {% endif %}
-                                {% for event in event_list %}
-                                    {% if event.start_datetime|timezone:"America/Los_Angeles"|date:"j" == day %}   
-                                        {% if event_detail_url %}
-                                    <div class="event hvr-grow d-block cursor-pointer"
-                                    hx-get="{% url event_detail_url event.pk %}"
-                                    hx-target="#modal_wrapper"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#modal_wrapper">{{ event }}
-                                    </div>
-                                        {% else %}
-                                        <div class="event">{{ event }}</div>
-                                        {% endif %}
-                                    {% endif %}
-                                {% endfor %}
-                            </td>
+                        <td{% if not day.day %} class="st-calendar-padding"{% endif %}>
+                            {% if day.day %}
+                            <time class="st-calendar-day{% if day.is_today %} st-calendar-current-day{% endif %}" datetime="{{ day.date|date:'Y-m-d' }}"{% if day.is_today %} aria-current="date"{% endif %}>{{ day.day }}{% if day.is_today %}<span class="visually-hidden"> (today)</span>{% endif %}</time>
+                            <div class="st-calendar-day-events">
+                                {% for event in day.events %}{% include "web/partials/home/calendar_event.htm" with compact=True %}{% endfor %}
+                            </div>
+                            {% endif %}
+                        </td>
                         {% endfor %}
-                        </tr>
+                    </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
-    </div>
-</section>
+        <div class="st-calendar-agenda" aria-labelledby="calendar-month">
+            {% for day in agenda_days %}
+            <section class="st-calendar-agenda-day" aria-labelledby="agenda-day-{{ day.day }}">
+                <h3 id="agenda-day-{{ day.day }}">{{ day.date|date:"l, M j" }}{% if day.is_today %}<span class="st-calendar-today-label">Today</span>{% endif %}</h3>
+                <div class="st-calendar-agenda-events">
+                    {% for event in day.events %}{% include "web/partials/home/calendar_event.htm" with compact=False %}{% endfor %}
+                </div>
+            </section>
+            {% endfor %}
+        </div>
+        {% if not event_list %}<div class="st-empty-state st-calendar-empty"><h3>No events listed for {{ month_name }}.</h3><p>Try another month or explore local groups for more ways to connect.</p><a class="st-text-link" href="{% url 'web:get_techgroups' display='list' %}" hx-get="{% url 'web:get_techgroups' display='list' %}" hx-target="#body_main" hx-push-url="true">Explore tech groups &rarr;</a></div>{% endif %}
+    </section>
+</div>
+{% endtimezone %}

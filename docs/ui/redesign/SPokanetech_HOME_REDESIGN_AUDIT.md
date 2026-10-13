@@ -298,3 +298,122 @@ navigation are excluded from request-failure assertions.
 Previews: [desktop group detail](qa/group-detail-1280.png),
 [mobile group detail](qa/group-detail-390.png),
 [group with upcoming events](qa/group-detail-upcoming-1280.png).
+
+### Tighter detail layout and event tabs
+
+Upcoming and past events now occupy separate tabs with live counts. Upcoming
+is selected initially; keyboard arrows, Home, and End switch tabs. Tab panels
+have accessible labels and focus support. The local `event-tabs.js` enhancement
+initializes after initial rendering, HTMX swaps, and history restoration; a
+restored page retains its selected tab. Without JavaScript the controls remain
+hidden and both event sections stay available with their original headings.
+
+Reduced header/panel spacing and kept the mobile logo beside the title. Past
+events now have separate cards with 12px gaps, full-item hover/focus backgrounds,
+borders, and shadows. Their title links cover the whole item while website links
+remain independently clickable. Upcoming cards get the same hover/focus effect;
+their original website links now live inside the cards. Homepage and directory
+card layouts are preserved. All event records and ordering remain intact.
+
+Affected files: the group detail partial, shared event card, `homepage.css`,
+`base.htm`, and new `event-tabs.js`. No query or dependency changes.
+Validation: **20 relevant tests passed, 12 subtests passed**; JavaScript syntax
+and diff checks passed. Chromium verified both tabs at 360, 390, 768, 1280, and
+1440px, no overflow, item spacing, full-card hover and click behavior, independent
+website links, keyboard tabs, HTMX navigation/history, and the no-script fallback.
+No JavaScript errors were observed.
+
+Previews: [desktop tabs](qa/group-tabs-1280.png), [mobile tabs](qa/group-tabs-390.png),
+[past event cards](qa/group-tabs-past-1280.png),
+[upcoming event card](qa/group-tabs-with-events-1280.png).
+
+### Shared card hover and focus
+
+Moved the detail-page card effect into the shared event/group card rules in
+`homepage.css`. Homepage, group directory, and event directory cards now use
+the same pale-blue hover/focus background, action-blue border, and subtle shadow
+as group-detail event items. The featured dark homepage card uses navy-soft for
+its interactive background to preserve white-text contrast. Reduced motion
+continues to disable transitions.
+
+Chromium verified identical computed hover and keyboard-focus styles across
+the light cards on all three pages, dark featured-card colors, no overflow at
+390px, reduced-motion behavior, and no JavaScript errors. Diff checks passed.
+
+## Homepage 30-day event carousel
+
+“Next up in Spokane Tech” now renders all events starting from the request's
+current timestamp up to, but excluding, 30 days later. The four-event cap is
+removed. The full event directory, group upcoming counts, and global upcoming
+total continue to cover all future events. The homepage introduction and empty
+state explain the 30-day window, while its all-events link remains available.
+
+Events use the groups carousel's shared native-scrolling enhancement and 32px
+chevron controls. Both tracks have hidden scrollbars, snapping, independent
+boundary states, arrow/Home/End keyboard controls, reduced-motion behavior, and
+HTMX/history initialization. Events use wider three-column desktop slots,
+two-column tablet slots, and a partial next card on mobile. The first event
+keeps its featured appearance. Native scrolling works without JavaScript.
+
+Affected files: `web/views.py`, the homepage partial, `homepage.css`,
+`group-carousel.js`, and homepage tests. Both tracks now use shared
+`data-carousel` and `data-carousel-scroll` attributes. Removed obsolete homepage
+event-grid styles. Existing card hover styles and real event metadata remain.
+
+Validation: **147 tests passed, 14 subtests passed**. Regression checks cover
+both window boundaries, all matching events beyond four, chronological order,
+unchanged global/group totals, and bounded query growth. The summer timezone
+test now uses a summer request timestamp to keep its event inside the window.
+Ruff, formatting, JavaScript syntax, `mypy src`, and diff checks passed.
+
+Chromium verified 360, 390, 430, 768, 1024, 1280, and 1440px with stored event
+and group data: one event row, no page overflow, hidden scrollbar, controls only
+when needed, first/last boundary states, independent tracks, keyboard scrolling,
+HTMX navigation/history, and native scrolling with scripts disabled. No
+JavaScript errors were observed.
+
+Previews: [desktop event carousel](qa/event-carousel-1280.png),
+[mobile event carousel](qa/event-carousel-390.png).
+
+## Calendar repair and redesign
+
+The old calendar expected `cal_data_str` and direct event objects, while the
+installed helper supplies `cal_data` and dictionaries wrapping each event. Its
+full-page template also loaded the current-month route rather than displaying
+the requested month. The application now builds a dedicated month/day context
+and renders the selected month immediately for full-page and HTMX requests.
+
+Event queries use Pacific-time midnight boundaries and each event's local date,
+including UTC dates that fall in a different Pacific month. Today highlights
+compare the complete local date. Previous/next/Today links retain real hrefs,
+HTMX navigation, and history. Invalid dates return 400. Event tiles keep the
+existing detail modals, with real internal detail URLs as their hrefs.
+
+The page shares the directory header, restrained blue palette, typography, and
+whole-card hover/focus treatment. Desktop shows a Monday-first month grid with
+event times and organizers. Below 768px a day-by-day agenda shows start/end times
+and available locations without horizontal overflow. One responsive template
+replaces user-agent-dependent calendar markup; the former mobile partial is a
+compatibility include. Empty months have an explanatory state. All content comes
+from stored events; no migrations or dependencies were added.
+
+Affected files: `web/views.py`, the full calendar template, desktop/mobile
+calendar partials, new `home/calendar_event.htm`, `homepage.css`, and new
+`tests/unit/web/test_calendar.py`. Events and related organizers load in one
+data query regardless of event count. Explicit timezone labels also handle the
+repeated daylight-saving hour, where Django's `date:"T"` filter yields no label.
+
+Validation: **160 tests passed, 23 subtests passed**. New coverage verifies real
+event rendering, initial and HTMX months, Pacific month/day boundaries, current
+month routes, today highlighting, year rollover, DST's repeated hour, empty
+months, invalid dates, and constant query counts. Ruff, formatting, `mypy src`
+(70 files), and diff checks passed.
+
+Chromium checks passed at 360, 390, 430, 768, 1024, 1280, and 1440px with the
+copied application's seven October events. Verified grid/agenda switching,
+hover, no overflow, month navigation, keyboard event modals, full-detail links,
+history, empty months, mobile modals, and no-script rendering/navigation. The
+final timezone change was rechecked at 390 and 1280px. No JavaScript errors.
+
+Previews: [desktop calendar](qa/calendar-1280.png),
+[mobile agenda](qa/calendar-390.png).

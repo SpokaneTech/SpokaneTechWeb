@@ -1,19 +1,19 @@
-// Enhance native horizontal scrolling without changing group links or requiring a library.
+// Enhance native horizontal scrolling without changing card links or requiring a library.
 (function () {
     function updateCarousel(track) {
-        const controls = track.closest('.st-groups').querySelector('.st-carousel-controls');
+        const controls = track.closest('section').querySelector('.st-carousel-controls');
         const maximum = track.scrollWidth - track.clientWidth;
         controls.hidden = maximum <= 1;
-        controls.querySelector('[data-group-scroll="-1"]').disabled = track.scrollLeft <= 1;
-        controls.querySelector('[data-group-scroll="1"]').disabled = track.scrollLeft >= maximum - 1;
+        controls.querySelector('[data-carousel-scroll="-1"]').disabled = track.scrollLeft <= 1;
+        controls.querySelector('[data-carousel-scroll="1"]').disabled = track.scrollLeft >= maximum - 1;
     }
 
     function updateAll() {
-        document.querySelectorAll('.st-group-carousel').forEach(updateCarousel);
+        document.querySelectorAll('[data-carousel]').forEach(updateCarousel);
     }
 
     function cardStep(track) {
-        return track.querySelector('.st-group-card').getBoundingClientRect().width
+        return track.querySelector('.st-group-card, .st-event-card').getBoundingClientRect().width
             + parseFloat(getComputedStyle(track).columnGap);
     }
 
@@ -22,17 +22,17 @@
     }
 
     document.addEventListener('click', function (event) {
-        const button = event.target.closest('[data-group-scroll]');
+        const button = event.target.closest('[data-carousel-scroll]');
         if (!button) return;
         const track = document.getElementById(button.getAttribute('aria-controls'));
         const step = cardStep(track);
         const visibleCards = Math.max(1, Math.floor(track.clientWidth / step));
-        track.scrollBy(scrollOptions(Number(button.dataset.groupScroll) * visibleCards * step));
+        track.scrollBy(scrollOptions(Number(button.dataset.carouselScroll) * visibleCards * step));
     });
 
     document.addEventListener('keydown', function (event) {
         const track = event.target;
-        if (!track.matches('.st-group-carousel')) return;
+        if (!track.matches('[data-carousel]')) return;
         if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
             event.preventDefault();
             track.scrollBy(scrollOptions((event.key === 'ArrowLeft' ? -1 : 1) * cardStep(track)));
@@ -43,7 +43,7 @@
     });
 
     document.addEventListener('scroll', function (event) {
-        if (event.target instanceof Element && event.target.matches('.st-group-carousel')) {
+        if (event.target instanceof Element && event.target.matches('[data-carousel]')) {
             updateCarousel(event.target);
         }
     }, true);

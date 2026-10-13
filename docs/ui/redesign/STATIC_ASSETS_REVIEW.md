@@ -59,3 +59,8 @@ Chromium verified the actual CDN scripts, icon fonts, responsive homepage at 360
 The installed handyhelpers `CalendarView` supplies `cal_data` and an `event_list` of dictionaries containing `object`, `day`, `month`, `year`, and `pk`. The existing desktop calendar template expects `cal_data_str` and direct event model objects. A real October 2026 request returned 200 but rendered no event controls despite event records in the database snapshot.
 
 This is a pre-existing view/template data-contract mismatch, independent of CDN asset loading. No calendar templates or backend views were changed in this asset-delivery update. Calendar compatibility should be repaired and covered by a positive event-rendering test separately.
+
+Resolved in the subsequent calendar redesign: the application now builds its
+own Pacific-time month/day context and renders real events directly. See the
+[calendar audit](SPokanetech_HOME_REDESIGN_AUDIT.md#calendar-repair-and-redesign)
+for implementation and validation.

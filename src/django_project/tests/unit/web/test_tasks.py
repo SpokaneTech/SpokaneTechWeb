@@ -1,9 +1,10 @@
 import os
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from unittest.mock import patch
 
 import django
-from django.test import TestCase
+from django.test import TestCase, override_settings
 
 BASE_DIR = Path(__file__).parents[4]
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.settings")
@@ -12,7 +13,15 @@ os.environ.setdefault("ENV_PATH", f"{BASE_DIR}/envs/.env.test")
 django.setup()
 from model_bakery import baker
 from web.models import Event
-from web.tasks import ingest_future_eventbrite_events, ingest_future_meetup_events, post_event_to_linkedin
+from web.signals import event_post_to_linkedin_signal
+from web.tasks import (
+    ingest_future_eventbrite_events,
+    ingest_future_meetup_events,
+    launch_reminders_for_tomorrows_events,
+    post_event_to_discord,
+    post_event_to_linkedin,
+    post_weekly_event_summary_to_discord,
+)
 from web.utilities.scrapers.meetup import get_event_information
 
 
@@ -93,7 +102,9 @@ class TestIngestFutureEventbriteEvents(TestCase):
 
     @patch("web.tasks.get_event_details")
     @patch("web.tasks.get_events_for_organization")
-    def test_ingests_event_with_null_primary_venue_address(self, mock_get_events_for_organization, mock_get_event_details):
+    def test_ingests_event_with_null_primary_venue_address(
+        self, mock_get_events_for_organization, mock_get_event_details
+    ):
         mock_get_events_for_organization.return_value = [
             {
                 "id": "evt_456",
@@ -119,9 +130,13 @@ class TestIngestFutureEventbriteEvents(TestCase):
 
     @patch("web.tasks.get_event_details")
     @patch("web.tasks.get_events_for_organization")
-    def test_truncates_eventbrite_fields_to_model_limits(self, mock_get_events_for_organization, mock_get_event_details):
+    def test_truncates_eventbrite_fields_to_model_limits(
+        self, mock_get_events_for_organization, mock_get_event_details
+    ):
         long_location_name = "LaunchPad INW Eventbrite Venue Name That Is Much Longer Than Sixty Four Characters"
-        long_location_address = "123 Long Address Lane, Spokane, WA 99201, United States, Building 7, Floor 12, Suite 1200"
+        long_location_address = (
+            "123 Long Address Lane, Spokane, WA 99201, United States, Building 7, Floor 12, Suite 1200"
+        )
 
         mock_get_events_for_organization.return_value = [
             {
@@ -232,3 +247,85 @@ class TestPostEventToLinkedIn(TestCase):
 
         self.assertEqual(result, f"POST_TO_LINKEDIN is False. Skipping LinkedIn post for event with pk {event.pk}.")
         mock_linkedin_client.assert_not_called()
+
+
+@override_settings(DISCORD_WEBHOOK_URL="https://example.com/webhook")
+class TestDiscordPostingSetting(TestCase):
+    def setUp(self):
+        self.now = datetime(2026, 1, 5, 18, tzinfo=timezone.utc)
+        self.group = baker.make("web.TechGroup", name="Local builders", enabled=True)
+        self.event = baker.make("web.Event", group=self.group, start_datetime=self.now + timedelta(days=1))
+
+    @override_settings(POST_TO_DISCORD=False)
+    @patch("web.tasks.DiscordNotifier")
+    def test_disabled_tasks_skip_before_database_or_notifier_work(self, notifier):
+        with self.assertNumQueries(0):
+            result = post_event_to_discord(999999)
+            summary = post_weekly_event_summary_to_discord()
+        self.assertIn("POST_TO_DISCORD is False", result)
+        self.assertIn("POST_TO_DISCORD is False", summary)
+        notifier.assert_not_called()
+
+    @override_settings(POST_TO_DISCORD=True)
+    @patch("web.tasks.DiscordNotifier")
+    def test_enabled_event_task_posts_new_events_and_reminders(self, notifier):
+        for is_new in (True, False):
+            with self.subTest(is_new=is_new):
+                notifier.reset_mock()
+                result = post_event_to_discord(self.event.pk, is_new=is_new)
+                notifier.assert_called_once_with(webhook_url="https://example.com/webhook")
+                notifier.return_value.post_event.assert_called_once_with(event=self.event, is_new=is_new)
+                self.assertIn("posted to Discord successfully", result)
+
+    @override_settings(POST_TO_DISCORD=True, DISCORD_WEBHOOK_URL=None)
+    @patch("web.tasks.DiscordNotifier")
+    def test_enabled_tasks_still_require_webhook(self, notifier):
+        for result in (post_event_to_discord(self.event.pk), post_weekly_event_summary_to_discord()):
+            self.assertIn("webhook URL not configured", result)
+        notifier.assert_not_called()
+
+    @override_settings(POST_TO_DISCORD=True)
+    @patch("web.tasks.DiscordNotifier")
+    def test_enabled_weekly_summary_posts_matching_events(self, notifier):
+        with patch("web.tasks.timezone.now", return_value=self.now):
+            result = post_weekly_event_summary_to_discord()
+        notifier.assert_called_once_with(webhook_url="https://example.com/webhook")
+        events = notifier.return_value.post_weekly_summary.call_args.kwargs["event_list"]
+        self.assertEqual(list(events), [self.event])
+        self.assertIn("posted to Discord successfully", result)
+
+    def test_reminders_only_queue_discord_when_enabled(self):
+        for enabled in (False, True):
+            with (
+                self.subTest(enabled=enabled),
+                override_settings(POST_TO_DISCORD=enabled),
+                patch("web.tasks.timezone.now", return_value=self.now),
+                patch("web.tasks.post_event_to_discord.s") as discord,
+                patch("web.tasks.post_event_to_linkedin.s") as linkedin,
+            ):
+                launch_reminders_for_tomorrows_events()
+                if enabled:
+                    discord.assert_called_once_with(self.event.pk, is_new=False)
+                    discord.return_value.apply_async.assert_called_once()
+                else:
+                    discord.assert_not_called()
+                linkedin.assert_called_once_with(self.event.pk, is_new=False)
+                linkedin.return_value.apply_async.assert_called_once()
+
+    def test_creation_signal_only_queues_discord_when_enabled(self):
+        for enabled in (False, True):
+            with (
+                self.subTest(enabled=enabled),
+                override_settings(POST_TO_DISCORD=enabled),
+                patch("web.signals.post_event_to_discord.s") as discord,
+                patch("web.signals.post_event_to_linkedin.s") as linkedin,
+                self.captureOnCommitCallbacks(execute=True),
+            ):
+                event_post_to_linkedin_signal(Event, self.event, created=True)
+            if enabled:
+                discord.assert_called_once_with(self.event.pk, is_new=True)
+                discord.return_value.apply_async.assert_called_once()
+            else:
+                discord.assert_not_called()
+            linkedin.assert_called_once_with(self.event.pk, is_new=True)
+            linkedin.return_value.apply_async.assert_called_once()

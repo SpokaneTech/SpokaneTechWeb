@@ -5,6 +5,7 @@ import random
 import re
 import time
 from datetime import timedelta
+from datetime import timezone as datetime_timezone
 from typing import Any
 from urllib.parse import urlparse
 
@@ -277,6 +278,9 @@ def post_event_to_linkedin(event_pk: int, is_new: bool) -> str:
 @shared_task(time_limit=300, max_retries=0, name="web.post_event_to_discord")
 def post_event_to_discord(event_pk: int, is_new: bool = True) -> str:
     """post an event to Discord via webhook"""
+    if not settings.POST_TO_DISCORD:
+        return f"POST_TO_DISCORD is False. Skipping Discord post for event with pk {event_pk}."
+
     event: Event = Event.objects.get(pk=event_pk)
     if not event:
         return f"Event with pk {event_pk} not found."
@@ -309,8 +313,8 @@ def launch_reminders_for_tomorrows_events() -> str:
     tomorrow_end_pacific: timezone.datetime = tomorrow_start_pacific + timedelta(days=1)
 
     # Convert to UTC
-    start_utc: timezone.datetime = convert_to_pacific(tomorrow_start_pacific).astimezone(timezone.utc)
-    end_utc: timezone.datetime = convert_to_pacific(tomorrow_end_pacific).astimezone(timezone.utc)
+    start_utc: timezone.datetime = convert_to_pacific(tomorrow_start_pacific).astimezone(datetime_timezone.utc)
+    end_utc: timezone.datetime = convert_to_pacific(tomorrow_end_pacific).astimezone(datetime_timezone.utc)
 
     # Filter events that start anytime tomorrow
     event_list: BaseManager[Event] = Event.objects.filter(
@@ -318,8 +322,9 @@ def launch_reminders_for_tomorrows_events() -> str:
     )
     for event in event_list:
         # post reminders to Discord
-        discord_job: Any = post_event_to_discord.s(event.pk, is_new=False)
-        discord_job.apply_async()
+        if settings.POST_TO_DISCORD:
+            discord_job: Any = post_event_to_discord.s(event.pk, is_new=False)
+            discord_job.apply_async()
 
         # post reminders to LinkedIn
         linkedin_job: Any = post_event_to_linkedin.s(event.pk, is_new=False)
@@ -359,6 +364,11 @@ def post_event_to_spug_task(event_pk: int) -> str:
 @shared_task(time_limit=900, max_retries=3, name="web.post_weekly_event_summary_to_discord")
 def post_weekly_event_summary_to_discord() -> str:
     """Posts a summary of the week's events to Discord."""
+    if not settings.POST_TO_DISCORD:
+        return "POST_TO_DISCORD is False. Skipping weekly Discord summary."
+    if not settings.DISCORD_WEBHOOK_URL:
+        return "Discord webhook URL not configured in settings. Skipping post."
+
     # Get the current time in Pacific Time
     now_pacific: timezone.datetime = convert_to_pacific(timezone.now())
 
@@ -367,8 +377,8 @@ def post_weekly_event_summary_to_discord() -> str:
     week_end_pacific: timezone.datetime = week_start_pacific + timezone.timedelta(days=7)
 
     # Convert to UTC
-    start_utc: timezone.datetime = convert_to_pacific(week_start_pacific).astimezone(timezone.utc)
-    end_utc: timezone.datetime = convert_to_pacific(week_end_pacific).astimezone(timezone.utc)
+    start_utc: timezone.datetime = convert_to_pacific(week_start_pacific).astimezone(datetime_timezone.utc)
+    end_utc: timezone.datetime = convert_to_pacific(week_end_pacific).astimezone(datetime_timezone.utc)
 
     # Filter events that start within the week
     event_list: BaseManager[Event] = Event.objects.filter(

@@ -33,24 +33,25 @@
             </aside>
             {% endif %}
         </div>
-        <div id="events_section" class="st-group-event-sections">
-            <section aria-labelledby="group-upcoming-title">
+        <div id="events_section" class="st-group-event-sections" data-event-tabs>
+            <div class="st-group-event-tabs" aria-label="Group events" hidden>
+                <button type="button" id="upcoming-tab-{{ object.id }}" aria-controls="upcoming-panel-{{ object.id }}" data-event-tab>Upcoming <span>{{ upcoming_events|length }}</span></button>
+                <button type="button" id="past-tab-{{ object.id }}" aria-controls="past-panel-{{ object.id }}" data-event-tab>Past <span>{{ past_events|length }}</span></button>
+            </div>
+            <section id="upcoming-panel-{{ object.id }}" aria-labelledby="group-upcoming-title" data-event-panel>
                 <div class="st-group-section-header">
                     <h2 id="group-upcoming-title">Upcoming events</h2>
                     <span class="st-directory-total">{{ upcoming_events|length }} upcoming event{{ upcoming_events|length|pluralize }}</span>
                 </div>
                 <div id="upcoming-events-{{ object.id }}" class="st-event-directory-grid">
                     {% for event in upcoming_events %}
-                    <div class="st-group-upcoming-item">
                         {% include "web/partials/home/event_card.htm" with detail=True directory=False featured=False %}
-                        {% if event.url %}<a class="st-group-event-source" href="{{ event.url }}" target="_blank" rel="noopener">Event website <span aria-hidden="true">&nearr;</span><span class="visually-hidden"> for {{ event.name }} (opens in a new tab)</span></a>{% endif %}
-                    </div>
                     {% empty %}
                     <div class="st-empty-state"><p>No upcoming events are listed yet. Check back for the next meetup.</p></div>
                     {% endfor %}
                 </div>
             </section>
-            <section aria-labelledby="group-past-title">
+            <section id="past-panel-{{ object.id }}" aria-labelledby="group-past-title" data-event-panel>
                 <div class="st-group-section-header">
                     <h2 id="group-past-title">Past events</h2>
                     <span class="st-group-history-count">{{ past_events|length }} past event{{ past_events|length|pluralize }}</span>
@@ -62,7 +63,7 @@
                         <li>
                             <time class="st-group-past-date" datetime="{{ event.start_datetime|localtime|date:'c' }}">{{ event.start_datetime|date:"M j, Y" }}<span>{{ event.start_datetime|time:"g:i A" }} {{ event.start_datetime|date:"T" }}</span></time>
                             <div class="st-group-past-info">
-                                <h3><a href="{{ event.get_absolute_url }}" hx-get="{{ event.get_absolute_url }}" hx-target="#body_main" hx-push-url="true">{{ event.name }}</a></h3>
+                                <h3><a class="st-group-past-link" href="{{ event.get_absolute_url }}" hx-get="{{ event.get_absolute_url }}" hx-target="#body_main" hx-push-url="true">{{ event.name }}</a></h3>
                                 {% if event.location_name or event.location_address %}<p>{{ event.location_name|default:event.location_address }}{% if event.location_name and event.location_address %} &middot; {{ event.location_address }}{% endif %}</p>{% endif %}
                             </div>
                             {% if event.url %}<a class="st-group-event-source" href="{{ event.url }}" target="_blank" rel="noopener">Event website <span aria-hidden="true">&nearr;</span><span class="visually-hidden"> for {{ event.name }} (opens in a new tab)</span></a>{% endif %}

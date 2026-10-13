@@ -1,7 +1,8 @@
 """Homepage data, navigation, and query regression coverage."""
 
 import os
-from datetime import datetime, timedelta, timezone as datetime_timezone
+from datetime import datetime, timedelta
+from datetime import timezone as datetime_timezone
 from unittest.mock import patch
 
 import django
@@ -15,7 +16,6 @@ from django.test import TestCase, override_settings
 from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 from model_bakery import baker
-
 from web.models import Event, TechGroup
 
 
@@ -62,22 +62,32 @@ class HomepageTests(TestCase):
                 else:
                     self.assertContains(response, "<html")
 
-    def test_upcoming_order_limit_boundary_and_total_counts(self):
+    def test_thirty_day_window_order_boundaries_and_total_counts(self):
         later = baker.make("web.Event", group=self.group, start_datetime=self.now + timedelta(days=2), _quantity=4)
         boundary = baker.make("web.Event", group=None, start_datetime=self.now)
+        last_in_window = baker.make(
+            "web.Event", group=self.group, start_datetime=self.now + timedelta(days=30) - timedelta(microseconds=1)
+        )
+        cutoff = baker.make("web.Event", group=self.group, start_datetime=self.now + timedelta(days=30))
+        distant = baker.make("web.Event", group=self.group, start_datetime=self.now + timedelta(days=31))
         response = self.get_home()
         displayed = response.context["upcoming_events"]
-        self.assertEqual([event.pk for event in displayed], [boundary.pk, self.future.pk, later[0].pk, later[1].pk])
-        self.assertEqual(response.context["upcoming_event_count"], 6)
+        self.assertEqual(
+            [event.pk for event in displayed],
+            [boundary.pk, self.future.pk, *[event.pk for event in later], last_in_window.pk],
+        )
+        self.assertNotContains(response, cutoff.name)
+        self.assertNotContains(response, distant.name)
+        self.assertEqual(response.context["upcoming_event_count"], 9)
         self.assertEqual(response.context["active_group_count"], 2)
         counts = {group.pk: group.upcoming_event_count for group in response.context["homepage_groups"]}
-        self.assertEqual(counts, {self.group.pk: 5, self.other_group.pk: 0})
+        self.assertEqual(counts, {self.group.pk: 8, self.other_group.pk: 0})
 
     def test_empty_events_and_groups_are_usable(self):
         Event.objects.all().delete()
         TechGroup.objects.all().update(enabled=False)
         response = self.get_home()
-        self.assertContains(response, "There are no upcoming events listed right now.")
+        self.assertContains(response, "There are no events listed in the next 30 days.")
         self.assertContains(response, "Local groups will appear here")
         self.assertContains(response, reverse("web:event_calendar", kwargs={"year": 0, "month": 0}))
         self.assertContains(response, reverse("web:get_techgroups", kwargs={"display": "list"}))
@@ -100,6 +110,7 @@ class HomepageTests(TestCase):
         self.assertContains(response, 'datetime="2026-01-08T18:30:00-08:00"')
         self.future.start_datetime = datetime(2026, 7, 9, 1, 30, tzinfo=datetime_timezone.utc)
         self.future.save()
+        self.now = datetime(2026, 7, 8, 18, 0, tzinfo=datetime_timezone.utc)
         response = self.get_home()
         self.assertContains(response, "6:30 PM PDT")
         self.assertContains(response, 'datetime="2026-07-08T18:30:00-07:00"')
@@ -135,7 +146,7 @@ class HomepageTests(TestCase):
             event.tags.add(self.tag)
         with CaptureQueriesContext(connection) as large:
             response = self.get_home()
-        self.assertEqual(len(response.context["upcoming_events"]), 4)
+        self.assertEqual(len(response.context["upcoming_events"]), 9)
         self.assertEqual(len(response.context["homepage_groups"]), 10)
         self.assertContains(response, self.group.get_absolute_url())
         self.assertContains(response, self.other_group.get_absolute_url())

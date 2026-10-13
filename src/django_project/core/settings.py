@@ -288,6 +288,7 @@ CELERY_ENABLE_UTC = True
 SALT_KEY: str = env.str("SALT_KEY", "this_should_be_changed")
 
 # third party integrations
+POST_TO_DISCORD: bool = env.bool("POST_TO_DISCORD", False)
 DISCORD_WEBHOOK_URL: str | None = env.str("DISCORD_WEBHOOK_URL", None)  # for the general channel
 EVENTBRITE_API_KEY: str | None = env.str("EVENTBRITE_API_KEY", None)
 EVENTBRITE_EVENT_LOOKAHEAD_DAYS: int = env.int("EVENTBRITE_EVENT_LOOKAHEAD_DAYS", 60)

@@ -27,12 +27,19 @@
                 <div>
                     <!-- <p class="st-eyebrow">What's happening</p> -->
                     <h2 id="events-title">Next up in Spokane Tech</h2>
+                    <p class="st-section-description">Meetups, workshops, and more.</p>
+                    <a class="st-text-link st-events-all-link" href="{% url 'web:get_events' display='list' %}">View all upcoming events <span aria-hidden="true">&rarr;</span></a>
                 </div>
-                <a class="st-text-link" href="{% url 'web:get_events' display='list' %}">View all upcoming events <span
-                        aria-hidden="true">&rarr;</span></a>
+                <div class="st-group-navigation">
+                    <div class="st-carousel-controls" hidden>
+                        <button class="st-carousel-button" type="button" aria-label="Scroll events left" aria-controls="event-carousel" data-carousel-scroll="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 6 9 12 15 18" /></svg></button>
+                        <button class="st-carousel-button" type="button" aria-label="Scroll events right" aria-controls="event-carousel" data-carousel-scroll="1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6 15 12 9 18" /></svg></button>
+                    </div>
+                </div>
             </div>
             {% if upcoming_events %}
-            <div class="st-event-grid">
+            <div class="st-event-carousel" id="event-carousel" data-carousel tabindex="0" role="region" aria-labelledby="events-title" aria-describedby="event-carousel-help">
+                <p class="visually-hidden" id="event-carousel-help">Scroll left or right to explore events in the next 30 days. Use the arrow keys when this region is focused.</p>
                 {% for event in upcoming_events %}
                 {% include "web/partials/home/event_card.htm" with featured=forloop.first %}
                 {% endfor %}
@@ -40,7 +47,7 @@
             {% else %}
             <div class="st-empty-state">
                 <h3>More connections are on the way.</h3>
-                <p>There are no upcoming events listed right now. Find a local group or check the calendar for more ways
+                <p>There are no events listed in the next 30 days. Find a local group or check the calendar for more ways
                     to connect.</p>
                 <div class="st-actions"><a class="st-text-link"
                         href="{% url 'web:get_techgroups' display='list' %}">Explore local groups &rarr;</a><a
@@ -62,13 +69,13 @@
                     <!-- <a class="st-text-link" href="{% url 'web:get_techgroups' display='list' %}">View all groups <span aria-hidden="true">&rarr;</span></a> -->
                     <div class="st-carousel-controls" hidden>
                         <button class="st-carousel-button" type="button" aria-label="Scroll groups left"
-                            aria-controls="group-carousel" data-group-scroll="-1"><svg viewBox="0 0 24 24" fill="none"
+                            aria-controls="group-carousel" data-carousel-scroll="-1"><svg viewBox="0 0 24 24" fill="none"
                                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                                 aria-hidden="true" focusable="false">
                                 <path d="M15 6 9 12 15 18" />
                             </svg></button>
                         <button class="st-carousel-button" type="button" aria-label="Scroll groups right"
-                            aria-controls="group-carousel" data-group-scroll="1"><svg viewBox="0 0 24 24" fill="none"
+                            aria-controls="group-carousel" data-carousel-scroll="1"><svg viewBox="0 0 24 24" fill="none"
                                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                                 aria-hidden="true" focusable="false">
                                 <path d="M9 6 15 12 9 18" />
@@ -77,7 +84,7 @@
                 </div>
             </div>
             {% if homepage_groups %}
-            <div class="st-group-carousel" id="group-carousel" tabindex="0" role="region" aria-labelledby="groups-title"
+            <div class="st-group-carousel" id="group-carousel" data-carousel tabindex="0" role="region" aria-labelledby="groups-title"
                 aria-describedby="group-carousel-help">
                 <p class="visually-hidden" id="group-carousel-help">Scroll left or right to explore all groups. Use the
                     arrow keys when this region is focused.</p>
