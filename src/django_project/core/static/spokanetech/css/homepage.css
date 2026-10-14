@@ -296,6 +296,7 @@
 .st-group-event-sections [role="tabpanel"] .st-group-section-header { display: none; }
 .st-event-card:hover, .st-event-card:focus-within,
 .st-group-card:hover, .st-group-card:focus-within,
+.st-blog-card:hover, .st-blog-card:focus-within,
 .st-group-past-list li:hover, .st-group-past-list li:focus-within { background: color-mix(in srgb, var(--st-blue-tint) 30%, white); border-color: var(--st-blue); box-shadow: 0 4px 12px rgb(15 23 42 / 8%); }
 .st-event-featured:hover, .st-event-featured:focus-within { background: var(--st-navy-soft); }
 .st-group-past-link::after { content: ""; position: absolute; inset: 0; border-radius: var(--st-radius); }
@@ -342,4 +343,52 @@
     .st-calendar-month h2 { font-size: 1.35rem; }
     .st-calendar-grid { display: none; }
     .st-calendar-agenda { display: grid; gap: 24px; }
+}
+
+/* About: readable community story alongside familiar artwork and join links. */
+.st-about .st-directory-header h1 { font-size: clamp(2rem, 3vw, 2.75rem); }
+.st-about-grid { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: 28px; align-items: start; }
+.st-about-story { min-width: 0; background: white; padding: 28px; border: 1px solid var(--st-border); border-radius: var(--st-radius); }
+.st-about-story section + section { margin-top: 28px; padding-top: 28px; border-top: 1px solid var(--st-border); }
+.st-about h2 { font-size: 1.5rem; line-height: 1.35; margin: 0 0 16px; }
+.st-about-story p:not(.st-eyebrow) { color: var(--st-muted); line-height: 1.75; max-width: 68ch; margin: 0 0 16px; }
+.st-about-story section > p:last-child { margin-bottom: 0; }
+.st-about-sidebar { min-width: 0; overflow: hidden; border: 1px solid var(--st-border); border-radius: var(--st-radius); background: white; }
+.st-about-art { display: block; padding: 24px 16px; }
+.st-about-art img { display: block; width: 100%; height: auto; }
+.st-about-connect { background: var(--st-navy); color: white; padding: 28px; }
+.st-about-connect .st-eyebrow { color: var(--st-accent); }
+.st-about-connect > p:not(.st-eyebrow) { color: var(--st-on-dark); line-height: 1.65; margin-bottom: 24px; }
+.st-about-connect .st-button { width: 100%; }
+.st-about-group-link { display: block; color: var(--st-accent); font-size: .9rem; font-weight: 600; margin-top: 18px; }
+.st-about-group-link:hover { color: white; }
+.st-about-connect a:focus-visible { outline-color: var(--st-accent); }
+@media (max-width: 991.98px) {
+    .st-about-grid { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+    .st-about-art img { max-width: 480px; margin-inline: auto; }
+}
+@media (max-width: 575.98px) {
+    .st-about-story, .st-about-connect { padding: 20px; }
+    .st-about-story section + section { margin-top: 24px; padding-top: 24px; }
+    .st-about h2 { font-size: 1.3rem; }
+}
+
+/* Development updates share native carousel controls and card interactions. */
+.st-development-updates { margin-top: 36px; }
+.st-development-updates .st-section-heading h2 { margin-bottom: 0; }
+.st-blog-carousel { display: grid; grid-auto-flow: column; grid-auto-columns: calc((100% - 32px) / 3); gap: 16px; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x proximity; scroll-padding-inline: 8px; padding: 8px 8px 16px; margin: -8px -8px 0; scrollbar-width: none; }
+.st-blog-carousel::-webkit-scrollbar { display: none; }
+.st-blog-card { display: flex; flex-direction: column; position: relative; min-width: 0; scroll-snap-align: start; background: white; border: 1px solid var(--st-border); border-radius: var(--st-radius); box-shadow: 0 3px 8px rgb(15 23 42 / 3%); overflow-wrap: anywhere; transition: background-color .15s, border-color .15s, box-shadow .15s; }
+.st-blog-art { width: 100%; height: 160px; object-fit: cover; border-radius: var(--st-radius) var(--st-radius) 0 0; }
+.st-blog-content { display: flex; flex-direction: column; flex: 1; padding: 20px; }
+.st-blog-card h3 { font-size: 1.1rem; line-height: 1.4; font-weight: 750; margin: 0 0 12px; }
+.st-blog-summary { color: var(--st-muted); font-size: .9rem; line-height: 1.65; margin-bottom: 16px; }
+.st-blog-byline { color: var(--st-muted); font-size: .8rem; margin-bottom: 16px; }
+.st-blog-card .st-card-bottom { flex-wrap: wrap; gap: 12px; }
+.st-blog-card .st-directory-card-action { margin-left: auto; }
+@media (max-width: 991.98px) {
+    .st-blog-carousel { grid-auto-columns: calc((100% - 16px) / 2); }
+}
+@media (max-width: 575.98px) {
+    .st-blog-carousel { grid-auto-columns: min(85%, 360px); gap: 12px; }
 }

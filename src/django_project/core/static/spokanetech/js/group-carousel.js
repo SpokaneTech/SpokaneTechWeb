@@ -13,7 +13,7 @@
     }
 
     function cardStep(track) {
-        return track.querySelector('.st-group-card, .st-event-card').getBoundingClientRect().width
+        return track.querySelector('.st-group-card, .st-event-card, .st-blog-card').getBoundingClientRect().width
             + parseFloat(getComputedStyle(track).columnGap);
     }
 

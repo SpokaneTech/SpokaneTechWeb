@@ -2,6 +2,7 @@ import calendar
 from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
+from blogs.models import BlogPost
 from django.db.models import Count, Q
 from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import render
@@ -68,6 +69,18 @@ class DevelopContentView(HtmxOptionView):
 
     htmx_template_name: str = "web/partials/custom/develop.htm"
     template_name: str = "web/full/custom/develop.html"
+
+    def get(self, request, *args, **kwargs):
+        posts = list(
+            BlogPost.objects.filter(platform__enabled=True)
+            .select_related("platform", "series")
+            .prefetch_related("tags")
+            .order_by("-created_at", "-pk")
+        )
+        for post in posts:
+            post.summary = convert_html_to_text(post.description, block_separator=" ")
+        self.context = {"blog_posts": posts}
+        return super().get(request, *args, **kwargs)
 
 
 class EventCalendarView(HtmxCalendarView):

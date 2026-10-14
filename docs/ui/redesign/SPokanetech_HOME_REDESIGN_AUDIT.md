@@ -417,3 +417,59 @@ final timezone change was rechecked at 390 and 1280px. No JavaScript errors.
 
 Previews: [desktop calendar](qa/calendar-1280.png),
 [mobile agenda](qa/calendar-390.png).
+
+## About page styling
+
+The About page now shares the directory typography, left-aligned introduction,
+subtle blue palette, borders, and spacing. Its existing mission, audience,
+learning opportunities, and invitation are reorganized into readable sections
+with shorter copy. The sidebar reuses the community illustration and includes
+the configured Discord link and real group-directory navigation. Event and group
+links preserve HTMX navigation with real hrefs. The layout becomes one column on
+tablet/mobile, and the full page renders content immediately without a second
+load request. No new assets, application data, dependencies, or migrations.
+
+Affected files: `web/templates/web/partials/custom/about.htm`, the full About
+template, and scoped About rules in `homepage.css`. Validation: **3 relevant
+tests passed, 6 subtests passed**, plus diff checks. Chromium verified 360, 390,
+430, 768, 1024, 1280, and 1440px, artwork rendering, no overflow, keyboard links,
+HTMX navigation/history, and initial rendering without scripts. No JavaScript
+errors were observed.
+
+Previews: [desktop About page](qa/about-1280.png),
+[mobile About page](qa/about-390.png).
+
+## Develop with us page and About contribution link
+
+The developer page now shares About's responsive story/sidebar layout, community
+illustration, typography, and blue palette. It retains the contribution
+invitation, original GitHub repository, and development-post resources, with
+the configured community Discord link alongside the repository CTA. About's
+“Help shape what's next” section now links directly to Develop with us using
+a real href and HTMX navigation.
+
+Development posts render immediately from enabled blog platforms, with newest
+stored records first. Cards show real titles, safe plain-text summaries, optional
+images/authors/series, and prefetched topics; no mock posts or publication dates
+are introduced. All matching records remain reachable in the native carousel.
+The shared carousel enhancement now supports blog cards, including chevron
+controls, keyboard arrows/Home/End, hidden scrollbars, and history initialization.
+Cards use the same whole-item hover/focus effect as groups and events. Removed
+the old inline style/script blocks and duplicate page/blog load requests. The
+existing blog partial endpoint remains available.
+
+Affected files: `web/views.py`, full/partial developer templates, About partial,
+`homepage.css`, shared `group-carousel.js`, and new `test_develop.py`. Post data
+takes two queries regardless of record/tag count. No dependencies or migrations.
+
+Validation: **184 tests passed, 28 subtests passed**, plus Ruff, formatting,
+JavaScript syntax, `mypy src` (74 files), and diff checks. New regression checks
+cover full/HTMX real post rendering, platform filtering, safe excerpts, resources,
+the About contribution link, empty states, and bounded queries. Chromium verified
+360, 390, 430, 768, 1024, 1280, and 1440px using nine stored blog posts, including
+control boundaries, keyboard scrolling, whole-card hover, no overflow, repeated
+About/Develop HTMX visits, focus, history, and native scrolling without scripts.
+No JavaScript errors were observed.
+
+Previews: [desktop developer page](qa/develop-1280.png),
+[mobile developer page](qa/develop-390.png).
