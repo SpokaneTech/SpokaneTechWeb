@@ -48,6 +48,9 @@ class Event(HandyHelperBaseModel):
     group = models.ForeignKey("TechGroup", blank=True, null=True, on_delete=models.SET_NULL)
     tags = models.ManyToManyField("Tag", blank=True)
     image = models.ImageField(upload_to="tech_events/", blank=True, null=True)
+    image_source_url = models.URLField(max_length=2048, blank=True)
+    image_synced_url = models.URLField(max_length=2048, blank=True)
+    image_managed_name = models.CharField(max_length=255, blank=True)
 
     class Meta:
         ordering: ClassVar[list[str]] = ["start_datetime"]

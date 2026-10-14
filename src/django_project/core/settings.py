@@ -302,3 +302,7 @@ LINKEDIN_REFRESH_TOKEN: str | None = env.str("LINKEDIN_REFRESH_TOKEN", None)
 POST_TO_LINKEDIN: bool = env.bool("POST_TO_LINKEDIN", False)
 SPUG_API_TOKEN: str | None = env.str("SPUG_API_TOKEN", None)
 SPUG_API_URL: str | None = env.str("SPUG_API_URL", None)
+
+# Event/group uploads live outside the container image and collected static files.
+MEDIA_ROOT = env.str("MEDIA_ROOT", str(BASE_DIR / "media"))
+MEDIA_URL = env.str("MEDIA_URL", "/media/")

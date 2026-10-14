@@ -80,3 +80,6 @@ src/django_project/core/static/package.json
 src/django_project/core/static/package-lock.json
 *.sass-cache
 *db_backup*
+
+# Uploaded media
+src/django_project/media/

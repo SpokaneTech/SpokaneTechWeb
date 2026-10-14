@@ -17,8 +17,10 @@ from django.db import transaction
 from django.db.models.manager import BaseManager
 from django.utils import timezone
 
+from web.image_tasks import queue_event_image
 from web.models import Event, IntegrationCredential, Link, Tag, TechGroup
 from web.utilities.dt_utils import convert_to_pacific
+from web.utilities.event_images import eventbrite_image_url
 from web.utilities.notifiers.discord import DiscordNotifier
 from web.utilities.notifiers.linkedin import LinkedInOrganizationClient
 from web.utilities.scrapers.eventbrite import (
@@ -109,7 +111,7 @@ def ingest_eventbrite_organization_details(group_pk) -> str:
 
 
 @shared_task(time_limit=900, max_retries=3, name="web.ingest_future_meetup_events")
-def ingest_future_meetup_events(group_pk) -> str:
+def ingest_future_meetup_events(group_pk, *, synchronous_images: bool = False) -> str:
     group = TechGroup.objects.get(pk=group_pk)
     if not group:
         return f"group with pk {group_pk} not found"
@@ -132,6 +134,7 @@ def ingest_future_meetup_events(group_pk) -> str:
             if event_info:
                 event_info["group"] = group
                 tag_names = event_info.pop("tags", []) or []
+                image_url = event_info.pop("image_url", "")
                 event_info.setdefault("location_name", "")
                 event_info.setdefault("location_address", "")
                 event_info.setdefault("map_link", "")
@@ -158,13 +161,14 @@ def ingest_future_meetup_events(group_pk) -> str:
                         if value:
                             tag, _ = Tag.objects.get_or_create(value=value)
                             event.tags.add(tag)
+                    queue_event_image(event, image_url, synchronous=synchronous_images)
                 if is_new:
                     event_count += 1
     return f"found {len(event_links)} upcoming events for {group.name}; added {event_count} new events"
 
 
 @shared_task(time_limit=900, max_retries=3, name="web.ingest_future_eventbrite_events")
-def ingest_future_eventbrite_events(group_pk) -> str:
+def ingest_future_eventbrite_events(group_pk, *, synchronous_images: bool = False) -> str:
     group: TechGroup = TechGroup.objects.get(pk=group_pk)
     if not group:
         return f"group with pk {group_pk} not found"
@@ -201,6 +205,11 @@ def ingest_future_eventbrite_events(group_pk) -> str:
                 group=group,
                 social_platform_id=_truncate_for_model(Event, "social_platform_id", item.get("id", "")),
                 defaults=event_data,
+            )
+            queue_event_image(
+                event,
+                eventbrite_image_url(event_details) or eventbrite_image_url(item),
+                synchronous=synchronous_images,
             )
             if is_new:
                 event_count += 1

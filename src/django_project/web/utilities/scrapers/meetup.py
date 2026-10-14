@@ -79,6 +79,32 @@ def _get_event_tags(soup: BeautifulSoup, url: str) -> list[str]:
     return tags
 
 
+def _get_event_image(soup: BeautifulSoup, url: str) -> str:
+    match = re.search(r"/events/([^/]+)/", url)
+    event_id = match.group(1) if match else None
+    for script in soup.find_all("script"):
+        try:
+            payload = json.loads(script.get_text())
+        except (json.JSONDecodeError, TypeError):
+            continue
+        mappings = list(_iter_mappings(payload))
+        photos = {}
+        for mapping in mappings:
+            for key, value in mapping.items():
+                if isinstance(value, dict) and value.get("__typename") == "PhotoInfo":
+                    photos[key] = value
+        for item in mappings:
+            if item.get("__typename") != "Event" or str(item.get("id")) != event_id:
+                continue
+            for key in ("featuredEventPhoto", "displayPhoto"):
+                photo = item.get(key)
+                if isinstance(photo, dict) and "__ref" in photo:
+                    photo = photos.get(photo["__ref"])
+                if isinstance(photo, dict) and isinstance(photo.get("source"), str):
+                    return photo["source"]
+    return ""
+
+
 def _get_venue(page_content: str, soup: BeautifulSoup) -> dict[str, Any] | None:
     """Find Meetup's Venue object without depending on JSON field order."""
     for script in soup.find_all("script"):
@@ -185,6 +211,7 @@ def get_event_information(url: str) -> dict:
 
         event_info: dict = {}
         event_info["tags"] = _get_event_tags(soup, url)
+        event_info["image_url"] = _get_event_image(soup, url)
         event_info["url"] = url
         event_info["name"] = soup.find("h1", class_="ds2-b32 text-ds2-text-fill-primary-enabled lg:ds2-b48")
         if event_info["name"]:

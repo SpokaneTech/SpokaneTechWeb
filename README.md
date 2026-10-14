@@ -153,3 +153,10 @@ sass --style expanded src/django_project/core/static/spokanetech/css/spokanetech
 Sass is an optional editing tool; deployments serve the committed CSS directly.
 See [the static assets review](docs/ui/redesign/STATIC_ASSETS_REVIEW.md) for the
 package inventory, framework recommendation, and validation details.
+
+### Event images and persistent media
+
+Meetup and Eventbrite ingestion saves event images into a shared persistent media
+volume. `runscript ingest_events` downloads images synchronously; scheduled
+ingestion uses background Celery image tasks. See the [design decision and VPS rollout guide](docs/design/decisions/0001-persistent-event-images.md)
+for migrations, reverse-proxy configuration, local development, and backups.
