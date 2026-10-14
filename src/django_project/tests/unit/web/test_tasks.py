@@ -1,3 +1,4 @@
+import json
 import os
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -12,7 +13,7 @@ os.environ.setdefault("ENV_PATH", f"{BASE_DIR}/envs/.env.test")
 
 django.setup()
 from model_bakery import baker
-from web.models import Event
+from web.models import Event, Tag
 from web.signals import event_post_to_linkedin_signal
 from web.tasks import (
     ingest_future_eventbrite_events,
@@ -203,6 +204,57 @@ class TestMeetupEventInformation(TestCase):
         self.assertEqual(event["location_name"], "")
         self.assertEqual(event["location_address"], "")
 
+    @patch("web.utilities.scrapers.meetup.fetch_content_with_playwright")
+    def test_reads_event_topics_and_resolves_apollo_references(self, fetch):
+        payload = {
+            "props": {
+                "pageProps": {
+                    "event": {
+                        "id": "123456",
+                        "topics": {
+                            "edges": [
+                                {"node": {"name": " Python "}},
+                                {"node": {"__ref": "Topic:2"}},
+                                {"node": {"name": "python"}},
+                                {"node": {"name": ""}},
+                                {"node": {}},
+                            ]
+                        },
+                        "group": {"topics": [{"name": "Group-only topic"}]},
+                    },
+                    "__APOLLO_STATE__": {
+                        "Topic:2": {"__typename": "Topic", "name": "AI &amp; Data"},
+                        "Event:999": {"__typename": "Event", "id": "999", "topics": [{"name": "Other event"}]},
+                    },
+                }
+            }
+        }
+        fetch.return_value = f'<script id="__NEXT_DATA__" type="application/json">{json.dumps(payload)}</script>'
+        result = get_event_information("https://www.meetup.com/example/events/123456/")
+        self.assertEqual(result["tags"], ["Python", "AI & Data"])
+
+    @patch("web.utilities.scrapers.meetup.fetch_content_with_playwright")
+    def test_reads_event_from_normalized_cache_and_ignores_group_topics(self, fetch):
+        payload = {
+            "__APOLLO_STATE__": {
+                "Event:123456": {"__typename": "Event", "id": "123456", "topics": {"nodes": [{"__ref": "Topic:1"}]}},
+                "Topic:1": {"name": "Web Development"},
+                "Group:1": {"topics": [{"name": "Group-only topic"}]},
+            }
+        }
+        fetch.return_value = f'<script type="application/json">{json.dumps(payload)}</script>'
+        result = get_event_information("https://www.meetup.com/example/events/123456/")
+        self.assertEqual(result["tags"], ["Web Development"])
+
+    @patch("web.utilities.scrapers.meetup.fetch_content_with_playwright")
+    def test_missing_or_empty_event_topics_do_not_use_group_topics(self, fetch):
+        for topics in (None, {}, {"edges": []}):
+            with self.subTest(topics=topics):
+                payload = {"event": {"topics": topics, "group": {"topics": [{"name": "Python"}]}}}
+                fetch.return_value = f"<script>not JSON</script><script>{json.dumps(payload)}</script>"
+                result = get_event_information("https://www.meetup.com/example/events/123456/")
+                self.assertEqual(result["tags"], [])
+
 
 class TestIngestFutureMeetupEvents(TestCase):
     def setUp(self):
@@ -233,6 +285,50 @@ class TestIngestFutureMeetupEvents(TestCase):
         event = Event.objects.get(social_platform_id="123456")
         self.assertEqual(event.location_name, "N" * 64)
         self.assertEqual(event.location_address, "A" * 256)
+
+    @patch("web.tasks.get_event_information")
+    @patch("web.tasks.get_event_links")
+    def test_ingests_and_backfills_tags_without_duplicate_events_or_tags(self, links, information):
+        links.return_value = ["https://www.meetup.com/test-meetup-group/events/123456/"]
+        existing = baker.make("web.Tag", value="Python")
+        data = {"name": "Tagged event", "social_platform_id": "123456", "start_datetime": "2026-09-20T18:00:00Z"}
+        information.side_effect = [dict(data), {**data, "tags": ["Python", " Django ", "Python", "", None]}]
+        ingest_future_meetup_events(self.group.pk)
+        event = Event.objects.get(social_platform_id="123456")
+        local = baker.make("web.Tag", value="Local topic")
+        event.tags.add(local)
+        result = ingest_future_meetup_events(self.group.pk)
+        self.assertIn("added 0 new events", result)
+        self.assertEqual(Event.objects.filter(social_platform_id="123456").count(), 1)
+        self.assertEqual(set(event.tags.values_list("value", flat=True)), {"Python", "Django", "Local topic"})
+        self.assertTrue(event.tags.filter(pk=existing.pk).exists())
+        self.assertEqual(Tag.objects.filter(value="Python").count(), 1)
+        information.side_effect = None
+        information.return_value = {**data, "tags": []}
+        ingest_future_meetup_events(self.group.pk)
+        self.assertEqual(event.tags.count(), 3)
+
+    @patch("web.tasks.get_event_information")
+    @patch("web.tasks.get_event_links")
+    def test_tag_limit_and_name_date_fallback(self, links, information):
+        links.return_value = ["https://www.meetup.com/test-meetup-group/events/123456/"]
+        information.return_value = {
+            "name": "Fallback tagged event",
+            "start_datetime": "2026-09-20T18:00:00Z",
+            "tags": ["A" * 80],
+        }
+        ingest_future_meetup_events(self.group.pk)
+        event = Event.objects.get(name="Fallback tagged event")
+        self.assertEqual(list(event.tags.values_list("value", flat=True)), ["A" * 64])
+
+    @patch("web.tasks.get_event_information", return_value={})
+    @patch("web.tasks.get_event_links")
+    def test_empty_scrape_does_not_create_event_or_tags(self, links, information):
+        links.return_value = ["https://www.meetup.com/test-meetup-group/events/123456/"]
+        result = ingest_future_meetup_events(self.group.pk)
+        self.assertIn("added 0 new events", result)
+        self.assertFalse(Event.objects.exists())
+        self.assertFalse(Tag.objects.exists())
 
 
 class TestPostEventToLinkedIn(TestCase):

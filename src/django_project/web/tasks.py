@@ -13,6 +13,7 @@ import requests
 from bs4 import BeautifulSoup
 from celery import shared_task
 from django.conf import settings
+from django.db import transaction
 from django.db.models.manager import BaseManager
 from django.utils import timezone
 
@@ -128,8 +129,9 @@ def ingest_future_meetup_events(group_pk) -> str:
         event_links.extend(ingest_links)
         for event_link in ingest_links:
             event_info = get_event_information(event_link)
-            event_info["group"] = group
             if event_info:
+                event_info["group"] = group
+                tag_names = event_info.pop("tags", []) or []
                 event_info.setdefault("location_name", "")
                 event_info.setdefault("location_address", "")
                 event_info.setdefault("map_link", "")
@@ -140,14 +142,22 @@ def ingest_future_meetup_events(group_pk) -> str:
                 if not event_info.get("name", None):
                     logger.error("error parsing name for event hosted by %s; data = %s", group.name, event_info)
                     continue
-                if event_info["social_platform_id"]:
-                    _, is_new = Event.objects.update_or_create(
-                        social_platform_id=event_info["social_platform_id"], defaults=event_info
-                    )
-                else:
-                    _, is_new = Event.objects.update_or_create(
-                        name=event_info["name"], start_datetime=event_info["start_datetime"], defaults=event_info
-                    )
+                with transaction.atomic():
+                    if event_info.get("social_platform_id"):
+                        event, is_new = Event.objects.update_or_create(
+                            social_platform_id=event_info["social_platform_id"], defaults=event_info
+                        )
+                    else:
+                        event, is_new = Event.objects.update_or_create(
+                            name=event_info["name"], start_datetime=event_info["start_datetime"], defaults=event_info
+                        )
+                    for name in tag_names:
+                        if not isinstance(name, str):
+                            continue
+                        value = " ".join(name.split())[: Tag._meta.get_field("value").max_length]
+                        if value:
+                            tag, _ = Tag.objects.get_or_create(value=value)
+                            event.tags.add(tag)
                 if is_new:
                     event_count += 1
     return f"found {len(event_links)} upcoming events for {group.name}; added {event_count} new events"

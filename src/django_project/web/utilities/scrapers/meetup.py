@@ -25,6 +25,60 @@ def _iter_mappings(value: Any):
             yield from _iter_mappings(child)
 
 
+def _get_event_tags(soup: BeautifulSoup, url: str) -> list[str]:
+    """Read only the requested event's topics, resolving Meetup's Apollo references."""
+    match = re.search(r"/events/([^/]+)/", url)
+    event_id = match.group(1) if match else None
+    tags: list[str] = []
+    seen: set[str] = set()
+    for script in soup.find_all("script"):
+        try:
+            payload = json.loads(script.get_text())
+        except (json.JSONDecodeError, TypeError):
+            continue
+        if not isinstance(payload, dict):
+            continue
+        props = payload.get("props") or {}
+        page_props = props.get("pageProps") or {} if isinstance(props, dict) else {}
+        if not isinstance(page_props, dict):
+            page_props = {}
+        raw_cache = page_props.get("__APOLLO_STATE__", payload.get("__APOLLO_STATE__", {}))
+        topic_cache: dict[str, Any] = raw_cache if isinstance(raw_cache, dict) else {}
+
+        def resolve(value: Any, cache: dict[str, Any] = topic_cache) -> Any:
+            if isinstance(value, dict) and "__ref" in value:
+                return cache.get(value["__ref"], {})
+            return value
+
+        candidates = [page_props.get("event"), payload.get("event")]
+        candidates.extend(
+            item
+            for item in _iter_mappings(payload)
+            if item.get("__typename") == "Event" and str(item.get("id")) == event_id
+        )
+        for candidate in candidates:
+            event = resolve(candidate)
+            if not isinstance(event, dict) or (event.get("id") is not None and str(event["id"]) != event_id):
+                continue
+            topics = resolve(event.get("topics", []))
+            if isinstance(topics, dict):
+                topics = topics.get("edges", topics.get("nodes", []))
+            if not isinstance(topics, list):
+                continue
+            for topic in topics:
+                topic = resolve(topic)
+                if isinstance(topic, dict):
+                    topic = resolve(topic.get("node", topic))
+                name = topic.get("name") if isinstance(topic, dict) else topic
+                if not isinstance(name, str):
+                    continue
+                name = " ".join(html.unescape(name).split())
+                if name and name.casefold() not in seen:
+                    tags.append(name)
+                    seen.add(name.casefold())
+    return tags
+
+
 def _get_venue(page_content: str, soup: BeautifulSoup) -> dict[str, Any] | None:
     """Find Meetup's Venue object without depending on JSON field order."""
     for script in soup.find_all("script"):
@@ -130,6 +184,7 @@ def get_event_information(url: str) -> dict:
         soup = BeautifulSoup(page_content, "html.parser")
 
         event_info: dict = {}
+        event_info["tags"] = _get_event_tags(soup, url)
         event_info["url"] = url
         event_info["name"] = soup.find("h1", class_="ds2-b32 text-ds2-text-fill-primary-enabled lg:ds2-b48")
         if event_info["name"]:
