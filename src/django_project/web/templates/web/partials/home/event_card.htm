@@ -13,7 +13,7 @@
         </div>
         <p class="st-event-detail"><i class="far fa-calendar" aria-hidden="true"></i><time datetime="{{ event.start_datetime|localtime|date:'c' }}">{{ event.start_datetime|date:"D, M j, Y" }} &middot; {{ event.start_datetime|time:"g:i A" }} {{ event.start_datetime|date:"T" }}{% if event.end_datetime %} &ndash; {{ event.end_datetime|time:"g:i A" }}{% if event.end_datetime|date:"Y-m-d" != event.start_datetime|date:"Y-m-d" %} ({{ event.end_datetime|date:"M j, Y" }}){% endif %}{% endif %}</time></p>
         {% if event.location_name or event.location_address %}<p class="st-event-detail"><i class="fas fa-map-marker-alt" aria-hidden="true"></i><span>{{ event.location_name|default:event.location_address }}{% if detail and event.location_name and event.location_address %}<br>{{ event.location_address }}{% endif %}</span></p>{% endif %}
-        <div class="st-card-bottom"><div class="st-tags">{% include "web/partials/home/tags.htm" with tags=event.tags.all|slice:":3" %}</div>{% if directory or detail %}<span class="st-directory-card-action" aria-hidden="true">View event &rarr;</span>{% else %}<span class="st-card-arrow" aria-hidden="true">&rarr;</span>{% endif %}</div>
-        {% if detail and event.url %}<a class="st-group-event-source" href="{{ event.url }}" target="_blank" rel="noopener">Event website <span aria-hidden="true">&nearr;</span><span class="visually-hidden"> for {{ event.name }} (opens in a new tab)</span></a>{% endif %}
+        <div class="st-card-bottom"><div class="st-tags">{% include "web/partials/home/tags.htm" with tags=event.tags.all|slice:":3" %}</div></div>
+        {% if detail and event.url %}<a class="st-group-event-source" href="{{ event.url }}" target="_blank" rel="noopener">Event website<span class="visually-hidden"> for {{ event.name }} (opens in a new tab)</span></a>{% endif %}
     </div>
 </article>

@@ -473,3 +473,116 @@ No JavaScript errors were observed.
 
 Previews: [desktop developer page](qa/develop-1280.png),
 [mobile developer page](qa/develop-390.png).
+
+### Decorative link arrows removed
+
+Removed decorative forward, back, and external arrows from links and card labels
+across the redesigned pages, including the homepage's arrow-only event-card
+badge. Removed its unused CSS rule. Carousel and calendar navigation chevrons,
+link destinations, HTMX behavior, and new-tab announcements remain intact.
+Validation: **31 relevant tests passed, 16 subtests passed**, plus diff checks;
+no decorative arrow entities or arrow-badge references remain in app templates.
+
+
+## Modal styling and interaction review
+
+Event and group previews now share a local Bootstrap modal shell with the site's
+typography, blue palette, rounded borders, and restrained shadow. The actual event
+or group name is the primary heading. The circular close control shares the
+carousel control's hover shadow and visible keyboard focus. Responsive spacing
+and a scrollable body keep actions reachable on narrow or short screens.
+
+Event previews retain the organizer, Pacific dates/times, topics,
+description excerpts, source links, and full-detail navigation. Location addresses
+now display even when a map link is absent. Group previews retain topics,
+description excerpts, stored community links, and full-detail navigation. One
+responsive event template replaces user-agent-based desktop/mobile selection.
+No decorative link arrows, mock data, dependencies, or migrations were added.
+
+The shared HTMX lifecycle preserves the dialog element Bootstrap initialized
+when swapping modal content, and Tab/Shift+Tab wrap within the open dialog.
+Escape/backdrop/footer/header dismissal, focus restoration, and navigation cleanup
+remain available. Existing helper modal endpoints retain their response contracts;
+the shared root supplies consistent base styling.
+
+Affected files: `core/templates/base.htm`, new `core/partials/modal.htm` and
+`modal_swap.htm`, modal rules in `homepage.css`, shared `navigation.js`, event/group
+modal views and body templates, and new `test_modal_previews.py`.
+
+Validation: **188 tests passed, 30 subtests passed**, plus Ruff, formatting,
+`mypy src` (75 files), JavaScript syntax, and diff checks. Chromium verified
+360, 390, 430, 768, 1024, 1280, and 1440px; no horizontal overflow; scroll bounds;
+close-control hover; repeated opening; keyboard opening/focus; Escape/backdrop
+and close-button dismissal; and full-details navigation without a leftover
+backdrop. A short mobile viewport verified internal group-modal scrolling.
+No JavaScript errors were observed.
+
+Previews: [desktop event modal](qa/modal-event-1280.png),
+[mobile event modal](qa/modal-event-390.png),
+[desktop group modal](qa/modal-group-1280.png),
+[short mobile group modal](qa/modal-group-390.png).
+
+### Modal refinement: standard controls and image-free previews
+
+Removed event/group image blocks and render description excerpts as escaped plain
+text so embedded images cannot appear in previews. Full details and Close use the
+shared site button padding and font size. Action links use the same font size,
+with a consistent 16px action gap; body sections use a 24px gap. Organizer,
+metadata, descriptions, and community links share the body text scale. Removed
+unused hero-image styling and modal-specific button-size overrides.
+
+Validation: **6 relevant tests and 2 subtests passed**, including populated image
+fields and embedded description images. Chromium checks passed at seven widths
+from 360px to 1440px, including dismissal, keyboard navigation, scrolling,
+matching computed button sizes, and consistent action text sizes. Updated the
+modal preview images linked above.
+
+
+## Event detail page
+
+The event detail page now shares the group detail page's container, header,
+responsive two-column layout, bordered panels, typography, and subtle blue
+palette. A real-date badge and host link identify the event. The main panel
+retains the complete stored description, optional event image, and topics below
+the description. The visit panel shows Pacific dates/times, optional location
+and map link, the original RSVP destination, and a link to the host's group page.
+Cross-day end dates remain visible. Missing optional fields do not produce empty
+links or sections; addresses remain visible without map links. No decorative
+arrows or mock content were added.
+
+Full-page requests now render the event content immediately, matching the group
+page, rather than issuing a second HTMX load request. Real hrefs and HTMX/history
+navigation both work. Event/group and topic data load in two queries using
+select_related/prefetch_related.
+
+Affected files: `web/partials/detail/event.htm`, `web/full/detail/event.html`,
+`TechEventView` in `web/views.py`, scoped event-detail rules in `homepage.css`,
+and new `test_event_detail.py`. No dependencies, migrations, or configuration
+changes.
+
+Validation: **29 relevant tests and 4 subtests passed**, plus Ruff, formatting,
+`mypy src` (76 files), and diff checks. Chromium verified 360, 390, 430, 768,
+1024, 1280, and 1440px using stored event data in an isolated database copy;
+stacked/sidebar layouts, no horizontal overflow, host/list HTMX navigation,
+browser history, and complete rendering without JavaScript. No JavaScript errors
+were observed. The requested event 155 was absent from the preview copy, so
+browser checks used its existing event 131; automated tests cover additional
+image, topic, date, and optional-field combinations.
+
+Previews: [desktop event detail](qa/event-detail-1280.png),
+[mobile event detail](qa/event-detail-390.png).
+
+
+### Event image sizing and page alignment correction
+
+Renamed the event page root to `st-event-page`: its previous `st-event-detail`
+class also styled card metadata as a flex row with small text. The page now uses
+the directory's normal block layout and body typography. Event artwork is capped
+at 280px high and 100% of its panel width, uses contain sizing to retain the full
+image, and carries Bootstrap's responsive-image utility as well.
+
+Chromium checked the actual `/events/155/` record and its loaded 1600px-wide
+image at 360, 390, 768, 991, 992, 1024, 1280, and 1440px. Image bounds stayed
+inside the description panel, separate from Plan your visit, within the height
+limit, and without horizontal overflow. No JavaScript errors were observed.
+The desktop/mobile previews above now show this record.

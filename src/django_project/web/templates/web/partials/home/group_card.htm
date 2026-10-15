@@ -18,7 +18,6 @@
         <p class="st-group-count">{{ group.upcoming_event_count }} upcoming event{{ group.upcoming_event_count|pluralize }}</p>
         <div class="st-directory-card-row">
             <div class="st-tags">{% include "web/partials/home/tags.htm" with tags=group.tags.all|slice:":3" %}</div>
-            <span class="st-directory-card-action" aria-hidden="true">View group &rarr;</span>
         </div>
         {% else %}
         <div class="st-tags">{% include "web/partials/home/tags.htm" with tags=group.tags.all|slice:":2" %}</div>

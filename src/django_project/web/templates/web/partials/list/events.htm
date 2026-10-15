@@ -16,7 +16,7 @@
             <div class="st-empty-state">
                 <h2>More meetups are on the way.</h2>
                 <p>No upcoming events match this list. Explore local groups for more ways to connect.</p>
-                <a class="st-text-link" href="{% url 'web:get_techgroups' display='list' %}" hx-get="{% url 'web:get_techgroups' display='list' %}" hx-target="#body_main" hx-push-url="true">Explore tech groups &rarr;</a>
+                <a class="st-text-link" href="{% url 'web:get_techgroups' display='list' %}" hx-get="{% url 'web:get_techgroups' display='list' %}" hx-target="#body_main" hx-push-url="true">Explore tech groups</a>
             </div>
             {% endfor %}
         </div>

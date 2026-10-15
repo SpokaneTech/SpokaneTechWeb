@@ -18,7 +18,7 @@
                     <h2 id="develop-contribute-title">Contribute at any level.</h2>
                     <p>Help improve the site with your experience in Python, Django, front-end development, databases, or DevOps—or use the project to learn something new.</p>
                     <p>Contributions to code, design, documentation, and the developer experience all help the project move forward. Explore the repository to get familiar with the code and find a place to contribute.</p>
-                    <a class="st-text-link" href="https://github.com/SpokaneTech/SpokaneTechWeb" target="_blank" rel="noopener">Explore the project on GitHub <span aria-hidden="true">&nearr;</span><span class="visually-hidden"> (opens in a new tab)</span></a>
+                    <a class="st-text-link" href="https://github.com/SpokaneTech/SpokaneTechWeb" target="_blank" rel="noopener">Explore the project on GitHub<span class="visually-hidden"> (opens in a new tab)</span></a>
                 </section>
             </div>
             <aside class="st-about-sidebar" aria-labelledby="develop-start-title">
@@ -31,7 +31,7 @@
                     <h2 id="develop-start-title">Start on GitHub.</h2>
                     <p>Explore the source, share an idea, or help improve SpokaneTech.org.</p>
                     <a class="st-button st-button-primary" href="https://github.com/SpokaneTech/SpokaneTechWeb" target="_blank" rel="noopener"><i class="fab fa-github" aria-hidden="true"></i> View repository<span class="visually-hidden"> (opens in a new tab)</span></a>
-                    {% if community_discord_url %}<a class="st-about-group-link" href="{{ community_discord_url }}" target="_blank" rel="noopener">Talk with the community <span aria-hidden="true">&nearr;</span><span class="visually-hidden"> (opens in a new tab)</span></a>{% endif %}
+                    {% if community_discord_url %}<a class="st-about-group-link" href="{{ community_discord_url }}" target="_blank" rel="noopener">Talk with the community<span class="visually-hidden"> (opens in a new tab)</span></a>{% endif %}
                 </div>
             </aside>
         </div>
@@ -57,7 +57,7 @@
                         <h3><a class="st-card-link" href="{{ post.url }}" target="_blank" rel="noopener">{{ post.title }}<span class="visually-hidden"> (opens in a new tab)</span></a></h3>
                         {% if post.summary %}<p class="st-blog-summary">{{ post.summary|truncatewords:30 }}</p>{% endif %}
                         {% if post.author or post.series %}<p class="st-blog-byline">{% if post.author %}{{ post.author }}{% endif %}{% if post.author and post.series %} &middot; {% endif %}{% if post.series %}{{ post.series.name }}{% endif %}</p>{% endif %}
-                        <div class="st-card-bottom"><div class="st-tags">{% include "web/partials/home/tags.htm" with tags=post.tags.all|slice:":3" %}</div><span class="st-directory-card-action" aria-hidden="true">Read post &nearr;</span></div>
+                        <div class="st-card-bottom"><div class="st-tags">{% include "web/partials/home/tags.htm" with tags=post.tags.all|slice:":3" %}</div><span class="st-directory-card-action" aria-hidden="true">Read post</span></div>
                     </div>
                 </article>
                 {% endfor %}

@@ -18,12 +18,12 @@
                 <section aria-labelledby="about-learning-title">
                     <h2 id="about-learning-title">Connect, learn, and share.</h2>
                     <p>Meetups, workshops, and events give members a place to connect, learn, and share their experiences. Topics range from software development and cybersecurity to emerging technologies like AI and blockchain. Whether you're a seasoned professional or just starting your tech journey, there's a place for you here.</p>
-                    <a class="st-text-link" href="{% url 'web:get_events' display='list' %}" hx-get="{% url 'web:get_events' display='list' %}" hx-target="#body_main" hx-push-url="true">Explore upcoming events <span aria-hidden="true">&rarr;</span></a>
+                    <a class="st-text-link" href="{% url 'web:get_events' display='list' %}" hx-get="{% url 'web:get_events' display='list' %}" hx-target="#body_main" hx-push-url="true">Explore upcoming events</a>
                 </section>
                 <section aria-labelledby="about-future-title">
                     <h2 id="about-future-title">Help shape what's next.</h2>
                     <p>Join a supportive community dedicated to making a positive impact through technology. Together, we can help shape the future of technology in Spokane and beyond.</p>
-                    <a class="st-text-link" href="{% url 'web:develop' %}" hx-get="{% url 'web:develop' %}" hx-target="#body_main" hx-push-url="true">Develop with us <span aria-hidden="true">&rarr;</span></a>
+                    <a class="st-text-link" href="{% url 'web:develop' %}" hx-get="{% url 'web:develop' %}" hx-target="#body_main" hx-push-url="true">Develop with us</a>
                 </section>
             </div>
             <aside class="st-about-sidebar" aria-labelledby="about-join-title">
@@ -38,7 +38,7 @@
                     {% if community_discord_url %}
                     <a class="st-button st-button-primary" href="{{ community_discord_url }}" target="_blank" rel="noopener"><i class="fab fa-discord" aria-hidden="true"></i> Join Discord<span class="visually-hidden"> (opens in a new tab)</span></a>
                     {% endif %}
-                    <a class="st-about-group-link" href="{% url 'web:get_techgroups' display='list' %}" hx-get="{% url 'web:get_techgroups' display='list' %}" hx-target="#body_main" hx-push-url="true">Explore tech groups <span aria-hidden="true">&rarr;</span></a>
+                    <a class="st-about-group-link" href="{% url 'web:get_techgroups' display='list' %}" hx-get="{% url 'web:get_techgroups' display='list' %}" hx-target="#body_main" hx-push-url="true">Explore tech groups</a>
                 </div>
             </aside>
         </div>

@@ -9,13 +9,13 @@
                     connect with people building technology in the Inland Northwest.</p>
                 <div class="st-actions">
                     <a class="st-button st-button-primary" href="#upcoming-events"><i class="far fa-calendar"
-                            aria-hidden="true"></i> Explore Upcoming Events <span aria-hidden="true">&rarr;</span></a>
+                            aria-hidden="true"></i> Explore Upcoming Events</a>
                     <a class="st-button st-button-outline" href="{% url 'web:get_techgroups' display='list' %}"><i
                             class="fas fa-users" aria-hidden="true"></i> Find a Tech Group</a>
                 </div>
                 {% if community_discord_url %}<a class="st-hero-discord" href="{{ community_discord_url }}"
                     target="_blank" rel="noopener"><i class="fab fa-discord" aria-hidden="true"></i> Join the community
-                    on Discord <span aria-hidden="true">&rarr;</span><span class="visually-hidden"> (opens in a new
+                    on Discord<span class="visually-hidden"> (opens in a new
                         tab)</span></a>{% endif %}
             </div>
         </div>
@@ -28,7 +28,7 @@
                     <!-- <p class="st-eyebrow">What's happening</p> -->
                     <h2 id="events-title">Next up in Spokane Tech</h2>
                     <p class="st-section-description">Meetups, workshops, and more.</p>
-                    <a class="st-text-link st-events-all-link" href="{% url 'web:get_events' display='list' %}">View all upcoming events <span aria-hidden="true">&rarr;</span></a>
+                    <a class="st-text-link st-events-all-link" href="{% url 'web:get_events' display='list' %}">View all upcoming events</a>
                 </div>
                 <div class="st-group-navigation">
                     <div class="st-carousel-controls" hidden>
@@ -50,9 +50,8 @@
                 <p>There are no events listed in the next 30 days. Find a local group or check the calendar for more ways
                     to connect.</p>
                 <div class="st-actions"><a class="st-text-link"
-                        href="{% url 'web:get_techgroups' display='list' %}">Explore local groups &rarr;</a><a
-                        class="st-text-link" href="{% url 'web:event_calendar' year=0 month=0 %}">View the calendar
-                        &rarr;</a></div>
+                        href="{% url 'web:get_techgroups' display='list' %}">Explore local groups</a><a
+                        class="st-text-link" href="{% url 'web:event_calendar' year=0 month=0 %}">View the calendar</a></div>
             </div>
             {% endif %}
         </div>
@@ -66,7 +65,7 @@
                     <p class="st-section-description">Local groups. Real people. All are welcome.</p>
                 </div>
                 <div class="st-group-navigation">
-                    <!-- <a class="st-text-link" href="{% url 'web:get_techgroups' display='list' %}">View all groups <span aria-hidden="true">&rarr;</span></a> -->
+                    <!-- <a class="st-text-link" href="{% url 'web:get_techgroups' display='list' %}">View all groups</a> -->
                     <div class="st-carousel-controls" hidden>
                         <button class="st-carousel-button" type="button" aria-label="Scroll groups left"
                             aria-controls="group-carousel" data-carousel-scroll="-1"><svg viewBox="0 0 24 24" fill="none"

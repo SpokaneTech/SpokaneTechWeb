@@ -8,7 +8,7 @@
                 <p class="st-section-description">Meetups, workshops, and connections across Spokane's tech community.</p>
                 <p class="st-calendar-timezone">All times are Pacific.</p>
             </div>
-            <a class="st-text-link" href="{% url 'web:get_events' display='list' %}" hx-get="{% url 'web:get_events' display='list' %}" hx-target="#body_main" hx-push-url="true">View upcoming events &rarr;</a>
+            <a class="st-text-link" href="{% url 'web:get_events' display='list' %}" hx-get="{% url 'web:get_events' display='list' %}" hx-target="#body_main" hx-push-url="true">View upcoming events</a>
         </div>
         <div class="st-calendar-toolbar">
             <div class="st-calendar-month"><h2 id="calendar-month">{{ month_name }} {{ year }}</h2><span class="st-directory-total">{{ event_list|length }} event{{ event_list|length|pluralize }}</span></div>
@@ -50,7 +50,7 @@
             </section>
             {% endfor %}
         </div>
-        {% if not event_list %}<div class="st-empty-state st-calendar-empty"><h3>No events listed for {{ month_name }}.</h3><p>Try another month or explore local groups for more ways to connect.</p><a class="st-text-link" href="{% url 'web:get_techgroups' display='list' %}" hx-get="{% url 'web:get_techgroups' display='list' %}" hx-target="#body_main" hx-push-url="true">Explore tech groups &rarr;</a></div>{% endif %}
+        {% if not event_list %}<div class="st-empty-state st-calendar-empty"><h3>No events listed for {{ month_name }}.</h3><p>Try another month or explore local groups for more ways to connect.</p><a class="st-text-link" href="{% url 'web:get_techgroups' display='list' %}" hx-get="{% url 'web:get_techgroups' display='list' %}" hx-target="#body_main" hx-push-url="true">Explore tech groups</a></div>{% endif %}
     </section>
 </div>
 {% endtimezone %}

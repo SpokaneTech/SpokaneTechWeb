@@ -1,7 +1,6 @@
 {% load tz %}
 <div class="st-directory st-group-detail">
     <div class="st-container">
-        <a class="st-text-link st-group-back" href="{% url 'web:get_techgroups' display='list' %}" hx-get="{% url 'web:get_techgroups' display='list' %}" hx-target="#body_main" hx-push-url="true">&larr; All tech groups</a>
         <header class="st-group-detail-header">
             <div class="st-group-detail-logo" aria-hidden="true">
                 {% if object.image %}<img src="{{ object.image.url }}" alt="" width="88" height="88" decoding="async">
@@ -9,7 +8,6 @@
                 {% else %}<span>{{ object.name|first }}</span>{% endif %}
             </div>
             <div>
-                <p class="st-eyebrow">Spokane's tech community</p>
                 <h1>{{ object.name }}</h1>
                 {% if object.tags.all %}<div class="st-tags">{% include "web/partials/home/tags.htm" with tags=object.tags.all %}</div>{% endif %}
             </div>
@@ -27,7 +25,7 @@
                 <p>Find the community online and get involved.</p>
                 <ul class="st-group-links">
                     {% for link in object.links.all %}
-                    <li><a href="{{ link.url }}" target="_blank" rel="noopener">{{ link.name|default:link.url }} <span aria-hidden="true">&nearr;</span><span class="visually-hidden"> (opens in a new tab)</span></a>{% if link.description %}<p>{{ link.description }}</p>{% endif %}</li>
+                    <li><a href="{{ link.url }}" target="_blank" rel="noopener">{{ link.name|default:link.url }}<span class="visually-hidden"> (opens in a new tab)</span></a>{% if link.description %}<p>{{ link.description }}</p>{% endif %}</li>
                     {% endfor %}
                 </ul>
             </aside>
@@ -66,7 +64,7 @@
                                 <h3><a class="st-group-past-link" href="{{ event.get_absolute_url }}" hx-get="{{ event.get_absolute_url }}" hx-target="#body_main" hx-push-url="true">{{ event.name }}</a></h3>
                                 {% if event.location_name or event.location_address %}<p>{{ event.location_name|default:event.location_address }}{% if event.location_name and event.location_address %} &middot; {{ event.location_address }}{% endif %}</p>{% endif %}
                             </div>
-                            {% if event.url %}<a class="st-group-event-source" href="{{ event.url }}" target="_blank" rel="noopener">Event website <span aria-hidden="true">&nearr;</span><span class="visually-hidden"> for {{ event.name }} (opens in a new tab)</span></a>{% endif %}
+                            {% if event.url %}<a class="st-group-event-source" href="{{ event.url }}" target="_blank" rel="noopener">Event website<span class="visually-hidden"> for {{ event.name }} (opens in a new tab)</span></a>{% endif %}
                         </li>
                         {% endfor %}
                     </ol>

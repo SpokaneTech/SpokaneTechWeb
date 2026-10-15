@@ -1,17 +1,4 @@
-<div class="container-fluid my-3">
-    {% if object.group %}
-    <div class="row my-3">
-        <div class="col-4 fw-bold text-primary">Group:</div>
-        <div class="col-8 text-secondary">{{ object.group.name }}</div>
-    </div>
-    {% endif %}
-    {% if object.description %}
-    <div class="row text-center my-3">
-        {{ object.description|truncatewords_html:50|safe }}
-    </div>
-    {% endif %}
-
-    <div class="row text-center my-3">
-        <a href="" hx-get="{% url 'web:get_techgroup' object.pk %}" hx-target="#body_main" hx-push-url="true" data-bs-dismiss="modal">full details</a>
-    </div>
-</div>
+{% if object.description %}<section class="st-modal-section" aria-labelledby="group-preview-description"><h3 id="group-preview-description">About the group</h3><div class="st-modal-description">{{ object.description|striptags|truncatewords:50 }}</div></section>{% endif %}
+{% if object.tags.all %}<div class="st-tags st-modal-tags">{% include "web/partials/home/tags.htm" with tags=object.tags.all %}</div>{% endif %}
+{% if object.links.all %}<section class="st-modal-section" aria-labelledby="group-preview-links"><h3 id="group-preview-links">Community links</h3><ul class="st-modal-links">{% for link in object.links.all %}<li><a href="{{ link.url }}" target="_blank" rel="noopener">{{ link.name|default:link.url }}<span class="visually-hidden"> (opens in a new tab)</span></a></li>{% endfor %}</ul></section>{% endif %}
+<div class="st-modal-actions"><a class="st-text-link" href="{{ object.get_absolute_url }}" hx-get="{{ object.get_absolute_url }}" hx-target="#body_main" hx-push-url="true" data-bs-dismiss="modal">Full details</a></div>

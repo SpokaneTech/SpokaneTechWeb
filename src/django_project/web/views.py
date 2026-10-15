@@ -195,6 +195,9 @@ class TechEventView(HtmxOptionDetailView):
     htmx_template_name: str = "web/partials/detail/event.htm"
     template_name: str = "web/full/detail/event.html"
 
+    def get_queryset(self):
+        return super().get_queryset().select_related("group").prefetch_related("tags")
+
 
 class TechEventsView(HtmxOptionMultiFilterView):
     """Render a list of Event instances"""
@@ -224,14 +227,9 @@ class TechEventModalView(ModelDetailBootstrapModalView):
     modal_button_submit = None
     modal_size: str = "modal-lg"
     modal_template: str = "web/partials/modal/event_information.htm"
-    modal_title: str = "Event Info"
+    modal_title: str = "Event details"
+    template_name: str = "core/partials/modal_swap.htm"
     model = Event
-
-    def get(self, request, *args, **kwargs):
-        user_agent = request.META.get("HTTP_USER_AGENT", "")
-        if "Mobile" in user_agent:
-            self.modal_template = "web/partials/modal/event_information_modal.htm"
-        return super().get(request, *args, **kwargs)
 
 
 class TechGroupView(HtmxOptionDetailView):
@@ -303,5 +301,6 @@ class TechGroupModalView(ModelDetailBootstrapModalView):
     modal_button_submit = None
     modal_size: str = "modal-lg"
     modal_template: str = "web/partials/modal/group_information.htm"
-    modal_title: str = "Group Info"
+    modal_title: str = "Group details"
+    template_name: str = "core/partials/modal_swap.htm"
     model = TechGroup
