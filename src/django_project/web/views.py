@@ -3,6 +3,7 @@ from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from blogs.models import BlogPost
+from django.core.exceptions import FieldError
 from django.db.models import Count, Q
 from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import render
@@ -221,6 +222,18 @@ class TechEventsView(HtmxOptionMultiFilterView):
     template_name: str = "web/full/list/events.html"
     default_display = "list"
 
+    def filter_by_query_params(self):
+        """Keep the public group_id filter supported across helper versions."""
+        queryset = super().filter_by_query_params()
+        if "group_id" in self.request.GET:
+            value = self.request.GET["group_id"]
+            group_id = None if value == "None" else value
+            try:
+                queryset = queryset.filter(group_id=group_id)
+            except (TypeError, ValueError):
+                return queryset.none()
+        return queryset
+
     def get(self, request, *args, **kwargs):
         self.queryset = (
             Event.objects.filter(status=Event.Status.ACTIVE, start_datetime__gte=timezone.now())
@@ -303,12 +316,27 @@ class TechGroupsView(HtmxOptionMultiFilterView):
         return super().get(request, *args, **kwargs)
 
     def filter_by_query_params(self, parameters=None):
-        """Normalize icons on the same cached results used by the directory and HTMX partials."""
-        queryset = super().filter_by_query_params(parameters)
-        for group in queryset:
-            group.homepage_icon = get_icon_classes(group.icon)
-            group.directory_description = convert_html_to_text(group.description, block_separator=" ")
-        return queryset
+        """Preserve directory filters without relying on helper-specific signatures."""
+        parameters = self.request.GET if parameters is None else parameters
+        field_names = {field.name for field in TechGroup._meta.get_fields()}
+        filters = {}
+        for key, value in parameters.items():
+            if key.split("__", 1)[0] not in field_names:
+                continue
+            if key.endswith("__in") and isinstance(value, str):
+                value = [part.strip() for part in value.split(",") if part.strip()]
+            elif value == "None":
+                value = None
+            elif value in ("True", "true", "TRUE"):
+                value = True
+            elif value in ("False", "false", "FALSE"):
+                value = False
+            filters[key] = value
+        try:
+            queryset = self.queryset.filter(**filters)
+        except (FieldError, TypeError, ValueError):
+            return self.queryset.none()
+        return queryset.distinct() if "distinct" in parameters else queryset
 
 
 class TechGroupModalView(ModelDetailBootstrapModalView):

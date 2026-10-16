@@ -50,10 +50,11 @@ class GroupDirectoryTests(TestCase):
                 self.assertNotContains(response, "unsafe()")
                 self.assertNotContains(response, self.disabled.name)
                 self.assertNotContains(response, 'hx-trigger="load"')
-                self.assertEqual(response["X-Initialize-Tables"], "initialize-tables")
                 if headers:
+                    self.assertEqual(response["X-Initialize-Tables"], "initialize-tables")
                     self.assertNotContains(response, "<html")
                 else:
+                    self.assertNotIn("X-Initialize-Tables", response.headers)
                     self.assertTemplateUsed(response, "base.htm")
 
     def test_default_route_renders_directory(self):
@@ -64,10 +65,12 @@ class GroupDirectoryTests(TestCase):
     def test_description_entities_and_paragraphs_render_as_safe_plain_text(self):
         self.group.description = "<p>Learn &amp; build.</p><p>Meet friends.</p><script>unsafe()</script>"
         self.group.save()
-        response = self.client.get(self.url)
-        self.assertContains(response, "Learn &amp; build. Meet friends.")
-        self.assertNotContains(response, "&amp;amp;")
-        self.assertNotContains(response, "unsafe()")
+        for headers in ({}, {"HTTP_HX_REQUEST": "true"}):
+            with self.subTest(headers=headers):
+                response = self.client.get(self.url, **headers)
+                self.assertContains(response, "Learn &amp; build. Meet friends.")
+                self.assertNotContains(response, "&amp;amp;")
+                self.assertNotContains(response, "unsafe()")
 
     def test_empty_directory_has_helpful_state(self):
         self.group.enabled = False

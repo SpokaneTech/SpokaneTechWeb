@@ -55,10 +55,11 @@ class EventDirectoryTests(TestCase):
                     self.assertContains(response, value)
                 self.assertNotContains(response, self.past.name)
                 self.assertNotContains(response, 'hx-trigger="load"')
-                self.assertEqual(response["X-Initialize-Tables"], "initialize-tables")
                 if headers:
+                    self.assertEqual(response["X-Initialize-Tables"], "initialize-tables")
                     self.assertNotContains(response, "<html")
                 else:
+                    self.assertNotIn("X-Initialize-Tables", response.headers)
                     self.assertTemplateUsed(response, "base.htm")
 
     def test_ordering_default_route_and_existing_filters(self):
@@ -68,10 +69,28 @@ class EventDirectoryTests(TestCase):
         response = self.client.get(reverse("web:get_events"))
         self.assertContains(response, "2 upcoming events")
         self.assertLess(response.content.index(self.event.name.encode()), response.content.index(later.name.encode()))
-        response = self.client.get(self.url, {"group_id": self.group.pk}, HTTP_HX_REQUEST="true")
-        self.assertContains(response, self.event.name)
-        self.assertNotContains(response, later.name)
-        self.assertContains(response, "1 upcoming event")
+        for headers in ({}, {"HTTP_HX_REQUEST": "true"}):
+            with self.subTest(headers=headers):
+                response = self.client.get(self.url, {"group_id": self.group.pk}, **headers)
+                self.assertContains(response, self.event.name)
+                self.assertNotContains(response, later.name)
+                self.assertContains(response, "1 upcoming event")
+
+    def test_group_filter_combines_with_other_filters_and_handles_invalid_ids(self):
+        for group_id in ("invalid", "999999"):
+            with self.subTest(group_id=group_id):
+                response = self.client.get(self.url, {"group_id": group_id}, HTTP_HX_REQUEST="true")
+                self.assertEqual(response.status_code, 200)
+                self.assertContains(response, "0 upcoming events")
+                self.assertNotContains(response, self.event.name)
+        response = self.client.get(self.url, {"group_id": self.group.pk, "name": "Missing meetup"})
+        self.assertContains(response, "0 upcoming events")
+        unhosted = baker.make(
+            "web.Event", name="Independent meetup", start_datetime=self.event.start_datetime, group=None
+        )
+        response = self.client.get(self.url, {"group_id": "None"})
+        self.assertContains(response, unhosted.name)
+        self.assertNotContains(response, self.event.name)
 
     def test_empty_state_and_minimal_display_are_preserved(self):
         response = self.client.get(self.url, {"name": "Missing meetup"})

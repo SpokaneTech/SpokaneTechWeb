@@ -7,6 +7,7 @@ from django.urls import reverse
 from handyhelpers.models import HandyHelperBaseModel
 
 from encrypted_fields.fields import EncryptedTextField
+from web.utilities.html_utils import convert_html_to_text
 from web.utilities.icons import get_icon_classes
 
 
@@ -164,6 +165,11 @@ class TechGroup(HandyHelperBaseModel):
     def icon_classes(self) -> str:
         """Provide safe icon classes regardless of which view renders the group."""
         return get_icon_classes(self.icon)
+
+    @property
+    def directory_description(self) -> str:
+        """Plain text summary with paragraph spacing, escaped by the template."""
+        return convert_html_to_text(self.description, block_separator=" ")
 
     def get_upcoming_events(self) -> models.QuerySet[Event]:
         """Get upcoming events for this TechGroup"""

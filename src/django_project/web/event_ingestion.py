@@ -64,12 +64,11 @@ def save_source_event(
         else:
             event = candidates.filter(name=values.get("name"), start_datetime=values.get("start_datetime")).first()
         is_new = event is None
-        if is_new:
+        if event is None:
             if not values.get("name") or not values.get("start_datetime"):
                 logger.warning("Skipping incomplete new event for group %s", group.pk)
                 return None, False
             event = Event(group=group, location_name="", location_address="")
-        assert event is not None
         for key, value in values.items():
             setattr(event, key, value)
         event.source_last_checked_at = timezone.now()
