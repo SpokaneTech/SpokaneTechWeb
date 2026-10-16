@@ -9,6 +9,7 @@ from typing import Any
 from bs4 import BeautifulSoup, Tag
 from bs4.element import NavigableString, PageElement
 
+from web.utilities.event_status import source_event_status
 from web.utilities.html_utils import fetch_content, fetch_content_with_playwright
 
 _TBD_LOCATION_NAMES = {"tbd", "tdb", "to be determined"}
@@ -23,6 +24,24 @@ def _iter_mappings(value: Any):
     elif isinstance(value, list):
         for child in value:
             yield from _iter_mappings(child)
+
+
+def _requested_event_data(soup: BeautifulSoup, url: str):
+    """Ignore recommended events and group-level status in page JSON."""
+    match = re.search(r"/events/([^/]+)/", url)
+    event_id = match.group(1) if match else None
+    for script in soup.find_all("script"):
+        try:
+            payload = json.loads(script.get_text())
+        except (json.JSONDecodeError, TypeError):
+            continue
+        for item in _iter_mappings(payload):
+            if item.get("__typename") == "Event" and str(item.get("id")) == event_id:
+                yield item
+            elif item.get("@type") == "Event":
+                item_url = item.get("url") or item.get("@id")
+                if isinstance(item_url, str) and item_url.rstrip("/") == url.rstrip("/"):
+                    yield item
 
 
 def _get_event_tags(soup: BeautifulSoup, url: str) -> list[str]:
@@ -210,6 +229,13 @@ def get_event_information(url: str) -> dict:
         soup = BeautifulSoup(page_content, "html.parser")
 
         event_info: dict = {}
+        requested_data = list(_requested_event_data(soup, url))
+        statuses = [source_event_status(item) for item in requested_data]
+        if "cancelled" in statuses:
+            event_info["status"] = "cancelled"
+        elif "active" in statuses:
+            event_info["status"] = "active"
+        event_info["tags_complete"] = any("topics" in item for item in requested_data)
         event_info["tags"] = _get_event_tags(soup, url)
         event_info["image_url"] = _get_event_image(soup, url)
         event_info["url"] = url
@@ -297,6 +323,9 @@ def get_event_information(url: str) -> dict:
             online_p = soup.find("p", class_="ds2-k16 text-ds2-text-fill-primary-enabled")
             if online_p and online_p.get_text(strip=True) == "Online event":
                 location_name = "Online event"
+        event_info["location_complete"] = bool(
+            is_tbd_location or location_name == "Online event" or (venue and location_name and location_address)
+        )
         event_info["location_name"] = location_name
         event_info["location_address"] = location_address
 

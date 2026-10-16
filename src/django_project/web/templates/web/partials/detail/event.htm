@@ -9,6 +9,7 @@
                 {% if object.group %}<p class="st-event-detail-host">Hosted by <a class="st-text-link" href="{{ object.group.get_absolute_url }}" hx-get="{{ object.group.get_absolute_url }}" hx-target="#body_main" hx-push-url="true">{{ object.group.name }}</a></p>{% endif %}
             </div>
         </header>
+        {% include "web/partials/home/event_status.htm" with event=object %}
         <div class="st-group-about-grid">
             <section class="st-group-panel" aria-labelledby="event-about-title">
                 {% if object.image %}<img class="st-event-detail-image img-fluid" src="{{ object.image.url }}" alt="" width="900" height="450" decoding="async">{% endif %}
@@ -32,7 +33,8 @@
                     </div>
                     {% endif %}
                 </dl>
-                {% if object.url %}<div class="st-event-detail-actions"><a class="st-button st-button-primary" href="{{ object.url }}" target="_blank" rel="noopener">RSVP<span class="visually-hidden"> on event website (opens in a new tab)</span></a></div>{% endif %}
+                {% if object.url and not object.is_cancelled %}<div class="st-event-detail-actions"><a class="st-button st-button-primary" href="{{ object.url }}" target="_blank" rel="noopener">RSVP<span class="visually-hidden"> on event website (opens in a new tab)</span></a></div>{% endif %}
+                {% if object.url and object.is_cancelled %}<div class="st-event-detail-actions"><a class="st-text-link" href="{{ object.url }}" target="_blank" rel="noopener">View original event<span class="visually-hidden"> (opens in a new tab)</span></a></div>{% endif %}
                 {% if object.group %}<div class="st-event-detail-group"><h3>Meet the host</h3><a class="st-text-link" href="{{ object.group.get_absolute_url }}" hx-get="{{ object.group.get_absolute_url }}" hx-target="#body_main" hx-push-url="true">{{ object.group.name }}</a><p>Learn about the group and explore its upcoming and past events.</p></div>{% endif %}
             </aside>
         </div>

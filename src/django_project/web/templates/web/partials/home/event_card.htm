@@ -7,6 +7,7 @@
         {% if featured %}<span class="st-next-label">Next event</span>{% endif %}
     </div>
     <div class="st-event-content">
+        {% if event.is_cancelled %}<p class="st-tag">Cancelled</p>{% endif %}
         <div class="st-event-title-row">
             <time class="st-date-badge" datetime="{{ event.start_datetime|localtime|date:'c' }}"><span>{{ event.start_datetime|date:"M" }}</span><strong>{{ event.start_datetime|date:"j" }}</strong></time>
             <div>{% if directory %}<h2><a class="st-card-link" href="{{ event.get_absolute_url }}" hx-get="{{ event.get_absolute_url }}" hx-target="#body_main" hx-push-url="true">{{ event.name }}</a></h2>{% else %}<h3><a class="st-card-link" href="{{ event.get_absolute_url }}"{% if detail %} hx-get="{{ event.get_absolute_url }}" hx-target="#body_main" hx-push-url="true"{% endif %}>{{ event.name }}</a></h3>{% endif %}{% if event.group %}<p class="st-event-group">{{ event.group.name }}</p>{% endif %}</div>

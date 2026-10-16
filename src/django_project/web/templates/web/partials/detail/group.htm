@@ -61,6 +61,7 @@
                         <li>
                             <time class="st-group-past-date" datetime="{{ event.start_datetime|localtime|date:'c' }}">{{ event.start_datetime|date:"M j, Y" }}<span>{{ event.start_datetime|time:"g:i A" }} {{ event.start_datetime|date:"T" }}</span></time>
                             <div class="st-group-past-info">
+                                {% if event.is_cancelled %}<span class="st-tag">Cancelled</span>{% endif %}
                                 <h3><a class="st-group-past-link" href="{{ event.get_absolute_url }}" hx-get="{{ event.get_absolute_url }}" hx-target="#body_main" hx-push-url="true">{{ event.name }}</a></h3>
                                 {% if event.location_name or event.location_address %}<p>{{ event.location_name|default:event.location_address }}{% if event.location_name and event.location_address %} &middot; {{ event.location_address }}{% endif %}</p>{% endif %}
                             </div>

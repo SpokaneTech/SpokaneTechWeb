@@ -7,10 +7,29 @@ from django.urls import reverse
 from handyhelpers.models import HandyHelperBaseModel
 
 from encrypted_fields.fields import EncryptedTextField
+from web.utilities.icons import get_icon_classes
 
 
 class Event(HandyHelperBaseModel):
     """An event on a specific day and time"""
+
+    class Status(models.TextChoices):
+        ACTIVE = "active", "Active"
+        CANCELLED = "cancelled", "Cancelled"
+
+    status = models.CharField(max_length=16, choices=Status.choices, default=Status.ACTIVE, db_index=True)
+    source_last_checked_at = models.DateTimeField(null=True, blank=True)
+    source_tag_names = models.JSONField(default=list, blank=True)
+    change_version = models.PositiveIntegerField(default=0, editable=False)
+
+    def save(self, *args, **kwargs):
+        if kwargs.get("update_fields"):
+            kwargs["update_fields"] = set(kwargs["update_fields"]) | {"change_version"}
+        return super().save(*args, **kwargs)
+
+    @property
+    def is_cancelled(self) -> bool:
+        return self.status == self.Status.CANCELLED
 
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
@@ -141,11 +160,18 @@ class TechGroup(HandyHelperBaseModel):
     def get_absolute_url(self) -> str:
         return reverse("web:get_techgroup", kwargs={"pk": self.pk})
 
+    @property
+    def icon_classes(self) -> str:
+        """Provide safe icon classes regardless of which view renders the group."""
+        return get_icon_classes(self.icon)
+
     def get_upcoming_events(self) -> models.QuerySet[Event]:
         """Get upcoming events for this TechGroup"""
         from django.utils import timezone
 
-        return Event.objects.filter(group=self, start_datetime__gte=timezone.now()).order_by("start_datetime")
+        return Event.objects.filter(
+            group=self, status=Event.Status.ACTIVE, start_datetime__gte=timezone.now()
+        ).order_by("start_datetime")
 
     def get_past_events(self) -> models.QuerySet[Event]:
         """Get past events for this TechGroup"""

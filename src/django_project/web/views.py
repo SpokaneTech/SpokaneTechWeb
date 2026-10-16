@@ -6,6 +6,7 @@ from blogs.models import BlogPost
 from django.db.models import Count, Q
 from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import render
+from django.urls import reverse
 from django.utils import timezone
 from handyhelpers.views.calendar import HtmxCalendarView
 from handyhelpers.views.htmx import (
@@ -93,6 +94,11 @@ class EventCalendarView(HtmxCalendarView):
     template_name: str = "web/full/custom/calendar.html"
     title: str = "Community calendar"
 
+    @staticmethod
+    def calendar_url(year: int, month: int) -> str:
+        """Build navigation links independently of the helper's URL utilities."""
+        return reverse("web:event_calendar", kwargs={"year": year, "month": month})
+
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         pacific = ZoneInfo("America/Los_Angeles")
         today = timezone.localtime(timezone.now(), pacific).date()
@@ -108,7 +114,7 @@ class EventCalendarView(HtmxCalendarView):
         start = datetime(year, month, 1, tzinfo=pacific)
         end = datetime(next_year, next_month, 1, tzinfo=pacific)
         events = list(
-            Event.objects.filter(start_datetime__gte=start, start_datetime__lt=end)
+            Event.objects.filter(status=Event.Status.ACTIVE, start_datetime__gte=start, start_datetime__lt=end)
             .select_related("group")
             .order_by("start_datetime", "pk")
         )
@@ -161,7 +167,7 @@ class IndexContentView(HtmxOptionView):
 
     def get(self, request, *args, **kwargs):
         now = timezone.now()
-        upcoming = Event.objects.filter(start_datetime__gte=now)
+        upcoming = Event.objects.filter(status=Event.Status.ACTIVE, start_datetime__gte=now)
         groups = TechGroup.objects.filter(enabled=True)
         self.context = {
             "upcoming_events": list(
@@ -171,14 +177,20 @@ class IndexContentView(HtmxOptionView):
                 .order_by("start_datetime", "pk")
             ),
             "homepage_groups": list(
-                groups.annotate(upcoming_event_count=Count("event", filter=Q(event__start_datetime__gte=now)))
+                groups.annotate(
+                    upcoming_event_count=Count(
+                        "event", filter=Q(event__start_datetime__gte=now, event__status=Event.Status.ACTIVE)
+                    )
+                )
                 .prefetch_related("tags")
                 .order_by("name", "pk")
             ),
             "upcoming_event_count": upcoming.count(),
             "active_group_count": groups.count(),
             "community_tags": list(
-                Tag.objects.filter(Q(techgroup__enabled=True) | Q(event__start_datetime__gte=now))
+                Tag.objects.filter(
+                    Q(techgroup__enabled=True) | Q(event__start_datetime__gte=now, event__status=Event.Status.ACTIVE)
+                )
                 .distinct()
                 .order_by("value")[:12]
             ),
@@ -211,7 +223,7 @@ class TechEventsView(HtmxOptionMultiFilterView):
 
     def get(self, request, *args, **kwargs):
         self.queryset = (
-            Event.objects.filter(start_datetime__gte=timezone.now())
+            Event.objects.filter(status=Event.Status.ACTIVE, start_datetime__gte=timezone.now())
             .select_related("group")
             .prefetch_related("tags")
             .order_by("start_datetime", "pk")
@@ -253,7 +265,7 @@ class TechGroupView(HtmxOptionDetailView):
         )
         context.update(
             group_icon=get_icon_classes(self.object.icon),
-            upcoming_events=[event for event in events if event.start_datetime >= now],
+            upcoming_events=[event for event in events if event.start_datetime >= now and not event.is_cancelled],
             past_events=[event for event in reversed(events) if event.start_datetime < now],
         )
         return context
@@ -275,7 +287,11 @@ class TechGroupsView(HtmxOptionMultiFilterView):
         self.queryset = (
             TechGroup.objects.filter(enabled=True)
             .annotate(
-                upcoming_event_count=Count("event", filter=Q(event__start_datetime__gte=timezone.now()), distinct=True)
+                upcoming_event_count=Count(
+                    "event",
+                    filter=Q(event__start_datetime__gte=timezone.now(), event__status=Event.Status.ACTIVE),
+                    distinct=True,
+                )
             )
             .prefetch_related("tags")
             .order_by("name", "pk")

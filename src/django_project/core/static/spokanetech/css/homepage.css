@@ -458,3 +458,6 @@
     .st-event-detail-date { width: 56px; padding: 10px 6px; }
     .st-event-detail-date strong { font-size: 1.75rem; }
 }
+
+.st-event-cancelled { padding: 16px 20px; margin-bottom: 24px; border: 1px solid var(--st-border); border-left: 4px solid var(--st-blue); border-radius: 8px; background: var(--st-blue-tint); color: var(--st-ink); }
+.st-event-cancelled p { margin: 8px 0 0; line-height: 1.65; }

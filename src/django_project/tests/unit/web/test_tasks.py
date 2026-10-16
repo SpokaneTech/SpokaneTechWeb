@@ -306,7 +306,7 @@ class TestIngestFutureMeetupEvents(TestCase):
         information.side_effect = None
         information.return_value = {**data, "tags": []}
         ingest_future_meetup_events(self.group.pk)
-        self.assertEqual(event.tags.count(), 3)
+        self.assertEqual(set(event.tags.values_list("value", flat=True)), {"Local topic"})
 
     @patch("web.tasks.get_event_information")
     @patch("web.tasks.get_event_links")

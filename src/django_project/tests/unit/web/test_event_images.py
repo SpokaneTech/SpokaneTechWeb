@@ -198,7 +198,7 @@ class ManagedImageTests(TestCase):
         self.assertEqual(download.call_count, 4)
         delay.assert_not_called()
 
-    @patch("web.tasks.queue_event_image")
+    @patch("web.event_ingestion.queue_event_image")
     def test_both_ingestion_paths_queue_provider_image(self, queue):
         for platform_name in ("Meetup", "Eventbrite"):
             platform = baker.make("web.SocialPlatform", name=platform_name)

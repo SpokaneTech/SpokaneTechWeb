@@ -86,9 +86,13 @@ class CalendarTests(TestCase):
 
     def test_current_month_routes_use_pacific_date(self):
         for url in (reverse("web:event_calendar"), reverse("web:event_calendar", kwargs={"year": 0, "month": 0})):
-            response = self.get_calendar(url)
-            self.assertEqual((response.context["year"], response.context["month"]), (2026, 10))
-            self.assertContains(response, self.late.name)
+            for headers in ({}, {"HTTP_HX_REQUEST": "true"}):
+                with self.subTest(url=url, headers=headers):
+                    response = self.get_calendar(url, **headers)
+                    self.assertEqual(response.status_code, 200)
+                    self.assertEqual((response.context["year"], response.context["month"]), (2026, 10))
+                    self.assertContains(response, self.late.name)
+                    self.assertEqual(response.context["today_url"], self.url)
 
     def test_navigation_rolls_years_and_preserves_actual_links(self):
         response = self.get_calendar(reverse("web:event_calendar", kwargs={"year": 2026, "month": 12}))

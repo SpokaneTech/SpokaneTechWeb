@@ -13,19 +13,20 @@ import requests
 from bs4 import BeautifulSoup
 from celery import shared_task
 from django.conf import settings
-from django.db import transaction
 from django.db.models.manager import BaseManager
 from django.utils import timezone
 
-from web.image_tasks import queue_event_image
-from web.models import Event, IntegrationCredential, Link, Tag, TechGroup
+from web.event_ingestion import save_source_event
+from web.models import Event, IntegrationCredential, Link, TechGroup
 from web.utilities.dt_utils import convert_to_pacific
 from web.utilities.event_images import eventbrite_image_url
+from web.utilities.event_status import source_event_status
 from web.utilities.notifiers.discord import DiscordNotifier
 from web.utilities.notifiers.linkedin import LinkedInOrganizationClient
 from web.utilities.scrapers.eventbrite import (
     create_google_map_link,
     get_event_details,
+    get_event_record,
     get_events_for_organization,
     get_organization_details,
 )
@@ -36,15 +37,6 @@ from web.utilities.scrapers.meetup import (
 )
 
 logger = logging.getLogger(__name__)
-
-
-def _truncate_for_model(model: type[Event], field_name: str, value: str | None) -> str:
-    if not value:
-        return ""
-    max_length = model._meta.get_field(field_name).max_length
-    if max_length is None:
-        return value
-    return value[:max_length]
 
 
 def _get_eventbrite_organization_id(url: str) -> str | None:
@@ -113,109 +105,157 @@ def ingest_eventbrite_organization_details(group_pk) -> str:
 @shared_task(time_limit=900, max_retries=3, name="web.ingest_future_meetup_events")
 def ingest_future_meetup_events(group_pk, *, synchronous_images: bool = False) -> str:
     group = TechGroup.objects.get(pk=group_pk)
-    if not group:
-        return f"group with pk {group_pk} not found"
-    platform_links = group.links.filter(name=f"{group.name} {group.platform.name} page").distinct()
-    if not platform_links:
+    links = group.links.filter(name=f"{group.name} {group.platform.name} page").distinct()
+    if not links:
         return f"no {group.platform.name} links found for {group.name}"
+    discovered: set[str] = set()
+    for link in links:
+        try:
+            discovered.update(url for url in get_event_links(link.url) if re.search(r"/events/(\d+)/", url))
+        except Exception:
+            logger.exception("Meetup discovery failed for group %s; rechecking stored events", group.pk)
+    known: dict[str, int] = {}
+    for event in Event.objects.filter(group=group, start_datetime__gte=timezone.now()):
+        url = event.url
+        if not url and event.social_platform_id.isdigit():
+            base = re.sub(r"/events/?$", "", links[0].url.rstrip("/"))
+            url = f"{base}/events/{event.social_platform_id}/"
+        if url and urlparse(url).hostname in {"meetup.com", "www.meetup.com"}:
+            known[url] = event.pk
+    event_count = 0
+    for url in sorted(discovered | known.keys()):
+        try:
+            info = dict(get_event_information(url) or {})
+        except Exception:
+            logger.exception("Meetup detail fetch failed for group %s; preserving stored event", group.pk)
+            continue
+        if not info:
+            continue
+        image_url = info.pop("image_url", "")
+        tags = info.pop("tags", None)
+        if not info.pop("tags_complete", True):
+            tags = None
+        complete = info.pop("location_complete", any(info.get(key) for key in ("location_name", "location_address")))
+        _, is_new = save_source_event(
+            group,
+            info,
+            tags=tags,
+            image_url=image_url,
+            location_complete=complete,
+            synchronous_images=synchronous_images,
+            existing_pk=known.get(url),
+        )
+        event_count += int(is_new)
+    return f"found {len(discovered)} upcoming events for {group.name}; added {event_count} new events"
 
-    event_links: list = []
-    event_count: int = 0
 
-    # filter event links for future recurring events. Meetup uses a numeric event id in the url for upcoming events
-    # and a alphanumeric event id for recurring events. This is causing duplicate events to be added to the database.
-    numeric_event_pattern = re.compile(r"/events/(\d+)/")
-
-    for link in group.links.filter(name=f"{group.name} {group.platform.name} page").distinct():
-        ingest_links: list = [url for url in get_event_links(link.url) if numeric_event_pattern.search(url)]
-        event_links.extend(ingest_links)
-        for event_link in ingest_links:
-            event_info = get_event_information(event_link)
-            if event_info:
-                event_info["group"] = group
-                tag_names = event_info.pop("tags", []) or []
-                image_url = event_info.pop("image_url", "")
-                event_info.setdefault("location_name", "")
-                event_info.setdefault("location_address", "")
-                event_info.setdefault("map_link", "")
-                event_info["location_name"] = _truncate_for_model(Event, "location_name", event_info["location_name"])
-                event_info["location_address"] = _truncate_for_model(
-                    Event, "location_address", event_info["location_address"]
-                )
-                if not event_info.get("name", None):
-                    logger.error("error parsing name for event hosted by %s; data = %s", group.name, event_info)
-                    continue
-                with transaction.atomic():
-                    if event_info.get("social_platform_id"):
-                        event, is_new = Event.objects.update_or_create(
-                            social_platform_id=event_info["social_platform_id"], defaults=event_info
-                        )
-                    else:
-                        event, is_new = Event.objects.update_or_create(
-                            name=event_info["name"], start_datetime=event_info["start_datetime"], defaults=event_info
-                        )
-                    for name in tag_names:
-                        if not isinstance(name, str):
-                            continue
-                        value = " ".join(name.split())[: Tag._meta.get_field("value").max_length]
-                        if value:
-                            tag, _ = Tag.objects.get_or_create(value=value)
-                            event.tags.add(tag)
-                    queue_event_image(event, image_url, synchronous=synchronous_images)
-                if is_new:
-                    event_count += 1
-    return f"found {len(event_links)} upcoming events for {group.name}; added {event_count} new events"
+def _save_eventbrite_snapshot(
+    group: TechGroup,
+    item: dict[str, Any],
+    details: dict[str, Any],
+    *,
+    synchronous_images: bool = False,
+    existing_pk: int | None = None,
+) -> tuple[Event | None, bool]:
+    # Detail responses take precedence; absent keys in a partial response do not erase list data.
+    snapshot = {**item, **details}
+    data: dict[str, Any] = {}
+    for key in ("name", "description"):
+        if key in snapshot:
+            value = snapshot[key]
+            data[key] = value.get("text", "") if isinstance(value, dict) else value
+    for key in ("start", "end"):
+        if snapshot.get(key):
+            data[f"{key}_datetime"] = snapshot[key].get("utc")
+    for key, field in (("url", "url"), ("id", "social_platform_id")):
+        if key in snapshot:
+            data[field] = str(snapshot[key])
+    statuses = [source_event_status(details), source_event_status(item)]
+    status = "cancelled" if "cancelled" in statuses else next((value for value in statuses if value), None)
+    if status:
+        data["status"] = status
+    venue = snapshot.get("primary_venue") or snapshot.get("venue") or {}
+    address = venue.get("address") or {}
+    location_address = address.get("localized_address_display", "")
+    name = venue.get("name") or ""
+    online = snapshot.get("online_event") is True or name.casefold() in {"online", "online event"}
+    data.update(
+        location_name="Online event" if online and not name else name,
+        location_address="" if online else location_address,
+        map_link=create_google_map_link(location_address) if location_address and not online else "",
+    )
+    raw_tags = snapshot.get("tags")
+    tags = (
+        [tag.get("display_name") for tag in raw_tags if isinstance(tag, dict)] if isinstance(raw_tags, list) else None
+    )
+    return save_source_event(
+        group,
+        data,
+        tags=tags,
+        image_url=eventbrite_image_url(details) or eventbrite_image_url(item),
+        location_complete=online or bool(name and location_address),
+        synchronous_images=synchronous_images,
+        existing_pk=existing_pk,
+    )
 
 
 @shared_task(time_limit=900, max_retries=3, name="web.ingest_future_eventbrite_events")
 def ingest_future_eventbrite_events(group_pk, *, synchronous_images: bool = False) -> str:
-    group: TechGroup = TechGroup.objects.get(pk=group_pk)
-    if not group:
-        return f"group with pk {group_pk} not found"
-    event_count = 0
-    link: Any = group.links.filter(name=f"{group.name} {group.platform.name} page").distinct().first()
+    group = TechGroup.objects.get(pk=group_pk)
+    link = group.links.filter(name=f"{group.name} {group.platform.name} page").distinct().first()
     if not link:
         return f"no {group.platform.name} links found for {group.name}"
-    eb_group_id = _get_eventbrite_organization_id(link.url)
-    if not eb_group_id:
+    organizer_id = _get_eventbrite_organization_id(link.url)
+    if not organizer_id:
         return f"invalid Eventbrite organization URL for {group.name}"
-    event_list: list = get_events_for_organization(eb_group_id)
+    known = {
+        event.social_platform_id: event.pk
+        for event in Event.objects.filter(group=group, start_datetime__gte=timezone.now()).exclude(
+            social_platform_id=""
+        )
+    }
+    try:
+        event_list = get_events_for_organization(organizer_id)
+    except Exception:
+        logger.exception("Eventbrite discovery failed for group %s; rechecking stored events", group.pk)
+        event_list = []
+    event_count = 0
+    checked: set[str] = set()
     for item in event_list:
-        event_details: dict = get_event_details(item["id"])
-        if event_details:
-            location_data: dict[str, Any] = event_details.get("primary_venue") or {}
-            tag_data: list[dict[str, Any]] = event_details.get("tags") or []
-            address_data: dict[str, Any] = location_data.get("address") or {}
-            location_address: str = address_data.get("localized_address_display", "")
-
-            event_data: dict[str, Any] = {
-                "group": group,
-                "name": _truncate_for_model(Event, "name", item["name"].get("text", "") if item.get("name") else ""),
-                "description": item["description"].get("text", "") if item.get("description") else "",
-                "url": item.get("url", ""),
-                "social_platform_id": _truncate_for_model(Event, "social_platform_id", item.get("id", "")),
-                "start_datetime": item["start"].get("utc", "") if item.get("start") else "",
-                "end_datetime": item["end"].get("utc", "") if item.get("end") else "",
-                "location_name": _truncate_for_model(Event, "location_name", location_data.get("name", "")),
-                "location_address": _truncate_for_model(Event, "location_address", location_address),
-                "map_link": create_google_map_link(location_address) if location_address else "",
-            }
-
-            event, is_new = Event.objects.update_or_create(
-                group=group,
-                social_platform_id=_truncate_for_model(Event, "social_platform_id", item.get("id", "")),
-                defaults=event_data,
+        event_id = str(item.get("id") or "")
+        if not event_id or event_id in checked:
+            continue
+        checked.add(event_id)
+        try:
+            details = get_event_details(event_id)
+        except Exception:
+            logger.exception("Eventbrite detail fetch failed for event %s; preserving stored details", event_id)
+            continue
+        # An empty detail response is not evidence of deletion or cancellation.
+        if not details:
+            continue
+        _, is_new = _save_eventbrite_snapshot(
+            group,
+            item,
+            details,
+            synchronous_images=synchronous_images,
+            existing_pk=known.get(event_id),
+        )
+        event_count += int(is_new)
+    for event_id in known.keys() - checked:
+        try:
+            snapshot = get_event_record(event_id)
+        except Exception:
+            logger.exception("Eventbrite recheck failed for event %s; retaining current status", event_id)
+            continue
+        if snapshot:
+            _save_eventbrite_snapshot(
+                group,
+                {"id": event_id},
+                snapshot,
+                synchronous_images=synchronous_images,
+                existing_pk=known[event_id],
             )
-            queue_event_image(
-                event,
-                eventbrite_image_url(event_details) or eventbrite_image_url(item),
-                synchronous=synchronous_images,
-            )
-            if is_new:
-                event_count += 1
-            for tag in tag_data:
-                obj, _ = Tag.objects.get_or_create(value=tag["display_name"], defaults={"value": tag["display_name"]})
-                event.tags.add(obj)
     return f"added {event_count} new events for {group.name}"
 
 
@@ -256,7 +296,9 @@ def launch_eventbrite_event_ingestion() -> str:
 
 
 @shared_task(time_limit=300, max_retries=0, name="web.post_event_to_linkedin")
-def post_event_to_linkedin(event_pk: int, is_new: bool) -> str:
+def post_event_to_linkedin(
+    event_pk: int, is_new: bool, *, change_message: str | None = None, change_version: int | None = None
+) -> str:
     event: Event = Event.objects.get(pk=event_pk)
     if not event:
         return f"Event with pk {event_pk} not found."
@@ -274,6 +316,11 @@ def post_event_to_linkedin(event_pk: int, is_new: bool) -> str:
     if not access_token and not (refresh_token and settings.LINKEDIN_CLIENT_ID and settings.LINKEDIN_CLIENT_SECRET):
         return "LinkedIn API credentials not configured in settings. Skipping post."
 
+    if change_version is not None and event.change_version != change_version:
+        return "Event change message is obsolete."
+    if event.is_cancelled and not change_message:
+        return "Event is cancelled. Skipping LinkedIn post."
+
     # Initialize LinkedIn client
     linkedin_client = LinkedInOrganizationClient(
         access_token=access_token,
@@ -285,17 +332,19 @@ def post_event_to_linkedin(event_pk: int, is_new: bool) -> str:
         credential=linkedin_credential,
     )
 
-    linkedin_client.post_event(
-        event=event,
-        is_new=is_new,
-    )
+    if change_message:
+        linkedin_client.post_organization_post(commentary=change_message[:3000])
+        return f"Event change for {event.name} posted to LinkedIn successfully."
+    linkedin_client.post_event(event=event, is_new=is_new)
     if is_new:
         return f"Event created message for {event.name} posted to LinkedIn successfully."
     return f"Event reminder for {event.name} posted to LinkedIn successfully."
 
 
 @shared_task(time_limit=300, max_retries=0, name="web.post_event_to_discord")
-def post_event_to_discord(event_pk: int, is_new: bool = True) -> str:
+def post_event_to_discord(
+    event_pk: int, is_new: bool = True, *, change_message: str | None = None, change_version: int | None = None
+) -> str:
     """post an event to Discord via webhook"""
     if not settings.POST_TO_DISCORD:
         return f"POST_TO_DISCORD is False. Skipping Discord post for event with pk {event_pk}."
@@ -304,15 +353,23 @@ def post_event_to_discord(event_pk: int, is_new: bool = True) -> str:
     if not event:
         return f"Event with pk {event_pk} not found."
 
+    if change_version is not None and event.change_version != change_version:
+        return "Event change message is obsolete."
+    if event.is_cancelled and not change_message:
+        return "Event is cancelled. Skipping Discord post."
+
     # Ensure Discord webhook URL is set
     if not settings.DISCORD_WEBHOOK_URL:
         return "Discord webhook URL not configured in settings. Skipping post."
 
     discord_notifier = DiscordNotifier(webhook_url=settings.DISCORD_WEBHOOK_URL)
-    discord_notifier.post_event(
-        event=event,
-        is_new=is_new,
-    )
+    if change_message:
+        payload = {"content": change_message[:1900], "allowed_mentions": {"parse": []}}
+        discord_notifier.send_message(payload)
+        if event.group and event.group.discord_webhook_url:
+            discord_notifier.send_message(payload, url=event.group.discord_webhook_url)
+        return f"Event change for {event.name} posted to Discord successfully."
+    discord_notifier.post_event(event=event, is_new=is_new)
     if is_new:
         return f"Event created message for {event.name} posted to Discord successfully."
     return f"Event reminder for {event.name} posted to Discord successfully."
@@ -337,7 +394,7 @@ def launch_reminders_for_tomorrows_events() -> str:
 
     # Filter events that start anytime tomorrow
     event_list: BaseManager[Event] = Event.objects.filter(
-        start_datetime__gte=start_utc, start_datetime__lt=end_utc, group__enabled=True
+        start_datetime__gte=start_utc, start_datetime__lt=end_utc, group__enabled=True, status=Event.Status.ACTIVE
     )
     for event in event_list:
         # post reminders to Discord
@@ -358,6 +415,8 @@ def post_event_to_spug_task(event_pk: int) -> str:
     event: Event = Event.objects.get(pk=event_pk)
     if not event:
         return f"Event with pk {event_pk} not found."
+    if event.is_cancelled:
+        return "Event is cancelled. Skipping SPUG post."
     spug_url: str | None = getattr(settings, "SPUG_API_URL", None)
     spug_token: str | None = getattr(settings, "SPUG_API_TOKEN", None)
     if not spug_url or not spug_token:
@@ -401,7 +460,7 @@ def post_weekly_event_summary_to_discord() -> str:
 
     # Filter events that start within the week
     event_list: BaseManager[Event] = Event.objects.filter(
-        start_datetime__gte=start_utc, start_datetime__lt=end_utc, group__enabled=True
+        start_datetime__gte=start_utc, start_datetime__lt=end_utc, group__enabled=True, status=Event.Status.ACTIVE
     )
     if not event_list.exists():
         return "No events found for the week."

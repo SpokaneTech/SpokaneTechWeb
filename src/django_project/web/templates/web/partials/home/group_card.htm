@@ -2,7 +2,7 @@
     {% if directory %}<div class="st-directory-card-header">{% endif %}
     <div class="st-group-logo" aria-hidden="true">
         {% if group.image %}<img src="{{ group.image.url }}" alt="" width="64" height="64" loading="lazy" decoding="async">
-        {% elif group.homepage_icon %}<i class="{{ group.homepage_icon }}" aria-hidden="true"></i>
+        {% elif group.icon_classes %}<i class="{{ group.icon_classes }}" aria-hidden="true"></i>
         {% else %}<span>{{ group.name|first }}</span>{% endif %}
     </div>
     {% if directory %}

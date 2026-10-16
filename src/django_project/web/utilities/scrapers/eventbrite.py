@@ -83,10 +83,18 @@ def get_events_for_organization(organization_id: str, age: int | None = None) ->
     start_date_range_start: str = timezone.now().strftime("%Y-%m-%dT%H:%M:%SZ")
     url: str = f"https://www.eventbriteapi.com/v3/organizers/{organization_id}/events/?start_date.range_start={start_date_range_start}&start_date.range_end={start_date_range_end}"
     headers: dict[str, str] = {"Authorization": f"Bearer {api_token}"}
-    response: requests.Response = requests.get(url, headers=headers, timeout=15)
-    response.raise_for_status()
-    data: dict = response.json()
-    return data["events"]
+    events: list = []
+    page = 1
+    while True:
+        page_url = url if page == 1 else f"{url}&page={page}"
+        response = requests.get(page_url, headers=headers, timeout=15)
+        response.raise_for_status()
+        data = response.json()
+        events.extend(data["events"])
+        pagination = data.get("pagination") or {}
+        if not pagination.get("has_more_items", page < pagination.get("page_count", page)):
+            return events
+        page += 1
 
 
 def get_event_details(event_id: str) -> dict:
@@ -156,7 +164,8 @@ def get_event_details(event_id: str) -> dict:
             resp.raise_for_status()
 
             # If successful, return the data
-            return resp.json()["events"][0]
+            events = resp.json().get("events") or []
+            return events[0] if events else {}
 
         except HTTPError as err:
             # Handle other HTTP errors (e.g., 400, 401, 404, 500)
@@ -186,3 +195,17 @@ def get_event_details(event_id: str) -> dict:
         f"Function completed without returning data for event_id {event_id}. This should not happen if errors are always re-raised."
     )
     return {}  # Fallback, though an exception should ideally cover failure# Initialize backoff time for 429 errors
+
+
+def get_event_record(event_id: str) -> dict:
+    """Recheck a stored event directly, outside discovery's date window."""
+    token = getattr(settings, "EVENTBRITE_API_KEY", None)
+    if not token:
+        return {}
+    response = requests.get(
+        f"https://www.eventbriteapi.com/v3/events/{event_id}/?expand=venue,logo",
+        headers={"Authorization": f"Bearer {token}"},
+        timeout=15,
+    )
+    response.raise_for_status()
+    return response.json()

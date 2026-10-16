@@ -1,5 +1,6 @@
 {% load tz %}
 {% timezone "America/Los_Angeles" %}
+{% include "web/partials/home/event_status.htm" with event=object %}
 {% if object.group %}<p class="st-modal-organizer">Hosted by {{ object.group.name }}</p>{% endif %}
 <dl class="st-modal-facts">
     <div class="d-flex flex-column gap-1"><dt>When</dt><dd><time datetime="{{ object.start_datetime|date:'c' }}">{{ object.start_datetime|date:"l, M j, Y" }} &middot; {{ object.start_datetime|time:"g:i A" }} {{ object.start_datetime|date:"T"|default:"Pacific" }}{% if object.end_datetime %} &ndash; {{ object.end_datetime|time:"g:i A" }} {{ object.end_datetime|date:"T"|default:"Pacific" }}{% if object.end_datetime|date:"Y-m-d" != object.start_datetime|date:"Y-m-d" %} ({{ object.end_datetime|date:"M j, Y" }}){% endif %}{% endif %}</time></dd></div>
