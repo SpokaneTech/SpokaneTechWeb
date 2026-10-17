@@ -24,6 +24,18 @@ https://spokanetech.github.io/blog/building-spokane-tech/intro/
 
 <br/>
 
+## Search discovery and organic growth
+
+Public pages include per-page search/social metadata, a sitemap, and guides
+backed by current groups and events. Development and staging default to noindex.
+Production must explicitly set `SEO_INDEXING_ENABLED=True` and configure
+`PUBLIC_SITE_URL` when deploying these changes. Event structured data requires
+individual eligibility review; notification promotion links are a separate opt-in.
+
+See the [rollout guide](docs/growth/SEO_IMPLEMENTATION_AND_ROLLOUT.md),
+[organic outreach playbook](docs/growth/ORGANIC_OUTREACH_PLAYBOOK.md), and
+[search account setup](docs/growth/SEARCH_ENGINE_OWNERSHIP_SETUP.md).
+
 ## Local Development
 
 ### prerequisites

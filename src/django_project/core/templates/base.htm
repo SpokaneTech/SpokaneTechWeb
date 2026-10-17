@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    {% if GOOGLE_ANALYTICS_TAG_ID %}
+    {% if GOOGLE_ANALYTICS_TAG_ID and seo.public and SEO_INDEXING_ENABLED %}
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id={{ GOOGLE_ANALYTICS_TAG_ID }}"></script>
     <script>
@@ -11,21 +11,34 @@
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
 
-        gtag('config', '{{ GOOGLE_ANALYTICS_TAG_ID }}');
+        gtag('config', '{{ GOOGLE_ANALYTICS_TAG_ID|escapejs }}', {send_page_view: {% if GA4_MANUAL_PAGE_VIEWS %}false{% else %}true{% endif %}, page_location: '{{ seo.analytics_location|escapejs }}'});
     </script>
     {% endif %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Home of the Spokane and Inland Northwest tech community">
-    <meta name="keywords" content="spokane, spokanetech, tech, technology">
-    <meta property="og:title" content="Spokane Tech">
-    <meta property="og:description" content="Home of the Spokane and Inland Northwest tech community">
-    <meta name="robots" content="noindex, nofollow">
-
+    <title>{{ seo.title }}</title>
+    <meta name="description" content="{{ seo.description }}">
+    <meta name="robots" content="{{ seo.robots }}">
+    {% if seo.public %}
+    <link rel="canonical" href="{{ seo.canonical }}">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="SpokaneTech">
+    <meta property="og:title" content="{{ seo.title }}">
+    <meta property="og:description" content="{{ seo.description }}">
+    <meta property="og:url" content="{{ seo.canonical }}">
+    <meta property="og:image" content="{{ seo.image }}">
+    <meta property="og:image:alt" content="{{ seo.image_alt }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ seo.title }}">
+    <meta name="twitter:description" content="{{ seo.description }}">
+    <meta name="twitter:image" content="{{ seo.image }}">
+    <meta name="twitter:image:alt" content="{{ seo.image_alt }}">
+    {# script_json escapes HTML-sensitive characters before this trusted JSON is rendered. #}
+    {% if seo.structured_data %}<script type="application/ld+json" data-st-schema>{{ seo_schema_json|safe }}</script>{% endif %}
+    {% endif %}
     <link rel="apple-touch-icon" sizes="180x180" href="{% static 'spokanetech/img/apple-touch-icon.png' %}">
     <link rel="icon" type="image/png" sizes="32x32" href="{% static 'spokanetech/img/favicon-32x32.png' %}">
     <link rel="icon" type="image/png" sizes="16x16" href="{% static 'spokanetech/img/favicon-16x16.png' %}">
-    <title>Spokane Tech</title>
 
     <!-- Third-party packages use pinned CDN versions; site assets remain local. -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
@@ -74,6 +87,8 @@
                 <a href="{% url 'web:event_calendar' year=0 month=0 %}">Calendar</a>
                 <a href="{% url 'web:about' %}">About</a>
                 <a href="{% url 'web:develop' %}">Develop with us</a>
+                <a href="{% url 'web:newcomer_guide' %}">Your first meetup</a>
+                <a href="{% url 'web:community_guide' %}">Community guide</a>
                 <a href="{% url 'web:privacy' %}">Privacy</a>
                 <a href="{% url 'web:terms' %}">Terms</a>
             </nav>
@@ -98,6 +113,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 
     <script src="{% static 'spokanetech/js/navigation.js' %}" defer></script>
+    <script src="{% static 'spokanetech/js/discovery.js' %}" defer></script>
     <script src="{% static 'spokanetech/js/group-carousel.js' %}" defer></script>
     <script src="{% static 'spokanetech/js/event-tabs.js' %}" defer></script>
 </body>

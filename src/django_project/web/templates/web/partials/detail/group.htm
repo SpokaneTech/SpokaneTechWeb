@@ -12,6 +12,10 @@
                 {% if object.tags.all %}<div class="st-tags">{% include "web/partials/home/tags.htm" with tags=object.tags.all %}</div>{% endif %}
             </div>
         </header>
+        <div class="st-actions">
+            <button class="st-button st-button-outline" type="button" data-share-link>Copy group link</button>
+            <span role="status" aria-live="polite"></span>
+        </div>
         <div class="st-group-about-grid{% if not object.links.all %} st-group-about-only{% endif %}">
             <section id="about_section" class="st-group-panel" aria-labelledby="group-about-title">
                 <h2 id="group-about-title">About the group</h2>
@@ -25,7 +29,7 @@
                 <p>Find the community online and get involved.</p>
                 <ul class="st-group-links">
                     {% for link in object.links.all %}
-                    <li><a href="{{ link.url }}" target="_blank" rel="noopener">{{ link.name|default:link.url }}<span class="visually-hidden"> (opens in a new tab)</span></a>{% if link.description %}<p>{{ link.description }}</p>{% endif %}</li>
+                    <li><a href="{{ link.url }}" data-track-event="community_link_click" target="_blank" rel="noopener">{{ link.name|default:link.url }}<span class="visually-hidden"> (opens in a new tab)</span></a>{% if link.description %}<p>{{ link.description }}</p>{% endif %}</li>
                     {% endfor %}
                 </ul>
             </aside>

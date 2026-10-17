@@ -8,6 +8,7 @@ import requests
 from django.utils import timezone
 
 from web.models import Event
+from web.seo import campaign_url, promotion_link
 from web.utilities.ai.gemini import generate_post_content
 from web.utilities.ai.prompts import (
     create_event_reminder_prompt,
@@ -85,12 +86,17 @@ class DiscordNotifier:
                 },
             ]
         )
+        discovery = promotion_link(event, "discord")
+        if discovery != event.url:
+            footer = f"\n\nExplore on SpokaneTech: {discovery}\nRSVP: {event.url}"
+            content = content[: max(0, 2000 - len(footer))] + footer
+
         data: dict[str, Any] = {
             "content": content,
             "embeds": [
                 {
                     "title": event.name,
-                    "url": event.url,
+                    "url": promotion_link(event, "discord"),
                     "fields": fields,
                     "footer": {"text": f"Hosted by {event.group.name}"},
                 }
@@ -136,12 +142,17 @@ class DiscordNotifier:
                 },
             ]
         )
+        discovery = promotion_link(event, "discord")
+        if discovery != event.url:
+            footer = f"\n\nExplore on SpokaneTech: {discovery}\nRSVP: {event.url}"
+            content = content[: max(0, 2000 - len(footer))] + footer
+
         data: dict[str, Any] = {
             "content": content,
             "embeds": [
                 {
                     "title": event.name,
-                    "url": event.url,
+                    "url": promotion_link(event, "discord"),
                     "fields": fields,
                     "footer": {"text": f"Hosted by {event.group.name}"},
                 }
@@ -172,14 +183,24 @@ class DiscordNotifier:
             content = f"📢 Hello Spokane Tech Community! We have {event_list.count()} great events happening this week!\n👉 Check them out!"
 
         embeded_event_list: list[dict[str, Any]] = []
-        for event in event_list:
-            embeded_event_list.append(
-                {
-                    "name": f"{convert_to_pacific(event.start_datetime).strftime('%Y-%m-%d %I:%M %p')} {event.name}",
-                    "value": f"{convert_html_to_text(event.description)}\n[RSVP here]({event.url})",
-                    "inline": False,
-                },
-            )
+        budget = 5000
+        for event in event_list[:25]:
+            discovery = promotion_link(event, "discord", "weekly_events")
+            links = f"[RSVP here]({event.url})"
+            if discovery != event.url:
+                links = f"[Explore on SpokaneTech]({discovery}) · " + links
+            name = f"{convert_to_pacific(event.start_datetime).strftime('%Y-%m-%d %I:%M %p')} {event.name}"[:256]
+            remaining = min(400, 1024 - len(links) - 1, budget - len(name) - len(links) - 1)
+            if remaining < 0:
+                break
+            summary = convert_html_to_text(event.description)[:remaining]
+            value = f"{summary}\n{links}"
+            embeded_event_list.append({"name": name, "value": value, "inline": False})
+            budget -= len(name) + len(value)
+        footer = f"\nShowing {len(embeded_event_list)} of {event_list.count()} events."
+        if embeded_event_list and promotion_link(event_list[0], "discord") != event_list[0].url:
+            footer += "\nAll upcoming events: " + campaign_url("/events/list", "discord", "weekly_events")
+        content = content[: max(0, 2000 - len(footer))] + footer
 
         data: dict[str, Any] = {
             "content": content,
@@ -212,7 +233,7 @@ class DiscordNotifier:
         self.send_message(message)
 
         # send to the group's Discord channel if a webhook URL is provided
-        if event.group.discord_webhook_url:
+        if event.group_id and event.group.discord_webhook_url:
             self.send_message(message, url=event.group.discord_webhook_url)
 
     def post_weekly_summary(self, event_list: BaseManager) -> None:

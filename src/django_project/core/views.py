@@ -10,15 +10,17 @@ from django.views.decorators.http import require_GET
 
 @require_GET
 def robots_txt(request) -> HttpResponse:
-    return HttpResponse(robots_txt_content, content_type="text/plain")
+    from web.seo import absolute_url
 
-
-robots_txt_content = """\
-User-Agent: *
-Disallow: /__debug__/
-Disallow: /accounts/
-Disallow: /admin/
-"""
+    if not settings.SEO_INDEXING_ENABLED:
+        content = "User-Agent: *\nDisallow: /\n"
+    else:
+        content = (
+            "User-Agent: *\nDisallow: /__debug__/\nDisallow: /accounts/\n"
+            "Disallow: /console/\nDisallow: /admin/\n"
+            f"Sitemap: {absolute_url('/sitemap.xml')}\n"
+        )
+    return HttpResponse(content, content_type="text/plain")
 
 
 class HostView(View):

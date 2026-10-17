@@ -1,0 +1,51 @@
+<div class="st-directory st-about">
+    <div class="st-container">
+        <header class="st-directory-header">
+            <div>
+                <h1>{% if newcomer %}Your first Spokane tech meetup{% else %}Find your Spokane tech community{% endif %}</h1>
+                <p class="st-section-description">Start with a real group, check the details, and find an event that interests you.</p>
+            </div>
+        </header>
+        <article class="st-about-story">
+            {% if newcomer %}
+            <section>
+                <h2>Choose a topic you want to explore.</h2>
+                <p>You do not need to know every tool in a group's name before asking whether a meetup is right for you. Read the group's description, look at its upcoming events, and contact the organizer if experience requirements are unclear.</p>
+                <p>The directory below uses current SpokaneTech listings. Groups set their own membership and participation requirements; a listing does not guarantee that every event is open to everyone.</p>
+            </section>
+            <section>
+                <h2>Check before you go.</h2>
+                <p>Follow the event's RSVP link to confirm the current time, venue or online format, cost, and attendance requirements. Event details and cancellations can change. Ask the organizer about accessibility, parking, and anything you need to bring.</p>
+                <p>If you are new, consider introducing yourself to an organizer and asking how the meeting works. Participation and networking styles vary; choose what feels comfortable for you.</p>
+            </section>
+            {% else %}
+            <section>
+                <h2>Look for the people and format that fit you.</h2>
+                <p>A technology community can be a place to learn, share work, or meet people with similar interests. Compare groups by their actual topics and event descriptions rather than assuming the largest or busiest group is the best match.</p>
+                <p>SpokaneTech lists communities across the Inland Northwest. Read each profile and its upcoming events, then check the group's own links for current participation details.</p>
+            </section>
+            <section>
+                <h2>Ask about expectations.</h2>
+                <p>Meeting schedules, beginner friendliness, accessibility, and membership rules vary. Contact the organizer to confirm those details. If a group has no upcoming event here, its profile may still link to ways to learn more.</p>
+                <p><a class="st-text-link" href="{% url 'web:newcomer_guide' %}">Read the first-meetup guide</a> for a checklist before attending.</p>
+            </section>
+            {% endif %}
+        </article>
+        <section class="st-section" aria-labelledby="guide-groups-title">
+            <div class="st-section-heading"><h2 id="guide-groups-title">Explore current communities</h2><a class="st-text-link" href="{% url 'web:get_techgroups' display='list' %}">All tech groups</a></div>
+            <div class="st-directory-grid">
+                {% for group in guide_groups %}
+                    {% include "web/partials/home/group_card.htm" with directory=True %}
+                {% empty %}<p>Group profiles will appear here as communities are added.</p>{% endfor %}
+            </div>
+        </section>
+        <section class="st-section" aria-labelledby="guide-events-title">
+            <div class="st-section-heading"><h2 id="guide-events-title">A few upcoming events</h2><a class="st-text-link" href="{% url 'web:get_events' display='list' %}">All upcoming events</a></div>
+            <div class="st-event-directory-grid">
+                {% for event in guide_events %}
+                    {% include "web/partials/home/event_card.htm" with directory=True %}
+                {% empty %}<p>No upcoming events are currently listed. Explore a group's own links for updates.</p>{% endfor %}
+            </div>
+        </section>
+    </div>
+</div>

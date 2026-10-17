@@ -1,7 +1,5 @@
-{% extends BASE_TEMPLATE|default:"base.htm" %}
+{% extends "web/full/page.html" %}
 
-{% block main_content %}
-    <main id="body_main" tabindex="-1" hx-history-elt="true">
+{% block page_content %}
         {% include "web/partials/list/events.htm" %}
-    </main>
-{% endblock main_content %}
+{% endblock page_content %}
