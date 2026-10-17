@@ -1,21 +1,23 @@
-## Pull Request
+## Problem and resulting behavior
 
-### Description:
-Provide a brief description of the changes introduced by this pull request
+<!-- Explain the concrete problem and what this change does. -->
 
-### Related Issue(s):
-Add links to applicable Issues
-- #1
-- #2
+## Related issues
 
-### Checklist:
-- [ ] All code quality checks pass
-- [ ] Code follows the project's style guide
-- [ ] Documentation has been updated
+<!-- Link actual relevant issues; use "Closes #..." only when this PR resolves one. -->
 
+## Validation
 
-### Testing:
-- [ ] Existing tests provided necessary coverage
-- [ ] Manual or ad-hoc testing has been performed
-- [ ] Applicable tests have been added/updated
-- [ ] This change does not require testing
+<!-- List the tests/checks run and their results. Explain any checks not run or
+why testing is not applicable. Include screenshots for meaningful UI changes. -->
+
+## Checklist
+
+- [ ] I followed the [contribution guide](https://github.com/SpokaneTech/SpokaneTechWeb/blob/main/.github/CONTRIBUTING.md) and [style guide](https://github.com/SpokaneTech/SpokaneTechWeb/blob/main/.github/STYLE_GUIDE.md).
+- [ ] Applicable checks pass, or outstanding failures are explained above.
+- [ ] Regression tests were added or updated where appropriate, or the reason is explained above.
+- [ ] Documentation was updated where appropriate, or no documentation change is needed.
+- [ ] Logs, screenshots, and changes contain no credentials or private personal data.
+
+<!-- Forks are welcome: target SpokaneTech/SpokaneTechWeb:main from your fork's branch.
+Report sensitive vulnerabilities through SECURITY.md instead of a public PR. -->

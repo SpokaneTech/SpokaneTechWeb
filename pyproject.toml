@@ -3,7 +3,6 @@ dependencies = [
     "beautifulsoup4",
     "celery[redis]",
     "django~=5.2.0",
-    "django-braces",
     "django-celery-beat",
     "django-debug-toolbar",
     "django-environ",
@@ -12,13 +11,20 @@ dependencies = [
     "django-filter==25.1",
     "django-handyhelpers",
     "flower",
-    "Pillow",
-    "packaging",
+    "Pillow>=12.3.0",
     "psycopg2-binary",
-    "redis",
-    "requests>=2.26.0",
+    "requests>=2.33.0",
     "playwright",
     "whitenoise",
+    # Security floors for transitive runtime dependencies; see docs/maintenance/DEPENDENCY_SECURITY.md.
+    "cryptography>=50.0.0",
+    "djangorestframework>=3.17.2",
+    "idna>=3.15",
+    "setuptools>=83.0.0",
+    "soupsieve>=2.9.0",
+    "sqlparse>=0.6.0",
+    "tornado>=6.5.9",
+    "urllib3>=2.8.0",
     ]
 description = "Inland Northwest Tech Community"
 dynamic = ["version"]
@@ -36,27 +42,26 @@ spokanetech-manage = "manage:main"
 [project.optional-dependencies]
 dev = [
     "bandit",
-    "black",
-    "coveralls",
-    "faker",
     "fawltydeps",
-    "isort",
     "model-bakery",
     "mypy",
-    "mypy-extensions",
     "ruff",
-    "pytest",
+    "pip-audit",
+    "pytest>=9.0.3",
     "pytest-cov",
     "pytest-django",
     "radon",
-    "safety",
-    "types-python-dateutil",
     "types-requests",
-    "typing_extensions",
+    # Security floor for pytest/Bandit's terminal highlighting dependency.
+    "pygments>=2.20.0",
     ]
 docker = [
     "gunicorn",
 ]
+
+[build-system]
+requires = ["setuptools>=83.0.0"]
+build-backend = "setuptools.build_meta"
 
 [tool.bandit]
 exclude_dirs = [
@@ -66,10 +71,6 @@ exclude_dirs = [
     "src/django_project/*/management/commands",
     "src/django_project/*/scripts/*"
     ]
-
-
-[tool.black]
-line-length = 120
 
 
 [tool.coverage.report]
@@ -88,10 +89,6 @@ omit = [
 [tool.coverage.run]
 branch = true
 source = ["src/django_project"]
-
-
-[tool.isort]
-profile = "black"
 
 
 [tool.mypy]
@@ -129,35 +126,35 @@ code = ["src/django_project"]
 deps = ["pyproject.toml"]
 ignore_unused = [
     "bandit",
-    "black",
-    "coveralls",
-    "django-braces",
     "django-celery-beat",
     "django-debug-toolbar",
     "django-extensions",
     "django-filter",
     "gunicorn",
-    "faker",
     "fawltydeps",
     "flower",
-    "isort",
     "model-bakery",
     "mypy",
-    "mypy-extensions",
     "ruff",
-    "packaging",
     "Pillow",
+    "pip-audit",
     "psycopg2-binary",
     "pytest",
     "pytest-cov",
     "pytest-django",
     "radon",
-    "redis",
-    "safety",
-    "types-python-dateutil",
     "types-requests",
-    "typing_extensions",
-    "whitenoise"
+    "whitenoise",
+    # Explicit security floors for packages imported by dependencies.
+    "cryptography",
+    "djangorestframework",
+    "idna",
+    "setuptools",
+    "soupsieve",
+    "sqlparse",
+    "tornado",
+    "urllib3",
+    "pygments",
     ]
 output_format = "human_detailed"
 

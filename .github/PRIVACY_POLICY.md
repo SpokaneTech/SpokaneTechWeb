@@ -1,75 +1,37 @@
-Privacy Policy
+# Privacy policy
 
-Last Updated: January 2025
+Last updated: October 17, 2026
 
-Spokanetech.org ("we," "us," or "our") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website spokanetech.org (the "Website"). Please read this Privacy Policy carefully. If you do not agree with the terms of this Privacy Policy, please do not access the Website.
+SpokaneTech.org is a community directory of technology groups and events. This policy explains information handling for the website. Contact [admin@spokanetech.org](mailto:admin@spokanetech.org) with privacy questions.
 
-1. Information We Collect
+## Information and services
 
-We may collect information about you in a variety of ways. The information we may collect on the Website includes:
+Public event and group listings can be browsed without an account. We do not currently offer public account registration, send marketing emails, or process payments on this website. Authorized maintainers use accounts to administer the site.
 
-a. Personal Data
+If you contact us, we receive the information you choose to send, such as your email address and message. Website and hosting infrastructure may record technical information such as IP addresses, requested URLs, browser information, timestamps, and errors for operation, troubleshooting, and security.
 
-Personally identifiable information, such as your name, email address, and telephone number, that you voluntarily give to us when you register with the Website or when you choose to participate in various activities related to the Website (e.g., posting messages in our online forums or entering competitions, contests, or giveaways).
+## Cookies and Google Analytics
 
-b. Derivative Data
+We use Google Analytics to understand how visitors use the site. Analytics can collect information about pages viewed, interactions, browsers, and devices, and may use cookies or similar identifiers. Google processes information under its own policies. See [Google’s explanation of partner-site data](https://policies.google.com/technologies/partner-sites) and [Google’s Privacy Policy](https://policies.google.com/privacy).
 
-Information our servers automatically collect when you access the Website, such as your IP address, your browser type, your operating system, your access times, and the pages you have viewed directly before and after accessing the Website.
+The website also uses cookies for authenticated sessions and protection against forged requests. Browser settings can manage or block cookies and scripts; blocking them can affect sign-in or other functionality. Google provides an [Analytics opt-out browser add-on](https://tools.google.com/dlpage/gaoptout).
 
-c. Cookies and Web Beacons
+## Third-party services and public listings
 
-We may use cookies, web beacons, tracking pixels, and other tracking technologies on the Website to help customize the Website and improve your experience. For more information on how we use cookies, please refer to our Cookie Policy.
+Styles, fonts, and scripts are delivered through third-party content delivery networks, including jsDelivr. Your browser contacts those providers when loading their resources, which can disclose technical request information such as your IP address and browser headers.
 
-2. How We Use Your Information
+We obtain public group and event information, including descriptions, images, and organizer details, from sources such as Meetup and Eventbrite. Public event information may also be shared through community services such as Discord and LinkedIn. Contact us about inaccurate listings or information you believe should be removed.
 
-We use the information we collect about you or that you provide to us, including any personal information, to:
+RSVP links and community links take you to external services. Those services handle information under their own policies. We use hosting and service providers to operate the site; information may also need to be disclosed to address abuse or applicable legal obligations.
 
-Provide, operate, and maintain the Website.
+## Retention and requests
 
-Improve, personalize, and expand our Website.
+We have not published fixed retention periods for every category of data, including server logs, correspondence, analytics, and backups. Contact admin@spokanetech.org for information about retention or to request access, correction, or deletion of information associated with you. We review requests against the data we control and applicable obligations; we do not offer a self-service account-deletion feature or promise immediate removal from backups or third-party systems.
 
-Understand and analyze how you use our Website.
+Please do not send passwords, API tokens, or unnecessary sensitive information with a request. Requests concerning information controlled by an external event organizer or service may need to be directed to that provider.
 
-Develop new products, services, features, and functionality.
+## Security and policy updates
 
-Communicate with you, such as to provide you with updates and other information relating to the Website, and for marketing and promotional purposes.
+We use security measures to protect the website, but no system can guarantee absolute security. Report suspected vulnerabilities privately as described in our [security policy](https://github.com/SpokaneTech/SpokaneTechWeb/blob/main/.github/SECURITY.md).
 
-Send you emails.
-
-Find and prevent fraud.
-
-3. Disclosure of Your Information
-
-We may share information we have collected about you in certain situations. Your information may be disclosed as follows:
-
-a. By Law or to Protect Rights
-
-If we believe the release of information about you is necessary to respond to legal process, to investigate or remedy potential violations of our policies, or to protect the rights, property, and safety of others, we may share your information as permitted or required by any applicable law, rule, or regulation.
-
-b. Third-Party Service Providers
-
-We may share your information with third parties that perform services for us or on our behalf, including payment processing, data analysis, email delivery, hosting services, customer service, and marketing assistance.
-
-c. Marketing Communications
-
-With your consent, or with an opportunity for you to withdraw consent, we may share your information with third parties for marketing purposes, as permitted by law.
-
-4. Security of Your Information
-
-We use administrative, technical, and physical security measures to help protect your personal information. While we have taken reasonable steps to secure the personal information you provide to us, please be aware that despite our efforts, no security measures are perfect or impenetrable, and no method of data transmission can be guaranteed against any interception or other type of misuse.
-
-5. Your Rights and Choices
-
-You may review, change, or terminate your account at any time. You may also opt out of receiving marketing emails from us by following the unsubscribe link or instructions provided in any email we send.
-
-6. Changes to This Privacy Policy
-
-We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page. You are advised to review this Privacy Policy periodically for any changes. Changes to this Privacy Policy are effective when they are posted on this page.
-
-7. Contact Us
-
-If you have any questions or concerns about this Privacy Policy, please contact us at:
-
-admin@spokanetech.org
-
-Thank you for choosing spokanetech.org.
+We will publish policy revisions on this page with an updated date. Review this page for current information about the services in use.

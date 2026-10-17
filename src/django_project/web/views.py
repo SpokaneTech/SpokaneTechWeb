@@ -66,6 +66,20 @@ class AboutContentView(HtmxOptionView):
     template_name: str = "web/full/custom/about.html"
 
 
+class PrivacyContentView(HtmxOptionView):
+    """Render the public privacy policy."""
+
+    htmx_template_name: str = "web/partials/custom/privacy.htm"
+    template_name: str = "web/full/custom/privacy.html"
+
+
+class TermsContentView(HtmxOptionView):
+    """Render the public terms of service."""
+
+    htmx_template_name: str = "web/partials/custom/terms.htm"
+    template_name: str = "web/full/custom/terms.html"
+
+
 class DevelopContentView(HtmxOptionView):
     """Render the 'development' page"""
 

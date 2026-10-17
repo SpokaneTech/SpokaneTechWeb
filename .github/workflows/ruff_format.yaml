@@ -1,19 +1,24 @@
 name: Code Consistency Check (ruff format)
 
 on:
-  push:
-    branches-ignore:
-      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
 
 jobs:
-  ruff:
+  ruff-format:
     runs-on: ubuntu-latest
-    name: "ruff"
-    if: github.event.created == false  # Skip if this push created a new branch
+    timeout-minutes: 15
     steps:
-      - name: actions_python_ruff
-        uses: davidslusser/actions_python_ruff@v1.0.3
+      - uses: actions/checkout@v4
         with:
-            src: "src/django_project"
-            command: ruff format src --check
-            python_version: "3.13"
+          persist-credentials: false
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.13"
+      - name: Install dependencies
+        run: python -m pip install -e '.[dev]'
+      - name: Run ruff-format
+        run: ruff format src --check

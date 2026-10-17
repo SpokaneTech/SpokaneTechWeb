@@ -3,6 +3,11 @@ description: Ask a question
 title: "[Question]: "
 labels: ["question"]
 body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not post credentials, tokens, webhook URLs, or private personal data.
+        Report suspected vulnerabilities privately using our [security policy](https://github.com/SpokaneTech/SpokaneTechWeb/blob/main/.github/SECURITY.md).
   - type: textarea
     id: question
     attributes:

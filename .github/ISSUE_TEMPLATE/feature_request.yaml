@@ -6,6 +6,11 @@ body:
   - type: markdown
     attributes:
       value: |
+        Do not post credentials, tokens, webhook URLs, or private personal data.
+        Report suspected vulnerabilities privately using our [security policy](https://github.com/SpokaneTech/SpokaneTechWeb/blob/main/.github/SECURITY.md).
+  - type: markdown
+    attributes:
+      value: |
         Thanks for taking the time to fill out this feature request!
   - type: textarea
     id: description

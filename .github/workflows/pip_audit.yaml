@@ -1,0 +1,29 @@
+name: Dependency Security Check (pip-audit)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  pip-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      AUDIT_VENV: ${{ runner.temp }}/pip-audit-venv
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.13"
+      - name: Install project dependencies in an isolated environment
+        run: |
+          python -m venv "$AUDIT_VENV"
+          "$AUDIT_VENV/bin/python" -m pip install --upgrade pip
+          "$AUDIT_VENV/bin/python" -m pip install '.[dev,docker]'
+      - name: Audit installed dependencies
+        run: '"$AUDIT_VENV/bin/python" -m pip_audit --progress-spinner=off'

@@ -1,49 +1,31 @@
-Terms of Service
+# Terms of service
 
-Last Updated: January 2025
+Last updated: October 17, 2026
 
-Welcome to spokanetech.org! These Terms of Service ("Terms") govern your access to and use of spokanetech.org ("we," "us," or "our"), including any content, functionality, and services offered on or through spokanetech.org (the "Website"). By using the Website, you agree to be bound by these Terms.
+These terms describe use of SpokaneTech.org’s community directory. Contact [admin@spokanetech.org](mailto:admin@spokanetech.org) with questions or concerns. Our [privacy policy](https://www.spokanetech.org/privacy/) explains information handling.
 
-1. Acceptance of Terms
+## Using the directory
 
-By accessing or using our Website, you agree to comply with and be bound by these Terms. If you do not agree to these Terms, you must not access or use the Website.
+The website provides public information about technology groups, events, and community development. Public browsing does not require an account. There is currently no public account registration, payment processing, or marketing-email subscription service.
 
-2. Changes to Terms
+Use the site lawfully and respectfully. Do not attempt unauthorized access, disrupt services, distribute malicious content, harass others, or expose private information. Administrative accounts are restricted to authorized maintainers, who must protect their credentials.
 
-We may revise and update these Terms from time to time in our sole discretion. All changes are effective immediately when we post them and apply to all access to and use of the Website thereafter. Your continued use of the Website following the posting of revised Terms means that you accept and agree to the changes.
+## Events and external services
 
-3. Eligibility
+Event descriptions, times, locations, availability, and cancellation status can change. Listings may be incomplete or outdated. Confirm details directly with the organizer before attending or making travel or payment arrangements.
 
-You must be at least 13 years of age to use our Website. By using the Website, you represent and warrant that you are of legal age to form a binding contract with us and meet all of the foregoing eligibility requirements. If you do not meet all of these requirements, you must not access or use the Website.
+Event organizers and external platforms set their own participation requirements, age restrictions, prices, and terms. A link does not make SpokaneTech.org the organizer or imply endorsement. RSVPs, purchases, and participation on linked services are governed by those services’ policies.
 
-4. User Accounts
+## Content and software rights
 
-You may be required to create an account to access certain features of the Website. You agree to provide accurate, current, and complete information during the registration process and to update such information to keep it accurate, current, and complete. You are responsible for maintaining the confidentiality of your account and password and for restricting access to your computer.
+Third-party event descriptions, images, names, and trademarks remain subject to their owners’ rights. Inclusion in the directory does not transfer ownership to SpokaneTech.org or grant visitors a general right to reuse those materials. Contact us about a correction, attribution concern, or removal request.
 
-5. Prohibited Activities
+The website’s open-source software is governed by the [repository LICENSE](https://github.com/SpokaneTech/SpokaneTechWeb/blob/main/LICENSE), which contains the GNU GPL version 3. These website terms do not replace that license or restrict rights it grants. Software contributions follow the [contribution guide](https://github.com/SpokaneTech/SpokaneTechWeb/blob/main/.github/CONTRIBUTING.md).
 
-You agree not to:
+Sending a correction or event suggestion does not grant a blanket perpetual license over all your material. Please submit only information you are entitled to share and tell us of any attribution or use restrictions.
 
-Use the Website in any way that violates any applicable federal, state, local, or international law or regulation.
+## Availability and responsibility
 
-Exploit, harm, or attempt to exploit or harm minors in any way by exposing them to inappropriate content, asking for personally identifiable information, or otherwise.
+This community-maintained directory is provided as available. We do not promise uninterrupted service or the completeness, accuracy, or suitability of every listing. You are responsible for checking event details and deciding whether to participate. Nothing here excludes rights or responsibilities that cannot be excluded under applicable law.
 
-Engage in any other conduct that restricts or inhibits anyone's use or enjoyment of the Website, or which, as determined by us, may harm us or users of the Website or expose them to liability.
-
-6. User Contributions
-
-The Website may contain message boards, chat rooms, personal web pages, or profiles, forums, bulletin boards, and other interactive features that allow users to post, submit, publish, display, or transmit to other users or other persons (hereinafter, "post") content or materials (collectively, "User Contributions") on or through the Website.
-
-All User Contributions must comply with these Terms. By providing any User Contribution on the Website, you grant us and our affiliates and service providers, and each of their and our respective licensees, successors, and assigns a non-exclusive, transferable, sub-licensable, royalty-free, perpetual, and worldwide license to use, reproduce, modify, perform, display, distribute, and otherwise disclose to third parties any such material.
-
-7. Intellectual Property Rights
-
-The Website and its entire contents, features, and functionality (including but not limited to all information, software, text, displays, images, video, and audio, and the design, selection, and arrangement thereof) are owned by us, our licensors, or other providers of such material and are protected by United States and international copyright, trademark, patent, trade secret, and other intellectual property or proprietary rights laws.
-
-8. Termination
-
-We may terminate or suspend your access to all or part of the Website for any reason, including without limitation, any violation of these Terms.
-
-9. Limitation of Liability
-
-In no event will we, our affiliates, or their licensors, service providers, employees, agents, officers, or directors be liable for damages of any kind, under any legal theory, arising out of or in connection with your use, or inability to use, the Website
+We may restrict access to protect the service or respond to misuse. Community contributions are subject to the [Code of Conduct](https://github.com/SpokaneTech/SpokaneTechWeb/blob/main/.github/CODE_OF_CONDUCT.md). Changes to these terms will be published here with an updated date; changes to the software license remain governed by that license.
