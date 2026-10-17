@@ -1,0 +1,12 @@
+<div class="modal-dialog modal-dialog-scrollable {{ modal_size|default:'modal-lg' }}">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div>
+                <h2 class="modal-title" id="generic_modal_label">{{ modal_subtitle|default:modal_title }}</h2>
+            </div>
+            <button type="button" class="st-carousel-button st-modal-close" data-bs-dismiss="modal" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="m6 6 12 12M18 6 6 18" /></svg></button>
+        </div>
+        <div class="modal-body">{{ modal_body|safe }}</div>
+        {% if modal_button_close %}<div class="modal-footer"><button type="button" class="st-button st-modal-dismiss" data-bs-dismiss="modal">{{ modal_button_close }}</button></div>{% endif %}
+    </div>
+</div>

@@ -1,14 +1,36 @@
 from __future__ import annotations
 
+from typing import ClassVar
+
 from django.db import models
 from django.urls import reverse
 from handyhelpers.models import HandyHelperBaseModel
 
 from encrypted_fields.fields import EncryptedTextField
+from web.utilities.html_utils import convert_html_to_text
+from web.utilities.icons import get_icon_classes
 
 
 class Event(HandyHelperBaseModel):
     """An event on a specific day and time"""
+
+    class Status(models.TextChoices):
+        ACTIVE = "active", "Active"
+        CANCELLED = "cancelled", "Cancelled"
+
+    status = models.CharField(max_length=16, choices=Status.choices, default=Status.ACTIVE, db_index=True)
+    source_last_checked_at = models.DateTimeField(null=True, blank=True)
+    source_tag_names = models.JSONField(default=list, blank=True)
+    change_version = models.PositiveIntegerField(default=0, editable=False)
+
+    def save(self, *args, **kwargs):
+        if kwargs.get("update_fields"):
+            kwargs["update_fields"] = set(kwargs["update_fields"]) | {"change_version"}
+        return super().save(*args, **kwargs)
+
+    @property
+    def is_cancelled(self) -> bool:
+        return self.status == self.Status.CANCELLED
 
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
@@ -46,9 +68,12 @@ class Event(HandyHelperBaseModel):
     group = models.ForeignKey("TechGroup", blank=True, null=True, on_delete=models.SET_NULL)
     tags = models.ManyToManyField("Tag", blank=True)
     image = models.ImageField(upload_to="tech_events/", blank=True, null=True)
+    image_source_url = models.URLField(max_length=2048, blank=True)
+    image_synced_url = models.URLField(max_length=2048, blank=True)
+    image_managed_name = models.CharField(max_length=255, blank=True)
 
     class Meta:
-        ordering = ("start_datetime",)
+        ordering: ClassVar[list[str]] = ["start_datetime"]
 
     def __str__(self) -> str:
         return self.name
@@ -76,7 +101,7 @@ class SocialPlatform(HandyHelperBaseModel):
     base_url = models.URLField(blank=True, help_text="base url of provider")
 
     class Meta:
-        ordering = ("name",)
+        ordering: ClassVar[list[str]] = ["name"]
 
     def __str__(self) -> str:
         return self.name
@@ -92,7 +117,7 @@ class IntegrationCredential(HandyHelperBaseModel):
     refresh_token_expires_at = models.DateTimeField(blank=True, null=True)
 
     class Meta:
-        ordering = ("provider",)
+        ordering: ClassVar[list[str]] = ["provider"]
 
     def __str__(self) -> str:
         return self.provider
@@ -104,7 +129,7 @@ class Tag(HandyHelperBaseModel):
     value = models.CharField(max_length=64, unique=True, null=False)
 
     class Meta:
-        ordering = ("value",)
+        ordering: ClassVar[list[str]] = ["value"]
 
     def __str__(self) -> str:
         return self.value
@@ -128,7 +153,7 @@ class TechGroup(HandyHelperBaseModel):
     discord_webhook_url = EncryptedTextField(blank=True, null=True)
 
     class Meta:
-        ordering = ("name",)
+        ordering: ClassVar[list[str]] = ["name"]
 
     def __str__(self) -> str:
         return self.name
@@ -136,11 +161,23 @@ class TechGroup(HandyHelperBaseModel):
     def get_absolute_url(self) -> str:
         return reverse("web:get_techgroup", kwargs={"pk": self.pk})
 
+    @property
+    def icon_classes(self) -> str:
+        """Provide safe icon classes regardless of which view renders the group."""
+        return get_icon_classes(self.icon)
+
+    @property
+    def directory_description(self) -> str:
+        """Plain text summary with paragraph spacing, escaped by the template."""
+        return convert_html_to_text(self.description, block_separator=" ")
+
     def get_upcoming_events(self) -> models.QuerySet[Event]:
         """Get upcoming events for this TechGroup"""
         from django.utils import timezone
 
-        return Event.objects.filter(group=self, start_datetime__gte=timezone.now()).order_by("start_datetime")
+        return Event.objects.filter(
+            group=self, status=Event.Status.ACTIVE, start_datetime__gte=timezone.now()
+        ).order_by("start_datetime")
 
     def get_past_events(self) -> models.QuerySet[Event]:
         """Get past events for this TechGroup"""

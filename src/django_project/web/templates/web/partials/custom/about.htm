@@ -1,17 +1,46 @@
-<section class="text-center my-5 mx-3">
-    <h1 class="h1 text-primary fw-bold animate__animated animate__fadeIn" style="animation-duration: 0.2s;">About SpokaneTech.org</h1>
-    <div class="mt-4">
-        <p class="py-1 animate__animated animate__fadeIn" style="animation-duration: 0.3s;">
-            Welcome to <span class="highlight">SpokaneTech.org</span>, a vibrant community of technology enthusiasts based in Spokane and the greater Inland Northwest. Our mission is to <strong class="text-primary">foster community</strong>, <strong class="text-primary">knowledge sharing</strong>, and <strong class="text-primary">growth</strong> among individuals who are passionate about technology.
-        </p>
-        <p class="py-1 animate__animated animate__fadeIn" style="animation-duration: 0.4s;">
-            Founded on the principles of collaboration and innovation, SpokaneTech.org brings together tech professionals, hobbyists, students, and anyone with an interest in technology. We believe that by working together and sharing knowledge, we can drive personal and professional growth, as well as contribute to the technological advancement of our community.
-        </p>
-        <p class="py-1 animate__animated animate__fadeIn" style="animation-duration: 0.5s;">
-            At SpokaneTech.org, we host regular meetups, workshops, and events where members can connect, learn, and share their experiences. Our events cover a wide range of topics, from software development and cybersecurity to emerging technologies like AI and blockchain. Whether you're a seasoned professional or just starting your tech journey, <strong class="text-primary">there's always something for everyone.</strong>
-        </p>
-        <p class="py-1 animate__animated animate__fadeIn" style="animation-duration: 0.6s;">
-            Join us at SpokaneTech.org and become a part of a supportive and dynamic community that is dedicated to making a positive impact through technology. Together, we can achieve great things and help shape the future of technology in Spokane and beyond.
-        </p>
+{% load static %}
+<div class="st-directory st-about">
+    <div class="st-container">
+        <header class="st-directory-header">
+            <div>
+                <h1 id="about-title">About SpokaneTech.org</h1>
+                <p class="st-section-description">Connecting people who build, learn, and explore technology in Spokane and the Inland Northwest.</p>
+            </div>
+        </header>
+        <div class="st-about-grid">
+            <div class="st-about-story">
+                <section aria-labelledby="about-community-title">
+                    <p class="st-eyebrow">One community. Many technologies.</p>
+                    <h2 id="about-community-title">A place for everyone in tech.</h2>
+                    <p>SpokaneTech.org brings together technology enthusiasts across Spokane and the greater Inland Northwest. Our mission is to build community, share knowledge, and help people grow.</p>
+                    <p>Founded on collaboration and innovation, our community welcomes tech professionals, hobbyists, students, and anyone with an interest in technology. Working together and sharing what we know creates opportunities for personal and professional growth and helps our region move forward.</p>
+                </section>
+                <section aria-labelledby="about-learning-title">
+                    <h2 id="about-learning-title">Connect, learn, and share.</h2>
+                    <p>Meetups, workshops, and events give members a place to connect, learn, and share their experiences. Topics range from software development and cybersecurity to emerging technologies like AI and blockchain. Whether you're a seasoned professional or just starting your tech journey, there's a place for you here.</p>
+                    <a class="st-text-link" href="{% url 'web:get_events' display='list' %}" hx-get="{% url 'web:get_events' display='list' %}" hx-target="#body_main" hx-push-url="true">Explore upcoming events</a>
+                </section>
+                <section aria-labelledby="about-future-title">
+                    <h2 id="about-future-title">Help shape what's next.</h2>
+                    <p>Join a supportive community dedicated to making a positive impact through technology. Together, we can help shape the future of technology in Spokane and beyond.</p>
+                    <a class="st-text-link" href="{% url 'web:develop' %}" hx-get="{% url 'web:develop' %}" hx-target="#body_main" hx-push-url="true">Develop with us</a>
+                </section>
+            </div>
+            <aside class="st-about-sidebar" aria-labelledby="about-join-title">
+                <picture class="st-about-art">
+                    <source srcset="{% static 'spokanetech/img/spokane-community-illustration.webp' %}" type="image/webp">
+                    <img src="{% static 'spokanetech/img/spokane-community-illustration.jpg' %}" width="1100" height="367" alt="" decoding="async">
+                </picture>
+                <div class="st-about-connect">
+                    <p class="st-eyebrow">Get involved</p>
+                    <h2 id="about-join-title">Find your people.</h2>
+                    <p>Discover a local group, meet someone new, or join the conversation online.</p>
+                    {% if community_discord_url %}
+                    <a class="st-button st-button-primary" href="{{ community_discord_url }}" target="_blank" rel="noopener"><i class="fab fa-discord" aria-hidden="true"></i> Join Discord<span class="visually-hidden"> (opens in a new tab)</span></a>
+                    {% endif %}
+                    <a class="st-about-group-link" href="{% url 'web:get_techgroups' display='list' %}" hx-get="{% url 'web:get_techgroups' display='list' %}" hx-target="#body_main" hx-push-url="true">Explore tech groups</a>
+                </div>
+            </aside>
+        </div>
     </div>
-</section>
+</div>

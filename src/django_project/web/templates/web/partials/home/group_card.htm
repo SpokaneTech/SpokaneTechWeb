@@ -1,0 +1,26 @@
+<article class="st-group-card{% if directory %} st-directory-card{% endif %}">
+    {% if directory %}<div class="st-directory-card-header">{% endif %}
+    <div class="st-group-logo" aria-hidden="true">
+        {% if group.image %}<img src="{{ group.image.url }}" alt="" width="64" height="64" loading="lazy" decoding="async">
+        {% elif group.icon_classes %}<i class="{{ group.icon_classes }}" aria-hidden="true"></i>
+        {% else %}<span>{{ group.name|first }}</span>{% endif %}
+    </div>
+    {% if directory %}
+    <h2><a class="st-card-link" href="{{ group.get_absolute_url }}" hx-get="{{ group.get_absolute_url }}" hx-target="#body_main" hx-push-url="true">{{ group.name }}</a></h2>
+    </div>
+    {% if group.directory_description %}<p class="st-directory-card-description">{{ group.directory_description|truncatewords:24 }}</p>{% endif %}
+    {% else %}
+    <h3><a class="st-card-link" href="{{ group.get_absolute_url }}">{{ group.name }}</a></h3>
+    {% endif %}
+    {% if not directory %}<p class="st-group-count">{{ group.upcoming_event_count }} upcoming event{{ group.upcoming_event_count|pluralize }}</p>{% endif %}
+    <div class="st-card-bottom">
+        {% if directory %}
+        <p class="st-group-count">{{ group.upcoming_event_count }} upcoming event{{ group.upcoming_event_count|pluralize }}</p>
+        <div class="st-directory-card-row">
+            <div class="st-tags">{% include "web/partials/home/tags.htm" with tags=group.tags.all|slice:":3" %}</div>
+        </div>
+        {% else %}
+        <div class="st-tags">{% include "web/partials/home/tags.htm" with tags=group.tags.all|slice:":2" %}</div>
+        {% endif %}
+    </div>
+</article>

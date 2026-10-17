@@ -19,8 +19,9 @@ RUN pip install --no-cache-dir uv \
 
 ENV PATH="/venv/bin:$PATH"
 
-# Copy project dependency definition
+# Copy dependency definition and source for the installed management command
 COPY pyproject.toml /app/
+COPY src/django_project /app/src/django_project/
 
 # Install Python dependencies (including Playwright and its deps)
 RUN uv pip install .[docker] --prerelease=allow \

@@ -50,6 +50,8 @@ class EventAdmin(admin.ModelAdmin):
         "id",
         "name",
         "description",
+        "status",
+        "source_last_checked_at",
         "start_datetime",
         "end_datetime",
         "location_name",
@@ -73,7 +75,8 @@ class EventAdmin(admin.ModelAdmin):
         "social_platform_id",
         "image",
     )
-    list_filter = ("group",)
+    list_filter = ("group", "status")
+    readonly_fields = ("source_last_checked_at", "source_tag_names", "change_version")
 
 
 # register models

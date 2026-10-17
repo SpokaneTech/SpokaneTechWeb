@@ -1,12 +1,7 @@
 {% extends BASE_TEMPLATE|default:"base.htm" %}
 
 {% block main_content %}
-    <main 
-        id="body_main" 
-        hx-get="{% url 'web:about' %}" 
-        hx-push-url="{% url 'web:about' %}" 
-        hx-trigger="load"
-        hx-swap="innerHTML settle:cache" 
-        hx-history-elt="true"> 
+    <main id="body_main" tabindex="-1" hx-history-elt="true">
+        {% include "web/partials/custom/about.htm" %}
     </main>
 {% endblock main_content %}

@@ -9,6 +9,7 @@ from typing import Any
 from bs4 import BeautifulSoup, Tag
 from bs4.element import NavigableString, PageElement
 
+from web.utilities.event_status import source_event_status
 from web.utilities.html_utils import fetch_content, fetch_content_with_playwright
 
 _TBD_LOCATION_NAMES = {"tbd", "tdb", "to be determined"}
@@ -23,6 +24,104 @@ def _iter_mappings(value: Any):
     elif isinstance(value, list):
         for child in value:
             yield from _iter_mappings(child)
+
+
+def _requested_event_data(soup: BeautifulSoup, url: str):
+    """Ignore recommended events and group-level status in page JSON."""
+    match = re.search(r"/events/([^/]+)/", url)
+    event_id = match.group(1) if match else None
+    for script in soup.find_all("script"):
+        try:
+            payload = json.loads(script.get_text())
+        except (json.JSONDecodeError, TypeError):
+            continue
+        for item in _iter_mappings(payload):
+            if item.get("__typename") == "Event" and str(item.get("id")) == event_id:
+                yield item
+            elif item.get("@type") == "Event":
+                item_url = item.get("url") or item.get("@id")
+                if isinstance(item_url, str) and item_url.rstrip("/") == url.rstrip("/"):
+                    yield item
+
+
+def _get_event_tags(soup: BeautifulSoup, url: str) -> list[str]:
+    """Read only the requested event's topics, resolving Meetup's Apollo references."""
+    match = re.search(r"/events/([^/]+)/", url)
+    event_id = match.group(1) if match else None
+    tags: list[str] = []
+    seen: set[str] = set()
+    for script in soup.find_all("script"):
+        try:
+            payload = json.loads(script.get_text())
+        except (json.JSONDecodeError, TypeError):
+            continue
+        if not isinstance(payload, dict):
+            continue
+        props = payload.get("props") or {}
+        page_props = props.get("pageProps") or {} if isinstance(props, dict) else {}
+        if not isinstance(page_props, dict):
+            page_props = {}
+        raw_cache = page_props.get("__APOLLO_STATE__", payload.get("__APOLLO_STATE__", {}))
+        topic_cache: dict[str, Any] = raw_cache if isinstance(raw_cache, dict) else {}
+
+        def resolve(value: Any, cache: dict[str, Any] = topic_cache) -> Any:
+            if isinstance(value, dict) and "__ref" in value:
+                return cache.get(value["__ref"], {})
+            return value
+
+        candidates = [page_props.get("event"), payload.get("event")]
+        candidates.extend(
+            item
+            for item in _iter_mappings(payload)
+            if item.get("__typename") == "Event" and str(item.get("id")) == event_id
+        )
+        for candidate in candidates:
+            event = resolve(candidate)
+            if not isinstance(event, dict) or (event.get("id") is not None and str(event["id"]) != event_id):
+                continue
+            topics = resolve(event.get("topics", []))
+            if isinstance(topics, dict):
+                topics = topics.get("edges", topics.get("nodes", []))
+            if not isinstance(topics, list):
+                continue
+            for topic in topics:
+                topic = resolve(topic)
+                if isinstance(topic, dict):
+                    topic = resolve(topic.get("node", topic))
+                name = topic.get("name") if isinstance(topic, dict) else topic
+                if not isinstance(name, str):
+                    continue
+                name = " ".join(html.unescape(name).split())
+                if name and name.casefold() not in seen:
+                    tags.append(name)
+                    seen.add(name.casefold())
+    return tags
+
+
+def _get_event_image(soup: BeautifulSoup, url: str) -> str:
+    match = re.search(r"/events/([^/]+)/", url)
+    event_id = match.group(1) if match else None
+    for script in soup.find_all("script"):
+        try:
+            payload = json.loads(script.get_text())
+        except (json.JSONDecodeError, TypeError):
+            continue
+        mappings = list(_iter_mappings(payload))
+        photos = {}
+        for mapping in mappings:
+            for key, value in mapping.items():
+                if isinstance(value, dict) and value.get("__typename") == "PhotoInfo":
+                    photos[key] = value
+        for item in mappings:
+            if item.get("__typename") != "Event" or str(item.get("id")) != event_id:
+                continue
+            for key in ("featuredEventPhoto", "displayPhoto"):
+                photo = item.get(key)
+                if isinstance(photo, dict) and "__ref" in photo:
+                    photo = photos.get(photo["__ref"])
+                if isinstance(photo, dict) and isinstance(photo.get("source"), str):
+                    return photo["source"]
+    return ""
 
 
 def _get_venue(page_content: str, soup: BeautifulSoup) -> dict[str, Any] | None:
@@ -130,6 +229,15 @@ def get_event_information(url: str) -> dict:
         soup = BeautifulSoup(page_content, "html.parser")
 
         event_info: dict = {}
+        requested_data = list(_requested_event_data(soup, url))
+        statuses = [source_event_status(item) for item in requested_data]
+        if "cancelled" in statuses:
+            event_info["status"] = "cancelled"
+        elif "active" in statuses:
+            event_info["status"] = "active"
+        event_info["tags_complete"] = any("topics" in item for item in requested_data)
+        event_info["tags"] = _get_event_tags(soup, url)
+        event_info["image_url"] = _get_event_image(soup, url)
         event_info["url"] = url
         event_info["name"] = soup.find("h1", class_="ds2-b32 text-ds2-text-fill-primary-enabled lg:ds2-b48")
         if event_info["name"]:
@@ -215,6 +323,9 @@ def get_event_information(url: str) -> dict:
             online_p = soup.find("p", class_="ds2-k16 text-ds2-text-fill-primary-enabled")
             if online_p and online_p.get_text(strip=True) == "Online event":
                 location_name = "Online event"
+        event_info["location_complete"] = bool(
+            is_tbd_location or location_name == "Online event" or (venue and location_name and location_address)
+        )
         event_info["location_name"] = location_name
         event_info["location_address"] = location_address
 

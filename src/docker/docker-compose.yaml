@@ -7,6 +7,11 @@ services:
     build:
       context: ../..
       dockerfile: src/docker/Dockerfile 
+    environment:
+      MEDIA_ROOT: /app/media
+      MEDIA_URL: /media/
+    volumes:
+      - media_data:/app/media
     command: ./entrypoint.sh
     ports:
       - "8000:8000"
@@ -38,8 +43,6 @@ services:
       - TZ=UTC
     volumes:
       - redis_data:/data
-    networks:
-      - internal
     deploy:
       resources:
         limits:
@@ -57,6 +60,11 @@ services:
     build:
       context: ../..
       dockerfile: src/docker/Dockerfile 
+    environment:
+      MEDIA_ROOT: /app/media
+      MEDIA_URL: /media/
+    volumes:
+      - media_data:/app/media
     command: celery -A core worker -l info
     depends_on:
       - redis
@@ -87,6 +95,18 @@ services:
       - redis
       - db
 
+  media:
+    image: nginx:1.28-alpine
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${MEDIA_HTTP_PORT:-8081}:80"
+    volumes:
+      - media_data:/srv/media:ro
+      - ./media-nginx.conf:/etc/nginx/conf.d/default.conf:ro
+
 volumes:
   postgres_data:
   static_volume:
+  redis_data:
+  media_data:
+    name: spokanetech_media

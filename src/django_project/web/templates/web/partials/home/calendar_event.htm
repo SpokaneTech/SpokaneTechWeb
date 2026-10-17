@@ -1,0 +1,6 @@
+<article class="st-calendar-event{% if compact %} st-calendar-event-compact{% endif %}">
+    <time datetime="{{ event.start_datetime|date:'c' }}">{{ event.start_datetime|time:"g:i A" }}{% if not compact %} {{ event.calendar_timezone }}{% if event.end_datetime %} &ndash; {{ event.end_datetime|time:"g:i A" }}{% if event.end_datetime|date:"Y-m-d" != event.start_datetime|date:"Y-m-d" %} ({{ event.end_datetime|date:"M j, Y" }}){% endif %}{% endif %}{% endif %}</time>
+    {% if compact %}<h3>{% else %}<h4>{% endif %}<a class="st-calendar-event-link" href="{{ event.get_absolute_url }}" hx-get="{% url 'web:techevent_modal' event.pk %}" hx-target="#modal_wrapper" data-bs-toggle="modal" data-bs-target="#modal_wrapper">{{ event.name }}</a>{% if compact %}</h3>{% else %}</h4>{% endif %}
+    {% if event.group %}<p class="st-calendar-organizer">{{ event.group.name }}</p>{% endif %}
+    {% if not compact and event.location_name or not compact and event.location_address %}<p class="st-calendar-location"><i class="fas fa-map-marker-alt" aria-hidden="true"></i> {{ event.location_name|default:event.location_address }}</p>{% endif %}
+</article>

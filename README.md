@@ -28,7 +28,7 @@ https://spokanetech.github.io/blog/building-spokane-tech/intro/
 
 ### prerequisites
 1. git installed on system
-2. python installed on system (3.10+ recommended)
+2. Python 3.10+ installed on system (required for Django 5.2)
 
 
 ### local git setup
@@ -80,9 +80,19 @@ To enable pre-commit code quality checks, update the location of git hooks with 
 
 4. install the python dependencies
     ```
-    pip install .[dev]
+    pip install -e '.[dev]'
     ```
-     ** mac users may need to use quotes, such as ```pip install ."[dev]"```
+    The editable install also adds `spokanetech-manage` to the active virtual
+    environment. It accepts the same arguments as `manage.py` and can be run
+    from the repository root or another directory:
+
+    ```shell
+    spokanetech-manage check
+    spokanetech-manage migrate
+    spokanetech-manage runserver
+    ```
+
+    After adding or changing the shortcut, rerun the install command above.
 
 5. (optional) create a custom .env file and update contents as applicable
     ```
@@ -124,3 +134,29 @@ To enable pre-commit code quality checks, update the location of git hooks with 
 open a browser and navigate to http://127.0.0.1:8000 (log in with admin/admin)
 
 ** you can stop the local demo server anytime via ```ctrl + c ```
+
+### Frontend static assets
+
+Third-party browser packages load from pinned CDN URLs with integrity checks in
+`src/django_project/core/templates/base.htm`. The application does not require
+static files from handyhelpers' `node_modules` directory. Site styles, scripts,
+and images remain in Django static assets.
+
+Bootstrap is loaded once from CDN. The committed `spokanetech.css` contains the
+site's theme overrides only. After changing its Sass source, regenerate it from
+the repository root:
+
+```shell
+sass --style expanded src/django_project/core/static/spokanetech/css/spokanetech.scss src/django_project/core/static/spokanetech/css/spokanetech.css
+```
+
+Sass is an optional editing tool; deployments serve the committed CSS directly.
+See [the static assets review](docs/ui/redesign/STATIC_ASSETS_REVIEW.md) for the
+package inventory, framework recommendation, and validation details.
+
+### Event images and persistent media
+
+Meetup and Eventbrite ingestion saves event images into a shared persistent media
+volume. `runscript ingest_events` downloads images synchronously; scheduled
+ingestion uses background Celery image tasks. See the [design decision and VPS rollout guide](docs/design/decisions/0001-persistent-event-images.md)
+for migrations, reverse-proxy configuration, local development, and backups.
