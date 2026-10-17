@@ -4,12 +4,18 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+permissions:
+  contents: read
+
 jobs:
   fawltydeps:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     name: "fawltydeps"
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-python@v4
         with:
           python-version: "3.13"

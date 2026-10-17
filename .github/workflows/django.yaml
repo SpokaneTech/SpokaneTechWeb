@@ -4,12 +4,18 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+permissions:
+  contents: read
+
 jobs:
   django-check:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - uses: actions/setup-python@v4
         with:
@@ -25,7 +31,9 @@ jobs:
           DB_ENGINE: django.db.backends.sqlite3
           DB_NAME: test_db.sqlite3
           SECRET_KEY: test_secret_key
-          DJANGO_DEBUG: False
+          DEBUG: "False"
+          DEPLOYMENT_ENV: ci
+          ENV_PATH: /dev/null
         run: |
           cd src/django_project
           python manage.py check

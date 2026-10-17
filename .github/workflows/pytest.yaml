@@ -4,14 +4,24 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+permissions:
+  contents: read
+
 jobs:
   pytest:
     runs-on: ubuntu-latest
-    name: "pytest"
+    timeout-minutes: 15
+    env:
+      ENV_PATH: ${{ github.workspace }}/src/envs/.env.test
+      DEBUG: "False"
     steps:
-      - uses: davidslusser/actions_python_pytest@v1.0.1
+      - uses: actions/checkout@v4
         with:
-          src: ""
-          options: ""
-          pip_install_command: "pip install -e .[dev]"
-          python_version: "3.13"
+          persist-credentials: false
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.13"
+      - name: Install dependencies
+        run: python -m pip install -e '.[dev]'
+      - name: Run tests
+        run: python -m pytest

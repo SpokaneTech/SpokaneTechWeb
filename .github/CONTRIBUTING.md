@@ -1,86 +1,118 @@
 # Contributing to SpokaneTech.org
 
-First off, thank you for considering contributing to SpokaneTech.org!
+Contributions to code, design, documentation, and testing are welcome. Please
+follow our [Code of Conduct](CODE_OF_CONDUCT.md) and [style guide](STYLE_GUIDE.md).
 
-The following is a set of guidelines for contributing to this project. These are just guidelines, not rules. Use your best judgment, and feel free to propose changes to this document in a pull request.
+## Reporting issues
 
-## Table of Contents
+Search [existing issues](https://github.com/SpokaneTech/SpokaneTechWeb/issues)
+before opening a bug report, feature request, or question. Include reproduction
+steps and relevant environment details. Remove credentials, webhook URLs,
+tokens, and personal information from screenshots and logs.
 
-1. [Code of Conduct](#code-of-conduct)
-2. [How Can I Contribute?](#how-can-i-contribute)
-    - [Reporting Bugs](#reporting-bugs)
-    - [Suggesting Enhancements](#suggesting-enhancements)
-    - [Pull Requests](#pull-requests)
-3. [Development Setup](#development-setup)
-4. [Style Guide](#style-guide)
-5. [License](#license)
+Report suspected vulnerabilities privately using [SECURITY.md](SECURITY.md),
+rather than a public issue. For conduct concerns, contact
+[admin@spokanetech.org](mailto:admin@spokanetech.org).
 
-<br/>
+## Development setup
 
-## Code of Conduct
+Follow the [README setup instructions](../README.md#local-development) for Python,
+the virtualenv, environment configuration, database setup, and optional ingestion.
+Python 3.10+ is declared in `pyproject.toml`; Django stays on the 5.2 series.
+Current CI checks use Python 3.13; the Docker image uses Python 3.12. This is not
+a claim that CI tests every supported Python version. Changes should preserve
+Python 3.10 syntax compatibility unless the minimum is deliberately changed.
 
-This project and everyone participating in it are governed by the [Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to [maintainer email].
+## Contributing through a fork
 
-<br/>
+Forking is the recommended path; you do not need write access to this repository.
 
-## How Can I Contribute?
+1. [Fork SpokaneTechWeb](https://github.com/SpokaneTech/SpokaneTechWeb/fork) into
+   your own GitHub account.
+2. Clone your fork, replacing `YOUR_USERNAME` below with your GitHub username:
 
-### Reporting Bugs
+   ```shell
+   git clone https://github.com/YOUR_USERNAME/SpokaneTechWeb.git
+   cd SpokaneTechWeb
+   git remote add upstream https://github.com/SpokaneTech/SpokaneTechWeb.git
+   git switch -c describe-your-change
+   python -m venv venv
+   ```
 
-- Before creating bug reports, please check the [existing issues](https://github.com/SpokaneTech/SpokaneTechWeb/issues) as you might find that the issue has already been reported.
-- When creating a bug report, please include a clear and concise description of the problem and steps to reproduce it.
+3. Activate the virtualenv as described in the README, then install editable
+   project dependencies:
 
-### Suggesting Enhancements
+   ```shell
+   python -m pip install -e '.[dev]'
+   ```
 
-- Before creating enhancement suggestions, please check the [list of open issues](https://github.com/SpokaneTech/SpokaneTechWeb/issues) as you might find that the suggestion has already been made.
-- When creating an enhancement suggestion, please provide a detailed description and, if possible, an implementation proposal.
+4. Make focused changes, update relevant documentation, and run applicable checks.
+5. Commit your changes and push the branch to your fork:
 
-### Pull Requests
+   ```shell
+   git push -u origin describe-your-change
+   ```
 
-- Provide a clear and concise description of your pull request.
-- Ensure you have tested your changes thoroughly.
-- Add/update unittests as necessary.
-- Make sure code quality tools run successfully. 
+6. Open a pull request from your fork's branch to
+   `SpokaneTech/SpokaneTechWeb`'s `main` branch. Explain the problem, resulting
+   behavior, related issues, and how you verified it. Maintainers review the PR;
+   opening one does not require pushing to the upstream repository.
 
-    Merging contributions requires passing the checks configured with the CI. This includes running tests, linters, and other code quality tools successfully on the currently officially supported Python and Django versions.
-
-<br/>
-
-## Development
-
-You can contribute to this project by sending pull requests to Github.
-
-First clone the repository
-[repository](https://github.com/SpokaneTech/SpokaneTechWeb):
-
-```shell
-git clone git@github.com:SpokaneTech/SpokaneTechWeb.git
-```
-
-Create a virtual environment and install dependencies:
-
-```shell
-cd SpokaneTechWeb
-python -m venv venv
-source venv/bin/activate
-pip install .[dev]
-```
-
-Unit tests are located under the src/django_project/tests directory and can be executed from the root directory via pytest:
+Before starting a later contribution, update your local main branch from upstream:
 
 ```shell
-pytest
+git fetch upstream
+git switch main
+git merge --ff-only upstream/main
+git switch -c another-change
 ```
 
+If your local main has diverged, resolve that deliberately rather than forcing
+an update that discards work.
 
-<br/>
+## Validation
 
-## Style Guide
+Run commands from the repository root with the virtualenv active:
 
-Follow the coding style outlined in [STYLE_GUIDE.md](STYLE_GUIDE.md).
+```shell
+ENV_PATH="$PWD/src/envs/.env.test" DEBUG=False pytest
+bandit src -c pyproject.toml -r
+mypy src
+ruff check src
+ruff format src --check
+fawltydeps
+pip-audit
+```
 
-<br/>
+The environment prefix shown for pytest uses POSIX shell syntax. In PowerShell,
+set `$env:ENV_PATH` to the absolute path of `src/envs/.env.test` and
+`$env:DEBUG = "False"` before running pytest. Use the test environment rather
+than local or production credentials. Tests use an isolated test database.
+
+Run focused tests while developing and the full suite before requesting review
+when application behavior changes. Some tests intentionally log simulated
+exceptions; a passing test can exercise an error path. Add meaningful regression
+coverage when behavior changes. Explain when tests are not applicable.
+
+Use `ruff format src` separately to apply formatting. The optional
+[pre-commit hook](hooks/pre-commit), enabled through the README instructions,
+checks formatting without modifying files. CI checks run on pull requests,
+including those from forks, without requiring production secrets. Relevant
+checks should pass before a maintainer merges; branch-protection enforcement
+is configured separately in GitHub settings.
+
+## Documentation and policies
+
+Keep setup instructions in the README and link to them rather than maintaining
+another setup walkthrough. Public privacy and terms pages are linked from the
+website footer. When changing policy wording, update both the corresponding
+`.github` Markdown policy and its `web/partials/custom` template; regression tests
+check that the published text matches the repository copy. Update their effective
+dates together. Do not invent retention periods, consent mechanisms, or services
+that are not configured.
 
 ## License
 
-By contributing, you agree that your contributions will be licensed under the [GNU-3 license](../LICENSE).
+Contributions to the repository's software are made under its existing
+[GNU GPL version 3 license](../LICENSE). This does not change the rights of
+third-party event descriptions, images, trademarks, or linked services.

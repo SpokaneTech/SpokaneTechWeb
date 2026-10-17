@@ -14,8 +14,8 @@ https://spokanetech.github.io/blog/building-spokane-tech/intro/
 |----------|-------------------------|------------------------------------------------------------------------------|
 |Bandit|security checks|![Bandit](https://github.com/SpokaneTech/SpokaneTechWeb/actions/workflows/bandit.yaml/badge.svg)|
 |FawltyDeps|dependency checks|![FawltyDeps](https://github.com/SpokaneTech/SpokaneTechWeb/actions/workflows/fawltydeps.yaml/badge.svg)|
-|Isort|python import ordering|![Isort](https://github.com/SpokaneTech/SpokaneTechWeb/actions/workflows/isort.yaml/badge.svg)|
 |Mypy|static type checking|![Mypy](https://github.com/SpokaneTech/SpokaneTechWeb/actions/workflows/mypy.yaml/badge.svg)|
+|pip-audit|dependency vulnerability checks|![pip-audit](https://github.com/SpokaneTech/SpokaneTechWeb/actions/workflows/pip_audit.yaml/badge.svg)|
 |PyTest|unittest execution|![Pytest](https://github.com/SpokaneTech/SpokaneTechWeb/actions/workflows/pytest.yaml/badge.svg)|
 |Radon|code complexity analysis|![Radon](https://github.com/SpokaneTech/SpokaneTechWeb/actions/workflows/radon.yaml/badge.svg)|
 |Ruff Format|code formatting|![Format](https://github.com/SpokaneTech/SpokaneTechWeb/actions/workflows/ruff_format.yaml/badge.svg)|
@@ -31,32 +31,36 @@ https://spokanetech.github.io/blog/building-spokane-tech/intro/
 2. Python 3.10+ installed on system (required for Django 5.2)
 
 
-### local git setup
-1. clone the repo:
+### Fork and clone
 
-    ```
-    git clone git@github.com:SpokaneTech/SpokaneTechWeb.git
-    ```
+Forking is the recommended contribution path. Use GitHub's
+[Fork button](https://github.com/SpokaneTech/SpokaneTechWeb/fork), then clone your
+fork rather than the upstream repository. Replace `YOUR_USERNAME` below:
 
-2. git config (optional)
-To enable pre-commit code quality checks, update the location of git hooks with the following command:
+```shell
+git clone https://github.com/YOUR_USERNAME/SpokaneTechWeb.git
+cd SpokaneTechWeb
+git remote add upstream https://github.com/SpokaneTech/SpokaneTechWeb.git
+git switch -c describe-your-change
+```
 
-    ```shell
-    git config core.hooksPath .github/hooks
-    ```
+Push your branch to your fork and open a pull request targeting
+`SpokaneTech/SpokaneTechWeb:main`. See the
+[contribution guide](.github/CONTRIBUTING.md) for updating your fork, validation,
+reporting issues, and review expectations.
 
-    Note: to make a commit with the precommit hooks temporarily disabled, run the following:
+To enable optional local pre-commit checks:
 
-    ```
-    git commit --no-verify
-    ```
+```shell
+git config core.hooksPath .github/hooks
+```
 
-<br/>
-
+The hook checks formatting without editing files. Run `ruff format src` yourself
+to apply formatting before committing.
 
 ### local environment setup steps
 
-1. cd into the repo directory
+1. from the directory containing your clone, cd into the repo directory (skip if already there)
     ```
     cd SpokaneTechWeb
     ```
@@ -75,12 +79,12 @@ To enable pre-commit code quality checks, update the location of git hooks with 
     for powershell:
 
     ```powershell
-    venv\Scripts\activate
+    .\venv\Scripts\Activate.ps1
     ```
 
 4. install the python dependencies
     ```
-    pip install -e '.[dev]'
+    python -m pip install -e '.[dev]'
     ```
     The editable install also adds `spokanetech-manage` to the active virtual
     environment. It accepts the same arguments as `manage.py` and can be run
@@ -131,7 +135,7 @@ To enable pre-commit code quality checks, update the location of git hooks with 
     ./manage.py runserver
     ```
 
-open a browser and navigate to http://127.0.0.1:8000 (log in with admin/admin)
+Open http://127.0.0.1:8000 and sign in with the credentials you configured for your local administrator account.
 
 ** you can stop the local demo server anytime via ```ctrl + c ```
 
@@ -160,3 +164,13 @@ Meetup and Eventbrite ingestion saves event images into a shared persistent medi
 volume. `runscript ingest_events` downloads images synchronously; scheduled
 ingestion uses background Celery image tasks. See the [design decision and VPS rollout guide](docs/design/decisions/0001-persistent-event-images.md)
 for migrations, reverse-proxy configuration, local development, and backups.
+
+### Project policies
+
+- [Code of Conduct](.github/CODE_OF_CONDUCT.md)
+- [Private security reporting](.github/SECURITY.md)
+- [Privacy policy](https://www.spokanetech.org/privacy/)
+- [Terms of service](https://www.spokanetech.org/terms/)
+
+Python 3.10+ is declared by the project. Current CI runs on Python 3.13, while the
+Docker image uses Python 3.12; there is currently no full Python-version test matrix.

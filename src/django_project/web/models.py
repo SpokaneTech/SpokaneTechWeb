@@ -4,9 +4,9 @@ from typing import ClassVar
 
 from django.db import models
 from django.urls import reverse
+from encrypted_fields.fields import EncryptedTextField
 from handyhelpers.models import HandyHelperBaseModel
 
-from encrypted_fields.fields import EncryptedTextField
 from web.utilities.html_utils import convert_html_to_text
 from web.utilities.icons import get_icon_classes
 

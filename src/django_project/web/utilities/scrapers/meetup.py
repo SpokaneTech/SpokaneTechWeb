@@ -3,7 +3,7 @@ from __future__ import annotations
 import html
 import json
 import re
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from typing import Any
 
 from bs4 import BeautifulSoup, Tag
@@ -163,52 +163,6 @@ def _format_venue_address(venue: dict[str, Any]) -> str:
         ]
         return ", ".join(str(part) for part in parts if part)
     return ""
-
-
-def get_end_datetime(datetime_string: str, time_string: str) -> datetime | None:
-    """create a datetime object with timezone information from information parsed from a meetup.com event page
-
-    Args:
-        datetime_string (str): string representation of a datetime; example: '2025-01-06T07:00:00-08:00'
-        time_string (str): string representation of a time; example: '7:00 PM PST'
-
-    Returns:
-        datetime: datetime object with timezone information
-    """
-    try:
-        # Extract the date part and timezone offset from the first string
-        date_part: str = datetime_string.split("T")[0]
-        timezone_offset: str = datetime_string[-6:]  # Extract the offset (-08:00)
-
-        # Convert the timezone offset into a timedelta and create a timezone object
-        offset_hours, offset_minutes = map(int, timezone_offset.split(":"))
-        offset = timedelta(hours=offset_hours, minutes=offset_minutes)
-        tz = timezone(offset)
-
-        # Parse the time string using regex to extract the time part
-        match = re.search(r"(\d{1,2}):(\d{2})\s*([aApP][mM])", time_string)
-        if not match:
-            return None
-        hour = int(match.group(1))
-        minute = int(match.group(2))
-        period = match.group(3).upper()
-
-        # Convert 12-hour format to 24-hour format
-        if period == "PM" and hour != 12:
-            hour += 12
-        elif period == "AM" and hour == 12:
-            hour = 0
-
-        time_obj = datetime.min.replace(tzinfo=tz, hour=hour, minute=minute)
-
-        # Combine date and time into a new datetime object
-        combined_datetime = datetime.fromisoformat(f"{date_part}T{time_obj.strftime('%H:%M:%S')}{timezone_offset}")
-
-        # Apply the extracted timezone to the combined datetime
-        return combined_datetime
-    except (TypeError, ValueError) as err:
-        print(err)
-        return None
 
 
 def get_event_information(url: str) -> dict:

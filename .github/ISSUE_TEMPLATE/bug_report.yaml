@@ -6,6 +6,11 @@ body:
   - type: markdown
     attributes:
       value: |
+        Do not post credentials, tokens, webhook URLs, or private personal data.
+        Report suspected vulnerabilities privately using our [security policy](https://github.com/SpokaneTech/SpokaneTechWeb/blob/main/.github/SECURITY.md).
+  - type: markdown
+    attributes:
+      value: |
         Thanks for taking the time to fill out this bug report!
   - type: textarea
     id: description
@@ -33,10 +38,18 @@ body:
     validations:
       required: true
   - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Include the browser and OS for website issues. For local/deployment issues, include Python/Django versions, the commit or release, and whether you use runserver or Docker. Do not paste environment files or secrets.
+      placeholder: "Example: Firefox on Windows; or Python 3.13, Django 5.2, Docker, commit abc123"
+    validations:
+      required: true
+  - type: textarea
     id: logs
     attributes:
       label: Relevant log output
-      description: Please copy and paste any relevant log output. This will be automatically formatted into code, so no need for backticks.
+      description: Paste relevant logs after removing secrets, credentials, webhook URLs, and personal information. Backticks are not needed.
       render: shell
   - type: checkboxes
     id: terms

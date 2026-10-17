@@ -66,6 +66,20 @@ class AboutContentView(HtmxOptionView):
     template_name: str = "web/full/custom/about.html"
 
 
+class PrivacyContentView(HtmxOptionView):
+    """Render the public privacy policy."""
+
+    htmx_template_name: str = "web/partials/custom/privacy.htm"
+    template_name: str = "web/full/custom/privacy.html"
+
+
+class TermsContentView(HtmxOptionView):
+    """Render the public terms of service."""
+
+    htmx_template_name: str = "web/partials/custom/terms.htm"
+    template_name: str = "web/full/custom/terms.html"
+
+
 class DevelopContentView(HtmxOptionView):
     """Render the 'development' page"""
 
@@ -184,7 +198,7 @@ class IndexContentView(HtmxOptionView):
                     )
                 )
                 .prefetch_related("tags")
-                .order_by("name", "pk")
+                .order_by("-upcoming_event_count", "name", "pk")
             ),
             "upcoming_event_count": upcoming.count(),
             "active_group_count": groups.count(),
@@ -307,7 +321,7 @@ class TechGroupsView(HtmxOptionMultiFilterView):
                 )
             )
             .prefetch_related("tags")
-            .order_by("name", "pk")
+            .order_by("-upcoming_event_count", "name", "pk")
         )
         if kwargs.get("display") == "marquee" or (
             not kwargs.get("display") and request.GET.get("display") == "marquee"

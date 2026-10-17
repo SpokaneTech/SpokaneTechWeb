@@ -169,33 +169,9 @@ $theme-colors: (
 }
 
 
-.social-icon-link .social-icon {
-    background-color: var(--bs-primary);
-    width: 32px;
-    height: 32px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 50%;
-    transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-}
-
-.social-icon-link:hover .social-icon {
-    background-color: $primary-hover;
-    box-shadow: 0 0 0 0.25rem rgba($primary, 0.25);
-}
-
 .navbar-nav .nav-link:hover {
   color: $primary !important;
   text-shadow: 0 1px 2px rgba($primary, 0.15);
-}
-
-.spaced-bordered-items .list-group-item {
-  margin-bottom: 0.75rem;                // space between items
-  border-radius: 0.375rem;               // optional rounding
-  padding: .5rem;                         // optional padding for spacing inside
-  background-color: #fff;                // make sure background is set
-  width: 95%;
 }
 
 .hover-grow {
@@ -210,33 +186,6 @@ $theme-colors: (
   // We don't need to repeat the transition here unless used standalone
   &:hover {
     background-color: $light;
-  }
-}
-
-
-// Themed link styles using Bootstrap emphasis text colors
-$link-colors: (
-  "primary": var(--bs-primary-text-emphasis),
-  "secondary": var(--bs-secondary-text-emphasis),
-  "success": var(--bs-success-text-emphasis),
-  "danger": var(--bs-danger-text-emphasis),
-  "warning": var(--bs-warning-text-emphasis),
-  "info": var(--bs-info-text-emphasis),
-  "light": var(--bs-light-text-emphasis),
-  "dark": var(--bs-dark-text-emphasis)
-);
-
-@each $name, $color in $link-colors {
-  .note-link-#{$name} {
-    color: #{$color};
-    text-decoration: none;
-    transition: color 0.2s ease;
-
-    &:hover,
-    &:focus {
-      color: rgba($color, 0.85); // subtle darken effect
-      text-decoration: none;
-    }
   }
 }
 
@@ -273,25 +222,4 @@ footer {
   color: $light;
   padding: 1rem 0;
   text-align: center;
-}
-
-
-.hero {
-    display: flex;
-    align-items: center;
-    text-align: left;
-    color: var(--light);
-    background: linear-gradient(135deg, rgba(0, 76, 138, 0.92) 0%, rgba(0, 12, 32, 0.92) 100%),
-                url('/static/spokanetech/img/hero.jpg') center/cover no-repeat;
-    background-attachment: fixed;
-    width: 100%;
-    position: relative;
-    padding-top: 5rem;
-    padding-bottom: 5rem;
-}
-.hero h1 {
-  font-size: 4rem;
-  font-weight: 700;
-  line-height: 1.1;
-  color: $light;
 }

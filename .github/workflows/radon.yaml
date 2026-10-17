@@ -1,17 +1,24 @@
 name: Code Metrics Analysis (radon)
 
 on:
-  push:
-    branches-ignore:
-      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
 
 jobs:
   radon:
     runs-on: ubuntu-latest
-    name: "radon"
-    if: github.event.created == false  # Skip if this push created a new branch
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v3
-      - uses: davidslusser/actions_python_radon@v1.0.0
+      - uses: actions/checkout@v4
         with:
-          src: "django_project"
+          persist-credentials: false
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.13"
+      - name: Install dependencies
+        run: python -m pip install -e '.[dev]'
+      - name: Run radon
+        run: radon cc src/django_project -a

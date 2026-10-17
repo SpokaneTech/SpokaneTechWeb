@@ -15,6 +15,7 @@ from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 from django.utils import timezone
 from model_bakery import baker
+from web.models import Event
 
 
 class GroupDirectoryTests(TestCase):
@@ -61,6 +62,33 @@ class GroupDirectoryTests(TestCase):
         response = self.client.get(reverse("web:get_techgroups"))
         self.assertContains(response, "Spokane's tech groups")
         self.assertContains(response, self.group.name)
+
+    def test_groups_order_by_upcoming_count_then_name(self):
+        now = timezone.now()
+        busiest = baker.make("web.TechGroup", name="Z busiest builders", enabled=True)
+        tied = baker.make("web.TechGroup", name="A builders", enabled=True)
+        inactive = baker.make("web.TechGroup", name="B inactive builders", enabled=True)
+        baker.make("web.Event", group=busiest, start_datetime=now + timedelta(days=40), _quantity=3)
+        baker.make("web.Event", group=tied, start_datetime=now + timedelta(days=1), _quantity=2)
+        baker.make(
+            "web.Event",
+            group=inactive,
+            start_datetime=now + timedelta(days=1),
+            status=Event.Status.CANCELLED,
+            _quantity=4,
+        )
+        baker.make("web.Event", group=inactive, start_datetime=now - timedelta(days=1), _quantity=4)
+        expected = [busiest, tied, self.group, inactive]
+        for headers in ({}, {"HTTP_HX_REQUEST": "true"}):
+            with self.subTest(headers=headers):
+                response = self.client.get(self.url, **headers)
+                self.assertEqual(
+                    [(group.pk, group.upcoming_event_count) for group in response.context["queryset"]],
+                    [(busiest.pk, 3), (tied.pk, 2), (self.group.pk, 2), (inactive.pk, 0)],
+                )
+                cards = response.content.decode()
+                positions = [cards.index(f'href="{group.get_absolute_url()}"') for group in expected]
+                self.assertEqual(positions, sorted(positions))
 
     def test_description_entities_and_paragraphs_render_as_safe_plain_text(self):
         self.group.description = "<p>Learn &amp; build.</p><p>Meet friends.</p><script>unsafe()</script>"

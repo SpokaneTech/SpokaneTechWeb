@@ -95,6 +95,31 @@ class HomepageTests(TestCase):
         self.assertEqual(response.context["active_group_count"], 0)
         self.assertNotContains(response, 'class="st-tag"')
 
+    def test_groups_order_by_upcoming_count_then_name(self):
+        busiest = baker.make("web.TechGroup", name="Z busiest builders", enabled=True)
+        tied = baker.make("web.TechGroup", name="A builders", enabled=True)
+        baker.make("web.Event", group=busiest, start_datetime=self.now + timedelta(days=40), _quantity=2)
+        baker.make("web.Event", group=tied, start_datetime=self.now + timedelta(days=1))
+        baker.make(
+            "web.Event",
+            group=self.other_group,
+            start_datetime=self.now + timedelta(days=1),
+            status=Event.Status.CANCELLED,
+            _quantity=3,
+        )
+        baker.make("web.Event", group=self.other_group, start_datetime=self.now - timedelta(days=1), _quantity=3)
+        expected = [busiest, tied, self.group, self.other_group]
+        for headers in ({}, {"HTTP_HX_REQUEST": "true"}):
+            with self.subTest(headers=headers):
+                response = self.get_home(**headers)
+                self.assertEqual(
+                    [(group.pk, group.upcoming_event_count) for group in response.context["homepage_groups"]],
+                    [(busiest.pk, 2), (tied.pk, 1), (self.group.pk, 1), (self.other_group.pk, 0)],
+                )
+                cards = response.content.decode().split('id="group-carousel"', 1)[1]
+                positions = [cards.index(f'href="{group.get_absolute_url()}"') for group in expected]
+                self.assertEqual(positions, sorted(positions))
+
     def test_only_live_topics_are_used_and_deduplicated(self):
         hidden_tag = baker.make("web.Tag", value="Inactive topic")
         self.disabled_group.tags.add(hidden_tag)
