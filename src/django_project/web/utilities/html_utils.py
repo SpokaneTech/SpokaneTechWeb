@@ -4,18 +4,13 @@ import time
 from typing import TYPE_CHECKING, Any
 
 import requests
-from bs4 import BeautifulSoup, Tag
-from bs4.element import NavigableString, PageElement
+from bs4 import BeautifulSoup
 
 if TYPE_CHECKING:
     from playwright.sync_api._generated import Browser, BrowserContext, Page
 
 
 class FetchContentError(RuntimeError):
-    pass
-
-
-class TargetNotFoundError(RuntimeError):
     pass
 
 
@@ -73,38 +68,6 @@ def fetch_content_with_playwright(url, retries=3, timeout=30000) -> str:
             time.sleep(2 + attempt)
     print("Max retries reached. Could not fetch the content.")
     return ""
-
-
-def find_target(
-    url, parent="ul", classes="flex w-full flex-col space-y-5 px-4 md:px-0", max_retries=3
-) -> PageElement | Tag | NavigableString:
-    """find the target ul element in the html content
-
-    Args:
-        url (str): url to fetch content from
-        parent (str, optional): parent html element to find. Defaults to "ul".
-        classes (str, optional): css classes to use in element search. Defaults to "flex w-full flex-col space-y-5 px-4 md:px-0".
-        max_retries (int, optional): max count of retries to attempt. Defaults to 3.
-
-    Raises:
-        TargetNotFoundError: if the target element is not found after max_retries
-
-    Returns:
-        str: html content of the target element
-    """
-    retries = 0
-    while retries < max_retries:
-        print(f"Attempt {retries + 1}/{max_retries}: Fetching HTML content...")
-        html_content: bytes | Any = fetch_content(url)
-        soup = BeautifulSoup(html_content, "html.parser")
-        target_ul: PageElement | Tag | NavigableString | None = soup.find(parent, class_=classes)
-        if target_ul:
-            return target_ul
-        retries += 1
-        print(f"Retry {retries}/{max_retries}: target_ul not found. Retrying in {1 + retries} seconds...")
-        time.sleep(1 + retries)
-
-    raise TargetNotFoundError("target_ul not found after maximum retries")
 
 
 def convert_html_to_text(html_content: str, *, block_separator: str | None = None) -> str:

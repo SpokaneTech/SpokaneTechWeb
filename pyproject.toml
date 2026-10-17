@@ -38,7 +38,6 @@ dev = [
     "bandit",
     "black",
     "coveralls",
-    "django-debug-toolbar",
     "faker",
     "fawltydeps",
     "isort",

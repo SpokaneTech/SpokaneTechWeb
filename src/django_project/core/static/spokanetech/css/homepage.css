@@ -223,7 +223,6 @@
 .st-event-directory .st-event-card h2 { font-size: 1.125rem; line-height: 1.35; letter-spacing: -.02em; margin: 0 0 6px; }
 .st-event-directory .st-event-detail { font-size: .875rem; line-height: 1.6; }
 .st-event-directory .st-card-bottom { flex-wrap: wrap; gap: 12px; }
-.st-event-directory .st-directory-card-action { margin-left: auto; }
 .st-event-directory .st-empty-state { grid-column: 1 / -1; }
 @media (max-width: 991.98px) {
     .st-event-directory-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -233,7 +232,6 @@
 }
 
 /* Group detail: community information, upcoming cards, and event history. */
-.st-group-back { display: inline-block; margin-bottom: 20px; font-size: .875rem; }
 .st-group-detail-header { display: flex; align-items: center; gap: 20px; padding-bottom: 24px; margin-bottom: 24px; border-bottom: 1px solid var(--st-border); }
 .st-group-detail-header h1 { font-size: clamp(2rem, 3vw, 2.75rem); margin: 0 0 14px; }
 .st-group-detail-logo { display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 88px; height: 88px; border-radius: 16px; background: white; border: 1px solid var(--st-border); color: var(--st-blue); font-size: 3rem; }
@@ -259,7 +257,6 @@
 .st-group-history-count { color: var(--st-muted); font-size: .875rem; }
 .st-group-detail .st-event-card h3 { font-weight: 750; }
 .st-group-detail .st-card-bottom { flex-wrap: wrap; gap: 12px; }
-.st-group-detail .st-directory-card-action { margin-left: auto; }
 .st-group-detail .st-empty-state { grid-column: 1 / -1; }
 .st-group-detail .st-empty-state p { margin: 0; }
 .st-group-past-list { display: grid; gap: 12px; list-style: none; margin: 0; padding: 0; }
@@ -418,9 +415,7 @@
 .st-modal-address { display: block; }
 .st-modal-section h3 { font-size: 1rem; font-weight: 650; margin: 0 0 12px; }
 .st-modal-description { color: var(--st-muted); }
-.st-modal-description > :last-child { margin-bottom: 0; }
-.st-modal-description pre, .st-modal-description table { display: block; max-width: 100%; overflow-x: auto; }
-.st-modal-description a, .st-modal-links a { color: var(--st-blue-hover); text-decoration: underline; text-underline-offset: 3px; }
+.st-modal-links a { color: var(--st-blue-hover); text-decoration: underline; text-underline-offset: 3px; }
 .st-modal-links { list-style: none; padding: 0; margin: 0; }
 .st-modal-links li + li { margin-top: 12px; }
 .st-modal-links a { font-weight: 550; }

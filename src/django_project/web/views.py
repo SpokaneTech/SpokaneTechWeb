@@ -184,7 +184,7 @@ class IndexContentView(HtmxOptionView):
                     )
                 )
                 .prefetch_related("tags")
-                .order_by("name", "pk")
+                .order_by("-upcoming_event_count", "name", "pk")
             ),
             "upcoming_event_count": upcoming.count(),
             "active_group_count": groups.count(),
@@ -307,7 +307,7 @@ class TechGroupsView(HtmxOptionMultiFilterView):
                 )
             )
             .prefetch_related("tags")
-            .order_by("name", "pk")
+            .order_by("-upcoming_event_count", "name", "pk")
         )
         if kwargs.get("display") == "marquee" or (
             not kwargs.get("display") and request.GET.get("display") == "marquee"

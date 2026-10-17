@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import random
 import time
-from datetime import datetime, timedelta
+from datetime import timedelta
 from typing import Any
 
 import requests
@@ -28,25 +28,6 @@ def create_google_map_link(address: str) -> str:
     address = address.replace("#", "%23")
     link: str = f"https://www.google.com/maps?q={address}"
     return link
-
-
-def filter_events_by_date(events: list, date_filter: timezone) -> list:
-    """
-    Filters a list of event instances by a provided datetime.
-
-    Args:
-        events (list): List of dictionaries, each representing an event with 'name', 'description', and 'created' keys.
-        date_filter (datetime): A datetime object to filter events created after this date.
-
-    Returns:
-        List of events created after the date_filter.
-    """
-    filtered_events: list = []
-    for event in events:
-        created_date = datetime.fromisoformat(event["created"].replace("Z", "+00:00"))
-        if created_date > date_filter:
-            filtered_events.append(event)
-    return filtered_events
 
 
 def get_organization_details(organization_id: str) -> dict:
