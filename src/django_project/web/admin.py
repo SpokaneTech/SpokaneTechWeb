@@ -75,7 +75,7 @@ class EventAdmin(admin.ModelAdmin):
         "social_platform_id",
         "image",
     )
-    list_filter = ("group", "status")
+    list_filter = ("group", "status", "event_schema_verified")
     readonly_fields = ("source_last_checked_at", "source_tag_names", "change_version")
 
 

@@ -222,6 +222,13 @@ class TechEventView(HtmxOptionDetailView):
     htmx_template_name: str = "web/partials/detail/event.htm"
     template_name: str = "web/full/detail/event.html"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        self.request.seo_object = self.object
+        event_end = self.object.end_datetime or self.object.start_datetime
+        context["event_has_ended"] = event_end <= timezone.now()
+        return context
+
     def get_queryset(self):
         return super().get_queryset().select_related("group").prefetch_related("tags")
 
@@ -283,6 +290,7 @@ class TechGroupView(HtmxOptionDetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        self.request.seo_object = self.object
         now = timezone.now()
         events = list(
             Event.objects.filter(group=self.object)
@@ -362,3 +370,33 @@ class TechGroupModalView(ModelDetailBootstrapModalView):
     modal_title: str = "Group details"
     template_name: str = "core/partials/modal_swap.htm"
     model = TechGroup
+
+
+class CommunityGuideView(HtmxOptionView):
+    """First-party guidance supported by enabled groups and actual upcoming events."""
+
+    template_name = "web/full/custom/guide.html"
+    htmx_template_name = "web/partials/custom/guide.htm"
+
+    def get(self, request, *args, **kwargs):
+        newcomer = request.resolver_match.url_name == "newcomer_guide"
+        self.context = {
+            "newcomer": newcomer,
+            "guide_groups": TechGroup.objects.filter(enabled=True)
+            .annotate(
+                upcoming_event_count=Count(
+                    "event",
+                    filter=Q(event__start_datetime__gte=timezone.now(), event__status=Event.Status.ACTIVE),
+                    distinct=True,
+                )
+            )
+            .prefetch_related("tags")
+            .order_by("name"),
+            "guide_events": Event.objects.filter(
+                status=Event.Status.ACTIVE, start_datetime__gte=timezone.now(), group__enabled=True
+            )
+            .select_related("group")
+            .prefetch_related("tags")
+            .order_by("start_datetime", "pk")[:6],
+        }
+        return super().get(request, *args, **kwargs)

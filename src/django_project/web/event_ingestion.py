@@ -69,6 +69,13 @@ def save_source_event(
                 logger.warning("Skipping incomplete new event for group %s", group.pk)
                 return None, False
             event = Event(group=group, location_name="", location_address="")
+        if not is_new and any(
+            getattr(event, key) != value
+            for key, value in values.items()
+            if key
+            in {"name", "description", "start_datetime", "end_datetime", "location_name", "location_address", "url"}
+        ):
+            event.event_schema_verified = False
         for key, value in values.items():
             setattr(event, key, value)
         event.source_last_checked_at = timezone.now()

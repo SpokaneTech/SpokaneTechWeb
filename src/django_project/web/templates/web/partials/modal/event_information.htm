@@ -10,6 +10,6 @@
 {% if object.tags.all %}<div class="st-tags st-modal-tags">{% include "web/partials/home/tags.htm" with tags=object.tags.all %}</div>{% endif %}
 <div class="st-modal-actions">
     <a class="st-text-link" href="{{ object.get_absolute_url }}" hx-get="{{ object.get_absolute_url }}" hx-target="#body_main" hx-push-url="true" data-bs-dismiss="modal">Full details</a>
-    {% if object.url %}<a class="st-text-link" href="{{ object.url }}" target="_blank" rel="noopener">Event website<span class="visually-hidden"> (opens in a new tab)</span></a>{% endif %}
+    {% if object.url %}<a class="st-text-link" href="{{ object.url }}" {% if not object.is_cancelled %}data-track-event="rsvp_click" data-event-id="{{ object.pk }}"{% endif %} target="_blank" rel="noopener">Event website<span class="visually-hidden"> (opens in a new tab)</span></a>{% endif %}
 </div>
 {% endtimezone %}

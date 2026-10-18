@@ -395,7 +395,7 @@ def launch_reminders_for_tomorrows_events() -> str:
     # Filter events that start anytime tomorrow
     event_list: BaseManager[Event] = Event.objects.filter(
         start_datetime__gte=start_utc, start_datetime__lt=end_utc, group__enabled=True, status=Event.Status.ACTIVE
-    )
+    ).select_related("group")
     for event in event_list:
         # post reminders to Discord
         if settings.POST_TO_DISCORD:

@@ -12,6 +12,7 @@ from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
 
+from web.seo import promotion_link
 from web.utilities.ai.gemini import generate_post_content
 from web.utilities.ai.prompts import (
     create_event_reminder_prompt,
@@ -342,6 +343,10 @@ class LinkedInOrganizationClient:
         commentary += f"\n⏰ Time: {event_start_datetime.strftime('%I:%M %p')}."
         if event.url:
             commentary += f"\n\n👉 RSVP here: {event.url}"
+        discovery = promotion_link(event, "linkedin")
+        if discovery != event.url:
+            footer = f"\n\nExplore on SpokaneTech: {discovery}\nRSVP: {event.url}"
+            commentary = commentary[: max(0, 3000 - len(footer))] + footer
         return commentary
 
     def post_event(
@@ -361,4 +366,6 @@ class LinkedInOrganizationClient:
             commentary: str = self.build_event_commentary(event, is_new)
         else:
             commentary = self.build_event_commentary(event, is_new)
-        return self.post_organization_post(commentary, article_url=event.url, article_title=event.name)
+        return self.post_organization_post(
+            commentary, article_url=promotion_link(event, "linkedin"), article_title=event.name
+        )

@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.sitemaps",
     # third party apps
     "django_celery_beat",
     "django_extensions",
@@ -66,6 +67,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "core.seo.SEOMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -106,6 +108,7 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 "handyhelpers.context_processors.get_settings",
                 "core.context_processors.community_links",
+                "core.seo.seo_context",
             ],
         },
     },
@@ -306,3 +309,13 @@ SPUG_API_URL: str | None = env.str("SPUG_API_URL", None)
 # Event/group uploads live outside the container image and collected static files.
 MEDIA_ROOT = env.str("MEDIA_ROOT", str(BASE_DIR / "media"))
 MEDIA_URL = env.str("MEDIA_URL", "/media/")
+
+# Explicit publication controls; leave indexing disabled outside the public deployment.
+PUBLIC_SITE_URL = env.str("PUBLIC_SITE_URL", "https://www.spokanetech.org").rstrip("/")
+SEO_INDEXING_ENABLED = env.bool("SEO_INDEXING_ENABLED", False)
+SEO_VERIFIED_PROFILE_URLS = env.list("SEO_VERIFIED_PROFILE_URLS", default=[])
+# Keep False when GA4 enhanced measurement handles browser-history page views.
+GA4_MANUAL_PAGE_VIEWS = env.bool("GA4_MANUAL_PAGE_VIEWS", False)
+
+# Enable only after profile ownership and preview approval. Direct RSVP links remain.
+PROMOTE_SITE_LINKS = env.bool("PROMOTE_SITE_LINKS", False)

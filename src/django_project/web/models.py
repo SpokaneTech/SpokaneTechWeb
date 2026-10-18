@@ -19,6 +19,10 @@ class Event(HandyHelperBaseModel):
         CANCELLED = "cancelled", "Cancelled"
 
     status = models.CharField(max_length=16, choices=Status.choices, default=Status.ACTIVE, db_index=True)
+    event_schema_verified = models.BooleanField(
+        default=False,
+        help_text="Reviewed as publicly bookable with a physical venue and complete address. Reset when source details change.",
+    )
     source_last_checked_at = models.DateTimeField(null=True, blank=True)
     source_tag_names = models.JSONField(default=list, blank=True)
     change_version = models.PositiveIntegerField(default=0, editable=False)
