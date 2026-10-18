@@ -398,7 +398,9 @@ class TestDiscordPostingSetting(TestCase):
             post_weekly_event_summary_to_discord()
         events = notifier.return_value.post_weekly_summary.call_args.kwargs["event_list"]
         with self.assertNumQueries(1):
-            self.assertTrue(all(event.group.enabled for event in events))
+            loaded_events = list(events)
+            self.assertEqual(len(loaded_events), 9)
+            self.assertTrue(all(event.group.enabled for event in loaded_events))
 
     def test_reminders_only_queue_discord_when_enabled(self):
         for enabled in (False, True):
