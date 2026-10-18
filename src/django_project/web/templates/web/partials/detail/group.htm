@@ -18,6 +18,12 @@
                 <div class="about-content st-group-description">
                     {% if object.description %}{{ object.description|safe }}{% else %}<p>This group hasn't added a description yet.</p>{% endif %}
                 </div>
+                {% if not object.links.all %}
+                <div class="st-actions mt-4">
+                    <button class="st-button st-button-outline" type="button" data-share-link>Copy group link</button>
+                    <span role="status" aria-live="polite"></span>
+                </div>
+                {% endif %}
             </section>
             {% if object.links.all %}
             <aside class="st-group-panel st-group-connect" aria-labelledby="group-connect-title">
@@ -25,9 +31,13 @@
                 <p>Find the community online and get involved.</p>
                 <ul class="st-group-links">
                     {% for link in object.links.all %}
-                    <li><a href="{{ link.url }}" target="_blank" rel="noopener">{{ link.name|default:link.url }}<span class="visually-hidden"> (opens in a new tab)</span></a>{% if link.description %}<p>{{ link.description }}</p>{% endif %}</li>
+                    <li><a href="{{ link.url }}" data-track-event="community_link_click" target="_blank" rel="noopener">{{ link.name|default:link.url }}<span class="visually-hidden"> (opens in a new tab)</span></a>{% if link.description %}<p>{{ link.description }}</p>{% endif %}</li>
                     {% endfor %}
                 </ul>
+                <div class="st-actions mt-4">
+                    <button class="st-button st-button-outline" type="button" data-share-link>Copy group link</button>
+                    <span role="status" aria-live="polite"></span>
+                </div>
             </aside>
             {% endif %}
         </div>

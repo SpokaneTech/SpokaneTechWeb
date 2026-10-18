@@ -461,7 +461,7 @@ def post_weekly_event_summary_to_discord() -> str:
     # Filter events that start within the week
     event_list: BaseManager[Event] = Event.objects.filter(
         start_datetime__gte=start_utc, start_datetime__lt=end_utc, group__enabled=True, status=Event.Status.ACTIVE
-    )
+    ).select_related("group")
     if not event_list.exists():
         return "No events found for the week."
 

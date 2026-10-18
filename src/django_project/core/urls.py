@@ -17,7 +17,9 @@ Including another URLconf
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
+from django.contrib.sitemaps.views import sitemap
 from django.urls import include, path
+from web.sitemaps import sitemaps
 from web.views import linkedin_oauth_callback
 
 from core.views import HostView, robots_txt
@@ -30,6 +32,7 @@ urlpatterns: list = [
     path("handyhelpers/", include("handyhelpers.urls")),
     # Local
     path("robots.txt", robots_txt),
+    path("sitemap.xml", sitemap, {"sitemaps": sitemaps}, name="sitemap"),
     path("host/", HostView.as_view(), name="host"),
     # app URLs
     path("", include("web.urls", namespace="web")),

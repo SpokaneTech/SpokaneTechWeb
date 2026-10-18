@@ -390,6 +390,18 @@ class TestDiscordPostingSetting(TestCase):
         self.assertEqual(list(events), [self.event])
         self.assertIn("posted to Discord successfully", result)
 
+    @override_settings(POST_TO_DISCORD=True)
+    @patch("web.tasks.DiscordNotifier")
+    def test_weekly_summary_loads_groups_without_per_event_queries(self, notifier):
+        baker.make("web.Event", group=self.group, start_datetime=self.event.start_datetime, _quantity=8)
+        with patch("web.tasks.timezone.now", return_value=self.now):
+            post_weekly_event_summary_to_discord()
+        events = notifier.return_value.post_weekly_summary.call_args.kwargs["event_list"]
+        with self.assertNumQueries(1):
+            loaded_events = list(events)
+            self.assertEqual(len(loaded_events), 9)
+            self.assertTrue(all(event.group.enabled for event in loaded_events))
+
     def test_reminders_only_queue_discord_when_enabled(self):
         for enabled in (False, True):
             with (

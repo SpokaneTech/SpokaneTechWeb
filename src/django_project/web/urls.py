@@ -6,7 +6,9 @@ app_name = "web"
 
 urlpatterns = [
     path("", views.IndexContentView.as_view(), name="index"),
-    path("index/", views.IndexContentView.as_view(), name="index"),
+    path("index/", views.IndexContentView.as_view(), name="index_alias"),
+    path("guides/first-tech-meetup/", views.CommunityGuideView.as_view(), name="newcomer_guide"),
+    path("guides/local-tech-communities/", views.CommunityGuideView.as_view(), name="community_guide"),
     path("about/", views.AboutContentView.as_view(), name="about"),
     path("develop/", views.DevelopContentView.as_view(), name="develop"),
     path("privacy/", views.PrivacyContentView.as_view(), name="privacy"),
