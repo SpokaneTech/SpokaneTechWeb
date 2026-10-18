@@ -72,7 +72,8 @@ def save_source_event(
         if not is_new and any(
             getattr(event, key) != value
             for key, value in values.items()
-            if key in {"name", "description", "location_name", "location_address", "url"}
+            if key
+            in {"name", "description", "start_datetime", "end_datetime", "location_name", "location_address", "url"}
         ):
             event.event_schema_verified = False
         for key, value in values.items():

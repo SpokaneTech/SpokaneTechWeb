@@ -65,7 +65,9 @@ class DiscordNotifier:
             )
             content: str = generate_post_content(prompt)
         except (ValueError, requests.HTTPError):
-            content = f"📢 A new event from {event.group.name} has just been created!\n\n👉 RSVP here: {event.url}"
+            content = f"📢 A new event from {event.group.name} has just been created!"
+            if event.url:
+                content += f"\n\n👉 RSVP here: {event.url}"
 
         event_start_datetime: timezone.datetime = convert_to_pacific(event.start_datetime)
         if event.end_datetime:
@@ -74,7 +76,7 @@ class DiscordNotifier:
             event_end_datetime = None
 
         fields: list[dict[str, Any]] = []
-        if event.location_name is not None:
+        if event.location_name:
             fields.append({"name": "📍 Location", "value": event.location_name, "inline": False})
         fields.extend(
             [
@@ -88,7 +90,9 @@ class DiscordNotifier:
         )
         discovery = promotion_link(event, "discord")
         if discovery != event.url:
-            footer = f"\n\nExplore on SpokaneTech: {discovery}\nRSVP: {event.url}"
+            footer = f"\n\nExplore on SpokaneTech: {discovery}"
+            if event.url:
+                footer += f"\nRSVP: {event.url}"
             content = content[: max(0, 2000 - len(footer))] + footer
 
         data: dict[str, Any] = {
@@ -96,7 +100,7 @@ class DiscordNotifier:
             "embeds": [
                 {
                     "title": event.name,
-                    "url": promotion_link(event, "discord"),
+                    **({"url": discovery} if discovery else {}),
                     "fields": fields,
                     "footer": {"text": f"Hosted by {event.group.name}"},
                 }
@@ -121,7 +125,9 @@ class DiscordNotifier:
             prompt: str = create_event_reminder_prompt(event_description=convert_html_to_text(event.description))
             content: str = generate_post_content(prompt)
         except (ValueError, requests.HTTPError):
-            content = f"🔔 Reminder: {event.name} is happening soon!\n\n👉 RSVP here: {event.url}"
+            content = f"🔔 Reminder: {event.name} is happening soon!"
+            if event.url:
+                content += f"\n\n👉 RSVP here: {event.url}"
 
         event_start_datetime: timezone.datetime = convert_to_pacific(event.start_datetime)
         if event.end_datetime:
@@ -130,7 +136,7 @@ class DiscordNotifier:
             event_end_datetime = None
 
         fields: list[dict[str, Any]] = []
-        if event.location_name is not None:
+        if event.location_name:
             fields.append({"name": "📍 Location", "value": event.location_name, "inline": False})
         fields.extend(
             [
@@ -144,7 +150,9 @@ class DiscordNotifier:
         )
         discovery = promotion_link(event, "discord")
         if discovery != event.url:
-            footer = f"\n\nExplore on SpokaneTech: {discovery}\nRSVP: {event.url}"
+            footer = f"\n\nExplore on SpokaneTech: {discovery}"
+            if event.url:
+                footer += f"\nRSVP: {event.url}"
             content = content[: max(0, 2000 - len(footer))] + footer
 
         data: dict[str, Any] = {
@@ -152,7 +160,7 @@ class DiscordNotifier:
             "embeds": [
                 {
                     "title": event.name,
-                    "url": promotion_link(event, "discord"),
+                    **({"url": discovery} if discovery else {}),
                     "fields": fields,
                     "footer": {"text": f"Hosted by {event.group.name}"},
                 }

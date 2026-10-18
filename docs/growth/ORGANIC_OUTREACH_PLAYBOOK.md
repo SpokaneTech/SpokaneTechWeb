@@ -35,8 +35,9 @@ python manage.py preview_growth_posts --source partner
 ```
 
 The command reads up to ten active events from enabled groups over the next seven
-days. It outputs real titles, hosts, Pacific start times, first-party campaign
-links, and unchanged provider RSVP URLs. It does not invoke AI, modify events,
+days, excluding events without a provider URL. It outputs real titles, hosts,
+Pacific start times, first-party campaign links, and unchanged provider RSVP URLs.
+It does not invoke AI, modify events,
 or publish. An empty array means no matching events, not permission to invent a
 roundup. Use actual current listings for later weeks as well.
 

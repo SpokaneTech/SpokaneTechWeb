@@ -138,6 +138,9 @@ class SEOTests(TestCase):
         self.assertEqual(response.status_code, 301)
         self.assertEqual(response["Location"], "/?utm_source=partner")
         self.assertEqual(reverse("web:index"), "/")
+        _, homepage = self.page("/")
+        _, alias = self.page("/index/", HTTP_HX_REQUEST="true")
+        self.assertEqual(self.payload(alias), self.payload(homepage))
         self.page(self.event.get_absolute_url())
         self.page(reverse("web:get_events"))  # Existing directory aliases retain compatibility.
 
@@ -200,6 +203,18 @@ class SEOTests(TestCase):
             event, _ = save_source_event(self.group, data, existing_pk=self.event.pk, location_complete=complete)
             self.assertEqual(event.event_schema_verified, expected)
 
+    @patch("web.event_ingestion.queue_event_image")
+    def test_rescheduling_start_or_end_requires_schema_review(self, queue):
+        for field in ("start_datetime", "end_datetime"):
+            with self.subTest(field=field):
+                Event.objects.filter(pk=self.event.pk).update(event_schema_verified=True)
+                event, _ = save_source_event(
+                    self.group,
+                    {"name": self.event.name, field: getattr(self.event, field) + timedelta(hours=1)},
+                    existing_pk=self.event.pk,
+                )
+                self.assertFalse(event.event_schema_verified)
+
     @override_settings(SEO_INDEXING_ENABLED=True)
     def test_guides_use_actual_enabled_groups_and_future_events(self):
         disabled = baker.make("web.TechGroup", enabled=False, name="Hidden group")
@@ -236,12 +251,32 @@ class SEOTests(TestCase):
         self.assertIn("utm_source=partner", campaign_url(self.event.get_absolute_url(), "partner"))
 
     def test_preview_is_read_only_and_uses_database_events(self):
+        baker.make(Event, group=self.group, start_datetime=self.event.start_datetime, url="", name="No RSVP link")
         output = StringIO()
         call_command("preview_growth_posts", source="partner", stdout=output)
         preview = json.loads(output.getvalue())
+        self.assertEqual(len(preview), 1)
         self.assertEqual(preview[0]["name"], self.event.name)
         self.assertEqual(preview[0]["rsvp_url"], self.event.url)
         self.assertIn("utm_source=partner", preview[0]["discovery_url"])
+
+    @patch("web.utilities.notifiers.discord.generate_post_content", side_effect=ValueError)
+    def test_discord_omits_missing_optional_url_and_location(self, ai):
+        self.event.url = ""
+        self.event.location_name = ""
+        notifier = DiscordNotifier("https://example.test/unused")
+        for enabled in (False, True):
+            with self.settings(PROMOTE_SITE_LINKS=enabled):
+                for builder in (notifier.build_event_created_message, notifier.build_event_reminder_message):
+                    with self.subTest(promotion=enabled, builder=builder.__name__):
+                        payload = builder(self.event)
+                        embed = payload["embeds"][0]
+                        if enabled:
+                            self.assertIn("www.spokanetech.org/events/", embed["url"])
+                        else:
+                            self.assertNotIn("url", embed)
+                        self.assertNotIn("RSVP", payload["content"])
+                        self.assertTrue(all(field["value"] for field in embed["fields"]))
 
     def test_public_origin_rejects_untrusted_or_incomplete_origins(self):
         for value in [

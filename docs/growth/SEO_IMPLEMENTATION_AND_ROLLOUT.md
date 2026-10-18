@@ -121,9 +121,10 @@ in Django administration for individual events:
    [Rich Results Test](https://search.google.com/test/rich-results) and inspect
    them in Search Console after deployment. Fix errors before approving a batch.
 
-Ingestion clears approval when source title, description, venue/address, or source
-URL changes. An unchanged poll or cancellation alone retains approval; cancelled
-event markup retains the original schedule and reports `EventCancelled`. A human
+Ingestion clears approval when source title, description, start/end time,
+venue/address, or source URL changes. An unchanged poll or cancellation alone
+retains approval; cancelled event markup retains the original schedule and
+reports `EventCancelled`. A human
 must re-review other material changes. Review manually edited details as well.
 No bulk approval is performed automatically. See
 [Google's Event requirements](https://developers.google.com/search/docs/appearance/structured-data/event).

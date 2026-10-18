@@ -225,7 +225,8 @@ class TechEventView(HtmxOptionDetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         self.request.seo_object = self.object
-        context["event_has_ended"] = self.object.start_datetime < timezone.now()
+        event_end = self.object.end_datetime or self.object.start_datetime
+        context["event_has_ended"] = event_end <= timezone.now()
         return context
 
     def get_queryset(self):

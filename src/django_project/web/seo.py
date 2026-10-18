@@ -157,6 +157,8 @@ def page_metadata(request) -> dict:
         return cached
     match = request.resolver_match
     route = match.view_name if match else ""
+    if route == "web:index_alias":
+        route = "web:index"
     kwargs = match.kwargs if match else {}
     obj = getattr(request, "seo_object", None)
     title, description = STATIC_PAGES.get(route, ("SpokaneTech", "Spokane's technology groups and events."))

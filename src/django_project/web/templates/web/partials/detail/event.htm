@@ -36,8 +36,10 @@
                     {% endif %}
                 </dl>
                 <div class="st-actions st-event-detail-actions">
-                    {% if object.url and not object.is_cancelled %}<a class="st-button st-button-primary" href="{{ object.url }}" data-track-event="rsvp_click" data-event-id="{{ object.pk }}" target="_blank" rel="noopener">RSVP<span class="visually-hidden"> on event website (opens in a new tab)</span></a>{% endif %}
-                    {% if object.url and object.is_cancelled %}<a class="st-text-link" href="{{ object.url }}" target="_blank" rel="noopener">View original event<span class="visually-hidden"> (opens in a new tab)</span></a>{% endif %}
+                    {% if object.url %}
+                        {% if not object.is_cancelled and not event_has_ended %}<a class="st-button st-button-primary" href="{{ object.url }}" data-track-event="rsvp_click" data-event-id="{{ object.pk }}" target="_blank" rel="noopener">RSVP<span class="visually-hidden"> on event website (opens in a new tab)</span></a>
+                        {% else %}<a class="st-text-link" href="{{ object.url }}" target="_blank" rel="noopener">View original event<span class="visually-hidden"> (opens in a new tab)</span></a>{% endif %}
+                    {% endif %}
                     <button class="st-button st-button-outline" type="button" data-share-link>Copy event link</button>
                     <span role="status" aria-live="polite"></span>
                 </div>

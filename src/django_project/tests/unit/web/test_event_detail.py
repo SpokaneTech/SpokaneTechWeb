@@ -1,7 +1,8 @@
 """Event detail rendering, real content, Pacific times, and optional fields."""
 
 import os
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
+from unittest.mock import patch
 
 import django
 
@@ -102,3 +103,32 @@ class EventDetailTests(TestCase):
             event = TechEventView().get_queryset().get(pk=self.event.pk)
             self.assertEqual(event.group.name, self.group.name)
             self.assertEqual([tag.value for tag in event.tags.all()], ["Development"])
+
+    def test_rsvp_is_available_only_before_end_and_without_cancellation(self):
+        now = datetime(2026, 10, 21, 0, 30, tzinfo=timezone.utc)
+        cases = [
+            ("future", 1, 2, False, False),
+            ("ongoing", -1, 1, False, False),
+            ("ended", -2, -1, False, True),
+            ("ended_at_boundary", -1, 0, False, True),
+            ("unknown_end", -1, None, False, True),
+            ("cancelled", 1, 2, True, False),
+        ]
+        with patch("web.views.timezone.now", return_value=now):
+            for label, start, end, cancelled, ended in cases:
+                self.event.start_datetime = now + timedelta(hours=start)
+                self.event.end_datetime = now + timedelta(hours=end) if end is not None else None
+                self.event.status = "cancelled" if cancelled else "active"
+                self.event.save()
+                for headers in ({}, {"HTTP_HX_REQUEST": "true"}):
+                    with self.subTest(case=label, headers=headers):
+                        response = self.client.get(self.url, **headers)
+                        self.assertEqual(response.context["event_has_ended"], ended)
+                        self.assertContains(response, self.event.url)
+                        if ended or cancelled:
+                            self.assertNotContains(response, 'data-track-event="rsvp_click"')
+                            self.assertContains(response, "View original event")
+                            self.assertContains(response, "Find upcoming events")
+                        else:
+                            self.assertContains(response, 'data-track-event="rsvp_click"')
+                            self.assertNotContains(response, "Find upcoming events")

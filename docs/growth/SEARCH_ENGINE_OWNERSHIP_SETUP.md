@@ -127,8 +127,9 @@ See [Namecheap's host-record instructions](https://www.namecheap.com/support/kno
 4. If Google cannot yet find the record, allow time for DNS propagation and retry.
    Propagation can take minutes or longer; Google's instructions allow for delays
    of a few days. An initial failure does not necessarily mean the record is wrong.
-5. Leave the TXT record in Namecheap after verification. Google periodically
-   checks that the verification method remains valid.
+5. Leave the TXT record at the authoritative DNS provider (Namecheap if it hosts
+   your DNS) after verification. Google periodically checks that the verification
+   method remains valid.
 
 If verification continues to fail, check:
 
@@ -204,7 +205,7 @@ See [Google's permission guidance](https://support.google.com/webmasters/answer/
 ## Completion checklist
 
 - [ ] Google Domain property for `spokanetech.org` is verified.
-- [ ] The required DNS TXT record remains in place at Namecheap.
+- [ ] The required DNS TXT record remains in place at the authoritative DNS provider.
 - [ ] Bing lists the intended site and confirms verification.
 - [ ] Responsible maintainers and account access are recorded privately.
 - [ ] Initial search/indexing reports have been reviewed, or their pending status recorded.

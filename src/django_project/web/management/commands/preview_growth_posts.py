@@ -26,6 +26,7 @@ class Command(BaseCommand):
                 start_datetime__lt=now + timedelta(days=7),
                 group__enabled=True,
             )
+            .exclude(url="")
             .select_related("group")
             .order_by("start_datetime", "pk")[:10]
         )
