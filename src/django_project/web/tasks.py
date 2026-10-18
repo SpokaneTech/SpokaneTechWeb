@@ -22,7 +22,7 @@ from web.utilities.dt_utils import convert_to_pacific
 from web.utilities.event_images import eventbrite_image_url
 from web.utilities.event_status import source_event_status
 from web.utilities.notifiers.discord import DiscordNotifier
-from web.utilities.notifiers.linkedin import LinkedInOrganizationClient
+from web.utilities.notifiers.linkedin import LinkedInOrganizationClient, add_event_hashtags
 from web.utilities.scrapers.eventbrite import (
     create_google_map_link,
     get_event_details,
@@ -333,7 +333,7 @@ def post_event_to_linkedin(
     )
 
     if change_message:
-        linkedin_client.post_organization_post(commentary=change_message[:3000])
+        linkedin_client.post_organization_post(commentary=add_event_hashtags(event, change_message))
         return f"Event change for {event.name} posted to LinkedIn successfully."
     linkedin_client.post_event(event=event, is_new=is_new)
     if is_new:

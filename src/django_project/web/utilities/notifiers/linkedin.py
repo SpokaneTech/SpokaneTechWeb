@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 from datetime import timedelta
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -25,6 +26,21 @@ if TYPE_CHECKING:
 
 
 logger = logging.getLogger(__name__)
+
+
+def add_event_hashtags(event: Event, commentary: str, *, footer: str = "") -> str:
+    """Keep event links and normalized, distinct hashtags within the post budget."""
+    hashtags = ["#spokanetech"]
+    seen = {"spokanetech"}
+    for tag in event.tags.all():
+        name = re.sub(r"[^\w]", "", tag.value)
+        if name and name.casefold() not in seen:
+            hashtags.append(f"#{name}")
+            seen.add(name.casefold())
+    suffix = footer + "\n\n" + " ".join(hashtags)
+    if len(suffix) > 3000:
+        raise ValueError("Event links and hashtags exceed the 3000-character LinkedIn post limit.")
+    return commentary[: 3000 - len(suffix)].rstrip() + suffix
 
 
 class LinkedInOrganizationClient:
@@ -337,17 +353,17 @@ class LinkedInOrganizationClient:
             else:
                 commentary = f"🔔 Reminder: {event.name} is happening soon!\n\n"
 
+        footer = ""
         if event.location_name:
-            commentary += f"\n\n📍 Location: {event.location_name}."
-        commentary += f"\n\n📅 Date: {event_start_datetime.date()}."
-        commentary += f"\n⏰ Time: {event_start_datetime.strftime('%I:%M %p')}."
+            footer += f"\n\n📍 Location: {event.location_name}."
+        footer += f"\n\n📅 Date: {event_start_datetime.date()}."
+        footer += f"\n⏰ Time: {event_start_datetime.strftime('%I:%M %p')}."
         if event.url:
-            commentary += f"\n\n👉 RSVP here: {event.url}"
+            footer += f"\n\n👉 RSVP here: {event.url}"
         discovery = promotion_link(event, "linkedin")
         if discovery != event.url:
-            footer = f"\n\nExplore on SpokaneTech: {discovery}\nRSVP: {event.url}"
-            commentary = commentary[: max(0, 3000 - len(footer))] + footer
-        return commentary
+            footer += f"\n\nExplore on SpokaneTech: {discovery}"
+        return add_event_hashtags(event, commentary, footer=footer)
 
     def post_event(
         self,
