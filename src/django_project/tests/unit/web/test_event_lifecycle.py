@@ -321,6 +321,7 @@ class EventChangeNotificationTests(TestCase):
     @override_settings(LINKEDIN_ACCESS_TOKEN="test", LINKEDIN_ORGANIZATION_URN="urn:li:organization:123")
     @patch("web.tasks.LinkedInOrganizationClient")
     def test_linkedin_cancelled_reminder_skipped_and_change_has_no_ai_prompt(self, client):
+        self.event.tags.add(baker.make("web.Tag", value="Python"))
         self.event.status = Event.Status.CANCELLED
         self.event.save()
         self.assertIn("cancelled", post_event_to_linkedin(self.event.pk, is_new=False))
@@ -328,7 +329,9 @@ class EventChangeNotificationTests(TestCase):
         post_event_to_linkedin(
             self.event.pk, is_new=False, change_message="Event cancelled", change_version=self.event.change_version
         )
-        client.return_value.post_organization_post.assert_called_once_with(commentary="Event cancelled")
+        client.return_value.post_organization_post.assert_called_once_with(
+            commentary="Event cancelled\n\n#spokanetech #Python"
+        )
         client.return_value.post_event.assert_not_called()
 
 
