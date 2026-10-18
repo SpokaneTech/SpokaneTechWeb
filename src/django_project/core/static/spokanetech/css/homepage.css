@@ -76,12 +76,16 @@
 .st-section { padding-block: 40px; }
 .st-events { background: #f8fafc; scroll-margin-top: 24px; }
 .st-section-heading { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 24px; }
-.st-section-heading h2 { font-size: clamp(1.6rem, 2.3vw, 2rem); margin: 0; }
+.st-section-heading h2, .st-newcomers h2 { font-size: clamp(1.6rem, 2.3vw, 2rem); margin: 0; }
 .st-section-heading .st-eyebrow { margin-bottom: 6px; }
 .st-text-link { color: var(--st-blue); font-size: .9rem; font-weight: 550; }
 .st-text-link:hover { color: var(--st-blue-hover); }
 .st-section-heading > .st-text-link { flex-shrink: 0; padding-block: 6px; }
 .st-section-description { margin: 8px 0 0; color: var(--st-muted); }
+.st-newcomers { background: var(--st-blue-tint); }
+.st-newcomers .st-container { display: grid; gap: 12px; }
+.st-newcomers .st-section-description { margin: 0; }
+.st-newcomers .st-actions { column-gap: 24px; }
 .st-events-all-link { display: inline-block; margin-top: 8px; }
 .st-event-card, .st-group-card { position: relative; min-width: 0; border: 1px solid var(--st-border); border-radius: var(--st-radius); background: white; box-shadow: 0 3px 8px rgb(15 23 42 / 3%); overflow-wrap: anywhere; transition: background-color .15s, border-color .15s, box-shadow .15s; }
 .st-card-link { color: inherit; }
