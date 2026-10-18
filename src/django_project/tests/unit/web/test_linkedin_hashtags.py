@@ -1,7 +1,7 @@
 """Event tag hashtags across LinkedIn announcements, reminders and long posts."""
 
 import os
-from datetime import timedelta
+from datetime import UTC, datetime, timedelta
 from unittest.mock import patch
 
 import django
@@ -68,6 +68,8 @@ class LinkedInEventHashtagTests(TestCase):
 
     @patch("web.utilities.notifiers.linkedin.generate_post_content", return_value="A long announcement. " * 300)
     def test_truncation_preserves_event_links_details_and_all_hashtags(self, ai):
+        self.event.start_datetime = datetime(2026, 10, 21, 0, 30, tzinfo=UTC)
+        self.event.end_datetime = datetime(2026, 10, 21, 2, 30, tzinfo=UTC)
         self.event.tags.add(baker.make(Tag, value="Python"))
         for promote in (False, True):
             with self.subTest(promotion=promote), self.settings(PROMOTE_SITE_LINKS=promote):
@@ -75,9 +77,39 @@ class LinkedInEventHashtagTests(TestCase):
                 self.assertLessEqual(len(commentary), 3000)
                 self.assertIn(self.event.url, commentary)
                 self.assertIn("📅 Date:", commentary)
+                self.assertIn("05:30 PM PDT – 07:30 PM PDT", commentary)
                 self.assertTrue(commentary.endswith("#spokanetech #Python"))
                 if promote:
                     self.assertIn("utm_source=linkedin", commentary)
+
+    @patch("web.utilities.notifiers.linkedin.generate_post_content", return_value="Join us.")
+    def test_scheduled_times_include_optional_end_date_and_pacific_offsets(self, ai):
+        cases = [
+            (
+                datetime(2026, 10, 21, 0, 30, tzinfo=UTC),
+                datetime(2026, 10, 21, 2, 30, tzinfo=UTC),
+                "05:30 PM PDT – 07:30 PM PDT",
+            ),
+            (
+                datetime(2026, 10, 21, 6, 30, tzinfo=UTC),
+                datetime(2026, 10, 21, 8, 30, tzinfo=UTC),
+                "11:30 PM PDT – 2026-10-21 01:30 AM PDT",
+            ),
+            (
+                datetime(2026, 11, 1, 8, 30, tzinfo=UTC),
+                datetime(2026, 11, 1, 9, 30, tzinfo=UTC),
+                "01:30 AM PDT – 01:30 AM PST",
+            ),
+            (datetime(2026, 10, 21, 0, 30, tzinfo=UTC), None, "05:30 PM PDT"),
+        ]
+        for start, end, expected in cases:
+            for is_new in (True, False):
+                with self.subTest(start=start, end=end, is_new=is_new):
+                    self.event.start_datetime = start
+                    self.event.end_datetime = end
+                    commentary = self.client.build_event_commentary(self.event, is_new=is_new)
+                    time_line = next(line for line in commentary.splitlines() if line.startswith("⏰ Time:"))
+                    self.assertEqual(time_line, f"⏰ Time: {expected}.")
 
     def test_excessive_tags_fail_explicitly_instead_of_silently_dropping_tags(self):
         tags = Tag.objects.bulk_create([Tag(value=f"Topic{index:02d}" + "a" * 57) for index in range(50)])

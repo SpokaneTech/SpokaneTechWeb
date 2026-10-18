@@ -357,7 +357,14 @@ class LinkedInOrganizationClient:
         if event.location_name:
             footer += f"\n\n📍 Location: {event.location_name}."
         footer += f"\n\n📅 Date: {event_start_datetime.date()}."
-        footer += f"\n⏰ Time: {event_start_datetime.strftime('%I:%M %p')}."
+        time_range = event_start_datetime.strftime("%I:%M %p %Z")
+        if event.end_datetime:
+            event_end_datetime = convert_to_pacific(event.end_datetime)
+            end_format = "%I:%M %p %Z"
+            if event_end_datetime.date() != event_start_datetime.date():
+                end_format = "%Y-%m-%d " + end_format
+            time_range += f" – {event_end_datetime.strftime(end_format)}"
+        footer += f"\n⏰ Time: {time_range}."
         if event.url:
             footer += f"\n\n👉 RSVP here: {event.url}"
         discovery = promotion_link(event, "linkedin")
