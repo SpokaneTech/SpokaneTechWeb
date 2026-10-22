@@ -347,7 +347,7 @@ class LinkedInOrganizationClient:
                     ),
                 )
             commentary: str = generate_post_content(prompt)
-        except (ValueError, requests.HTTPError):
+        except (ValueError, requests.RequestException):
             if is_new:
                 commentary = f"🚀 New Event Alert! Join us for: {event.name}\n\n"
             else:

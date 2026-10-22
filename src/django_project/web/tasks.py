@@ -360,6 +360,7 @@ def post_event_to_discord(
 
     # Ensure Discord webhook URL is set
     if not settings.DISCORD_WEBHOOK_URL:
+        logger.warning("Discord posting enabled but DISCORD_WEBHOOK_URL is missing; event %s was not posted.", event_pk)
         return "Discord webhook URL not configured in settings. Skipping post."
 
     discord_notifier = DiscordNotifier(webhook_url=settings.DISCORD_WEBHOOK_URL)
