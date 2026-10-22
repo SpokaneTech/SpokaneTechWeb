@@ -5,6 +5,7 @@ from datetime import UTC, datetime, timedelta
 from unittest.mock import patch
 
 import django
+import requests
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.settings")
 os.environ.setdefault("ENV_PATH", "../../../envs/.env.test")
@@ -116,3 +117,42 @@ class LinkedInEventHashtagTests(TestCase):
         self.event.tags.add(*tags)
         with self.assertRaisesRegex(ValueError, "hashtags exceed"):
             add_event_hashtags(self.event, "Join us.")
+
+    @patch("web.utilities.notifiers.linkedin.generate_post_content", side_effect=requests.Timeout)
+    def test_ai_network_failure_preserves_hashtags(self, ai):
+        self.event.tags.add(baker.make(Tag, value="Python"))
+        with self.assertLogs("web.utilities.notifiers.linkedin", level="WARNING") as logs:
+            commentary = self.client.build_event_commentary(self.event)
+        self.assertTrue(commentary.endswith("#spokanetech #Python"))
+        self.assertIn(f"event {self.event.pk} (Timeout); using fallback text", logs.output[0])
+
+    @override_settings(POST_TO_LINKEDIN=True, POST_TO_DISCORD=True)
+    def test_ingestion_commits_tags_before_dispatching_both_announcements(self):
+        from web.event_ingestion import save_source_event
+        from web.models import Event
+
+        observed = []
+
+        def queued_commentary(pk, **kwargs):
+            observed.append(add_event_hashtags(Event.objects.get(pk=pk), "Join us."))
+            from unittest.mock import MagicMock
+            return MagicMock()
+
+        with (
+            patch("web.event_ingestion.queue_event_image"),
+            patch("web.signals.post_event_to_linkedin.s", side_effect=queued_commentary) as linkedin,
+            patch("web.signals.post_event_to_discord.s") as discord,
+            self.captureOnCommitCallbacks(execute=True),
+        ):
+            event, created = save_source_event(
+                self.event.group,
+                {"name": "New tagged event", "start_datetime": timezone.now() + timedelta(days=2)},
+                tags=["Python", "Machine Learning"],
+            )
+            linkedin.assert_not_called()
+            discord.assert_not_called()
+        self.assertTrue(created)
+        discord.assert_called_once_with(event.pk, is_new=True)
+        linkedin.assert_called_once_with(event.pk, is_new=True)
+        self.assertIn("#Python", observed[0])
+        self.assertIn("#MachineLearning", observed[0])

@@ -347,7 +347,12 @@ class LinkedInOrganizationClient:
                     ),
                 )
             commentary: str = generate_post_content(prompt)
-        except (ValueError, requests.HTTPError):
+        except (ValueError, requests.RequestException) as exc:
+            logger.warning(
+                "LinkedIn AI content generation failed for event %s (%s); using fallback text.",
+                event.pk,
+                type(exc).__name__,
+            )
             if is_new:
                 commentary = f"🚀 New Event Alert! Join us for: {event.name}\n\n"
             else:

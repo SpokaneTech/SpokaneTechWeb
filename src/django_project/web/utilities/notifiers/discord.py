@@ -36,6 +36,8 @@ class DiscordNotifier:
             requests.HTTPError: If the HTTP request returned an unsuccessful status code.
         """
 
+        # Event and generated text must never trigger Discord notifications.
+        payload = {**payload, "allowed_mentions": {"parse": []}}
         headers: dict[str, str] = {"Content-Type": "application/json"}
         response: requests.Response = requests.post(
             url or self.webhook_url, data=json.dumps(payload), headers=headers, timeout=15
@@ -64,7 +66,7 @@ class DiscordNotifier:
                 group_name=event.group.name,
             )
             content: str = generate_post_content(prompt)
-        except (ValueError, requests.HTTPError):
+        except (ValueError, requests.RequestException):
             content = f"📢 A new event from {event.group.name} has just been created!"
             if event.url:
                 content += f"\n\n👉 RSVP here: {event.url}"
@@ -77,7 +79,7 @@ class DiscordNotifier:
 
         fields: list[dict[str, Any]] = []
         if event.location_name:
-            fields.append({"name": "📍 Location", "value": event.location_name, "inline": False})
+            fields.append({"name": "📍 Location", "value": event.location_name[:1024], "inline": False})
         fields.extend(
             [
                 {"name": "📅 Date", "value": str(event_start_datetime.date()), "inline": True},
@@ -96,13 +98,13 @@ class DiscordNotifier:
             content = content[: max(0, 2000 - len(footer))] + footer
 
         data: dict[str, Any] = {
-            "content": content,
+            "content": content[:2000],
             "embeds": [
                 {
-                    "title": event.name,
+                    "title": event.name[:256],
                     **({"url": discovery} if discovery else {}),
                     "fields": fields,
-                    "footer": {"text": f"Hosted by {event.group.name}"},
+                    "footer": {"text": f"Hosted by {event.group.name}"[:2048]},
                 }
             ],
         }
@@ -124,7 +126,7 @@ class DiscordNotifier:
         try:
             prompt: str = create_event_reminder_prompt(event_description=convert_html_to_text(event.description))
             content: str = generate_post_content(prompt)
-        except (ValueError, requests.HTTPError):
+        except (ValueError, requests.RequestException):
             content = f"🔔 Reminder: {event.name} is happening soon!"
             if event.url:
                 content += f"\n\n👉 RSVP here: {event.url}"
@@ -137,7 +139,7 @@ class DiscordNotifier:
 
         fields: list[dict[str, Any]] = []
         if event.location_name:
-            fields.append({"name": "📍 Location", "value": event.location_name, "inline": False})
+            fields.append({"name": "📍 Location", "value": event.location_name[:1024], "inline": False})
         fields.extend(
             [
                 {"name": "📅 Date", "value": str(event_start_datetime.date()), "inline": True},
@@ -156,13 +158,13 @@ class DiscordNotifier:
             content = content[: max(0, 2000 - len(footer))] + footer
 
         data: dict[str, Any] = {
-            "content": content,
+            "content": content[:2000],
             "embeds": [
                 {
-                    "title": event.name,
+                    "title": event.name[:256],
                     **({"url": discovery} if discovery else {}),
                     "fields": fields,
-                    "footer": {"text": f"Hosted by {event.group.name}"},
+                    "footer": {"text": f"Hosted by {event.group.name}"[:2048]},
                 }
             ],
         }
@@ -187,7 +189,7 @@ class DiscordNotifier:
         try:
             prompt: str = create_weekly_events_list_prompt(event_count=event_list.count())
             content: str = generate_post_content(prompt)
-        except (ValueError, requests.HTTPError):
+        except (ValueError, requests.RequestException):
             content = f"📢 Hello Spokane Tech Community! We have {event_list.count()} great events happening this week!\n👉 Check them out!"
 
         embeded_event_list: list[dict[str, Any]] = []
@@ -211,7 +213,7 @@ class DiscordNotifier:
         content = content[: max(0, 2000 - len(footer))] + footer
 
         data: dict[str, Any] = {
-            "content": content,
+            "content": content[:2000],
             "embeds": [{"fields": embeded_event_list}],
         }
         return data
