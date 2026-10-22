@@ -17,6 +17,7 @@ dependencies = [
     "playwright",
     "whitenoise",
     # Security floors for transitive runtime dependencies; see docs/maintenance/DEPENDENCY_SECURITY.md.
+    "certifi>=2026.10.19",
     "cryptography>=50.0.0",
     "djangorestframework>=3.17.2",
     "idna>=3.15",
@@ -146,6 +147,7 @@ ignore_unused = [
     "types-requests",
     "whitenoise",
     # Explicit security floors for packages imported by dependencies.
+    "certifi",
     "cryptography",
     "djangorestframework",
     "idna",

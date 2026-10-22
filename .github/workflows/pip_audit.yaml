@@ -11,8 +11,6 @@ jobs:
   pip-audit:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    env:
-      AUDIT_VENV: ${{ runner.temp }}/pip-audit-venv
     steps:
       - uses: actions/checkout@v4
         with:
@@ -22,6 +20,8 @@ jobs:
           python-version: "3.13"
       - name: Install project dependencies in an isolated environment
         run: |
+          AUDIT_VENV="$RUNNER_TEMP/pip-audit-venv"
+          echo "AUDIT_VENV=$AUDIT_VENV" >> "$GITHUB_ENV"
           python -m venv "$AUDIT_VENV"
           "$AUDIT_VENV/bin/python" -m pip install --upgrade pip
           "$AUDIT_VENV/bin/python" -m pip install '.[dev,docker]'

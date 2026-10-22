@@ -94,3 +94,14 @@ Already-running Django/Celery processes need restarting to load updated modules.
 Production receives these requirements on its next image build; this work does
 not deploy or restart production. Docker image builds, live PostgreSQL/Redis
 connections, and real provider scraping were not exercised.
+
+## Certifi follow-up (2026-10-22)
+
+The supplied pip-audit report identified certifi 2026.1.4 as affected by
+PYSEC-2026-4320. Require `certifi>=2026.10.19` explicitly for Requests' CA
+bundle, with the corresponding FawltyDeps exclusion. This supersedes the
+October 17 audit result for certifi; no advisory is suppressed.
+
+Upgrade existing environments with `python -m pip install 'certifi>=2026.10.19'`
+and rerun `python -m pip_audit`. Rebuild production images and restart processes
+to load the updated certificate bundle.
