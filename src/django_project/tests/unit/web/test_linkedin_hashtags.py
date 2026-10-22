@@ -121,7 +121,10 @@ class LinkedInEventHashtagTests(TestCase):
     @patch("web.utilities.notifiers.linkedin.generate_post_content", side_effect=requests.Timeout)
     def test_ai_network_failure_preserves_hashtags(self, ai):
         self.event.tags.add(baker.make(Tag, value="Python"))
-        self.assertTrue(self.client.build_event_commentary(self.event).endswith("#spokanetech #Python"))
+        with self.assertLogs("web.utilities.notifiers.linkedin", level="WARNING") as logs:
+            commentary = self.client.build_event_commentary(self.event)
+        self.assertTrue(commentary.endswith("#spokanetech #Python"))
+        self.assertIn(f"event {self.event.pk} (Timeout); using fallback text", logs.output[0])
 
     @override_settings(POST_TO_LINKEDIN=True, POST_TO_DISCORD=True)
     def test_ingestion_commits_tags_before_dispatching_both_announcements(self):

@@ -36,6 +36,8 @@ class DiscordNotifier:
             requests.HTTPError: If the HTTP request returned an unsuccessful status code.
         """
 
+        # Event and generated text must never trigger Discord notifications.
+        payload = {**payload, "allowed_mentions": {"parse": []}}
         headers: dict[str, str] = {"Content-Type": "application/json"}
         response: requests.Response = requests.post(
             url or self.webhook_url, data=json.dumps(payload), headers=headers, timeout=15

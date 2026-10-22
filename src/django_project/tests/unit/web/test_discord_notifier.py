@@ -47,3 +47,19 @@ class DiscordPayloadTests(TestCase):
     def test_ai_network_failure_uses_fallback(self, ai):
         for builder in (self.notifier.build_event_created_message, self.notifier.build_event_reminder_message):
             self.assertIn(self.event.url, builder(self.event)["content"])
+
+    @patch("web.utilities.notifiers.discord.requests.post")
+    def test_send_disables_all_mentions_for_general_and_group_webhooks(self, post):
+        content = "@everyone @here <@123> <@&456>"
+        for url in (None, "https://example.com/group-webhook"):
+            for mentions in (None, {"parse": ["everyone", "roles", "users"], "users": ["123"]}):
+                with self.subTest(url=url, mentions=mentions):
+                    payload = {"content": content}
+                    if mentions is not None:
+                        payload["allowed_mentions"] = mentions
+                    self.notifier.send_message(payload, url=url)
+                    sent = json.loads(post.call_args.kwargs["data"])
+                    self.assertEqual(sent["allowed_mentions"], {"parse": []})
+                    self.assertEqual(sent["content"], content)
+                    self.assertEqual(post.call_args.args[0], url or self.notifier.webhook_url)
+                    self.assertEqual(payload.get("allowed_mentions"), mentions)
