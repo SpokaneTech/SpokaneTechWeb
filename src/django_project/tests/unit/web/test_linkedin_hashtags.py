@@ -15,7 +15,7 @@ from django.test import TestCase, override_settings
 from django.utils import timezone
 from model_bakery import baker
 from web.models import Tag
-from web.utilities.notifiers.linkedin import LinkedInOrganizationClient, add_event_hashtags
+from web.utilities.notifiers.linkedin import LinkedInOrganizationClient, add_event_hashtags, escape_linkedin_commentary
 
 
 @override_settings(POST_TO_LINKEDIN=False, POST_TO_DISCORD=False, PROMOTE_SITE_LINKS=False)
@@ -51,6 +51,17 @@ class LinkedInEventHashtagTests(TestCase):
 
     def test_untagged_events_still_include_spokanetech(self):
         self.assertEqual(add_event_hashtags(self.event, "Join us."), "Join us.\n\n#spokanetech")
+
+    def test_escaped_budget_preserves_footer_and_hashtags(self):
+        self.event.tags.add(baker.make(Tag, value="Python"))
+        footer = "\n\nLocation: Library (South Hill)\nhttps://example.com/event"
+        result = add_event_hashtags(self.event, "(SPUG) *project* " * 300, footer=footer)
+        self.assertLessEqual(len(escape_linkedin_commentary(result)), 3000)
+        self.assertTrue(result.endswith(footer + "\n\n#spokanetech #Python"))
+
+    def test_footer_that_only_exceeds_limit_after_escaping_is_rejected(self):
+        with self.assertRaisesRegex(ValueError, "hashtags exceed"):
+            add_event_hashtags(self.event, "Join us.", footer="(" * 1500)
 
     @patch("web.utilities.notifiers.linkedin.generate_post_content")
     def test_announcements_reminders_and_ai_fallbacks_include_hashtags(self, ai):

@@ -1,3 +1,4 @@
+import json
 import os
 import tempfile
 import unittest
@@ -11,7 +12,7 @@ BASE_DIR = Path(__file__).parents[4]
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.settings")
 os.environ.setdefault("ENV_PATH", f"{BASE_DIR}/envs/.env.test")
 
-from web.utilities.notifiers.linkedin import LinkedInOrganizationClient
+from web.utilities.notifiers.linkedin import LinkedInOrganizationClient, escape_linkedin_commentary
 
 
 class DummyCredentialManager:
@@ -38,6 +39,35 @@ class DummyCredential:
 
 
 class LinkedInOrganizationClientTests(unittest.TestCase):
+    def test_oversized_encoded_commentary_is_rejected_before_network_calls(self):
+        client = self.build_client()
+        with patch("web.utilities.notifiers.linkedin.requests.post") as post:
+            with self.assertRaisesRegex(ValueError, "after escaping"):
+                client.post_organization_post("(" * 1501)
+        post.assert_not_called()
+
+    def test_commentary_escapes_reserved_characters_and_preserves_hashtags(self):
+        self.assertEqual(
+            escape_linkedin_commentary("\\ | { } @ [ ] ( ) < > * _ ~ # #Python #Café"),
+            r"\\ \| \{ \} \@ \[ \] \( \) \< \> \* \_ \~ \# #Python #Café",
+        )
+
+    def test_spug_reminder_is_escaped_in_published_payload(self):
+        commentary = (
+            "Hey Spokane tech enthusiasts!\n\n"
+            "Tomorrow is our Spokane Python Users Group (SPUG) meetup!\n\n"
+            "Bring a project, a problem, or your curiosity.\n\n"
+            "👉 RSVP here: https://www.meetup.com/python-spokane/events/316660284/\n\n"
+            "#spokanetech #Python"
+        )
+        client = self.build_client()
+        with patch("web.utilities.notifiers.linkedin.requests.post") as post:
+            client.post_organization_post(commentary, article_url="https://example.com/event")
+        payload = json.loads(post.call_args.kwargs["data"])
+        self.assertEqual(payload["commentary"], commentary.replace("(SPUG)", r"\(SPUG\)"))
+        self.assertTrue(payload["commentary"].endswith("#spokanetech #Python"))
+        self.assertEqual(payload["content"]["article"]["source"], "https://example.com/event")
+
     def build_client(self, env_path: str | None = None, access_token: str | None = "old-token") -> LinkedInOrganizationClient:
         return LinkedInOrganizationClient(
             access_token=access_token,
