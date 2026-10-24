@@ -48,9 +48,18 @@ def add_event_hashtags(event: Event, commentary: str, *, footer: str = "") -> st
             hashtags.append(f"#{name}")
             seen.add(name.casefold())
     suffix = footer + "\n\n" + " ".join(hashtags)
-    if len(suffix) > 3000:
+    budget = 3000 - len(escape_linkedin_commentary(suffix))
+    if budget < 0:
         raise ValueError("Event links and hashtags exceed the 3000-character LinkedIn post limit.")
-    return commentary[: 3000 - len(suffix)].rstrip() + suffix
+    # Budget the encoded text, but slice the original so escape pairs stay intact.
+    low, high = 0, min(len(commentary), budget)
+    while low < high:
+        middle = (low + high + 1) // 2
+        if len(escape_linkedin_commentary(commentary[:middle])) <= budget:
+            low = middle
+        else:
+            high = middle - 1
+    return commentary[:low].rstrip() + suffix
 
 
 class LinkedInOrganizationClient:
@@ -275,10 +284,13 @@ class LinkedInOrganizationClient:
         article_title: str | None = None,
         article_description: str | None = None,
     ) -> requests.Response:
+        encoded_commentary = escape_linkedin_commentary(commentary)
+        if len(encoded_commentary) > 3000:
+            raise ValueError("LinkedIn commentary exceeds the 3000-character limit after escaping.")
         self.ensure_access_token()
         payload: dict[str, Any] = {
             "author": self.organization_urn,
-            "commentary": escape_linkedin_commentary(commentary),
+            "commentary": encoded_commentary,
             "visibility": "PUBLIC",
             "distribution": {"feedDistribution": "MAIN_FEED", "targetEntities": []},
             "lifecycleState": "PUBLISHED",

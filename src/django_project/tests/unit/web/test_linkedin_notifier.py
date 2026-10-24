@@ -39,6 +39,13 @@ class DummyCredential:
 
 
 class LinkedInOrganizationClientTests(unittest.TestCase):
+    def test_oversized_encoded_commentary_is_rejected_before_network_calls(self):
+        client = self.build_client()
+        with patch("web.utilities.notifiers.linkedin.requests.post") as post:
+            with self.assertRaisesRegex(ValueError, "after escaping"):
+                client.post_organization_post("(" * 1501)
+        post.assert_not_called()
+
     def test_commentary_escapes_reserved_characters_and_preserves_hashtags(self):
         self.assertEqual(
             escape_linkedin_commentary("\\ | { } @ [ ] ( ) < > * _ ~ # #Python #Café"),
