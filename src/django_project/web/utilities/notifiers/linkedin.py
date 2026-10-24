@@ -28,6 +28,16 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+def escape_linkedin_commentary(commentary: str) -> str:
+    """Encode plain text for LinkedIn's little format, retaining hashtag elements.
+
+    JSON escaping alone does not escape little's reserved punctuation. In
+    particular, an unescaped parenthesis can cause LinkedIn to drop the rest
+    of an otherwise successfully published post.
+    """
+    return re.sub(r"[\\|{}@\[\]()<>*_~]|#(?!\w)", lambda match: "\\" + match.group(), commentary)
+
+
 def add_event_hashtags(event: Event, commentary: str, *, footer: str = "") -> str:
     """Keep event links and normalized, distinct hashtags within the post budget."""
     hashtags = ["#spokanetech"]
@@ -268,7 +278,7 @@ class LinkedInOrganizationClient:
         self.ensure_access_token()
         payload: dict[str, Any] = {
             "author": self.organization_urn,
-            "commentary": commentary,
+            "commentary": escape_linkedin_commentary(commentary),
             "visibility": "PUBLIC",
             "distribution": {"feedDistribution": "MAIN_FEED", "targetEntities": []},
             "lifecycleState": "PUBLISHED",
