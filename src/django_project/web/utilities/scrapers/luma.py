@@ -42,8 +42,10 @@ def validate_calendar_url(url: str) -> None:
 def fetch_luma_calendar(url: str) -> bytes:
     """Fetch a bounded public feed with a finite timeout."""
     validate_calendar_url(url)
-    response = requests.get(url, headers={"Accept": "text/calendar"}, timeout=20, stream=True)
+    response = requests.get(url, headers={"Accept": "text/calendar"}, timeout=20, stream=True, allow_redirects=False)
     try:
+        if response.status_code in range(300, 400):
+            raise ValueError("Unexpected Luma calendar redirect")
         response.raise_for_status()
         result = bytearray()
         for chunk in response.iter_content(chunk_size=65536):
@@ -114,7 +116,7 @@ def parse_luma_calendar(content: bytes) -> list[dict[str, Any]]:
             continue
         location = str(component.get("LOCATION", "")).strip()
         venue = location.split(",", maxsplit=1)[0].strip()
-        complete = is_coeur_dalene_location(location)
+        complete = bool(location and re.search(r"\b\d{1,6}\s+\S+", location) and "," in location)
         events.append(
             {
                 "social_platform_id": uid,
@@ -126,10 +128,7 @@ def parse_luma_calendar(content: bytes) -> list[dict[str, Any]]:
                 "location_address": location,
                 "location_complete": complete,
                 # An independent, brief summary; never reproduce Luma page descriptions.
-                "description": (
-                    "In-person community event in Coeur d'Alene, Idaho. "
-                    "See Luma for details and registration."
-                ) if complete else "See Luma for event details and registration.",
+                "description": "See Luma for event details and registration.",
             }
         )
     return events
