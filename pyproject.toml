@@ -106,6 +106,7 @@ ignore_missing_imports = true
 [tool.pytest.ini_options]
 addopts = "-s -v -x --strict-markers -m 'not extra'"
 testpaths = ["src/django_project"]
+markers = ["extra: optional extended test suite"]
 filterwarnings = [
     "ignore::DeprecationWarning",
     "ignore::UserWarning",
