@@ -30,6 +30,7 @@ def ics_event(uid="evt-approved@events.lu.ma", url="https://luma.com/build-3wx2"
     location = location or "Innovation Den, 418 E Lakeside Ave, Coeur d'Alene, ID 83814"
     start = start or (timezone.now() + timedelta(days=20))
     end = start + timedelta(minutes=75)
+    escaped_location = location.replace(",", r"\,")
     return (
         "BEGIN:VEVENT\r\n"
         f"UID:{uid}\r\n"
@@ -37,7 +38,7 @@ def ics_event(uid="evt-approved@events.lu.ma", url="https://luma.com/build-3wx2"
         f"DTSTART:{start.strftime('%Y%m%dT%H%M%SZ')}\r\n"
         f"DTEND:{end.strftime('%Y%m%dT%H%M%SZ')}\r\n"
         f"DESCRIPTION:Get details at: {url}\\nHosted by Nick Smoot\r\n"
-        f"LOCATION:{location.replace(',', r'\,')}\r\n"
+        f"LOCATION:{escaped_location}\r\n"
         "STATUS:TENTATIVE\r\n"
         "SEQUENCE:215499820\r\n"
         "END:VEVENT\r\n"
