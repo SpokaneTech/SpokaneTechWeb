@@ -187,11 +187,49 @@ def create_social_platforms() -> None:
             "base_url": "www.meetup.com",
         },
         {
+            "name": "Luma",
+            "base_url": "https://luma.com",
+        },
+        {
             "name": "Other",
         },
     ]
     for data in data_list:
         SocialPlatform.objects.update_or_create(name=data["name"], defaults=data)
+
+
+
+def create_luma_group() -> None:
+    """Seed only the four independently verified Idaho AI Agents occurrences.
+
+    The build_cda Luma calendar includes unrelated events. Future event URLs
+    must be positively approved before they can be attributed to this group.
+    """
+    platform = SocialPlatform.objects.get(name="Luma")
+    group, _ = TechGroup.objects.get_or_create(
+        name="Idaho AI Agents",
+        defaults={
+            "platform": platform,
+            "description": (
+                "A North Idaho community exploring AI agents through discussion "
+                "and hands-on building."
+            ),
+        },
+    )
+    sources = [
+        ("page", "https://luma.com/build_CDA"),
+        ("feed", "https://api.luma.com/ics/get?entity=calendar&id=cal-yFU7dz3kUHXxUDR"),
+        ("approved event", "https://luma.com/build-3wx2"),
+        ("approved event", "https://luma.com/build-gbf9"),
+        ("approved event", "https://luma.com/build-rnaq"),
+        ("approved event", "https://luma.com/build-vdqc"),
+    ]
+    for kind, url in sources:
+        link, _ = Link.objects.get_or_create(
+            name=f"{group.name} Luma {kind}",
+            url=url,
+        )
+        group.links.add(link)
 
 
 def get_eventbrite_organization_details():
@@ -210,5 +248,6 @@ def get_meetup_group_details():
 def run():
     create_social_platforms()
     create_groups()
+    create_luma_group()
     get_eventbrite_organization_details()
     get_meetup_group_details()
