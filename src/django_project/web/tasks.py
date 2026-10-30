@@ -280,7 +280,6 @@ def launch_group_detail_ingestion() -> str:
     return f"ingesting details for {TechGroup.objects.filter(enabled=True).count()} tech groups"
 
 
-
 @shared_task(time_limit=180, max_retries=2, name="web.ingest_future_luma_events")
 def ingest_future_luma_events(group_pk: int) -> str:
     """Ingest only explicitly approved Luma events from a public calendar.
