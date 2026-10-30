@@ -24,35 +24,35 @@ response. Only those URLs are eligible for the initial import:
 
 **Never import every event from build_cda into Idaho AI Agents.** For future
 events, verify group association first and add each public event permalink as
-a new \`Link\` with name \`Idaho AI Agents Luma approved event\`. The
-\`Idaho AI Agents Luma feed\` Link holds the calendar subscription. This
+a new `Link` with name `Idaho AI Agents Luma approved event`. The
+`Idaho AI Agents Luma feed` Link holds the calendar subscription. This
 allowlist is intentionally conservative, not automatic future discovery.
 Additional groups can use the same link naming conventions and parser.
 
 ## Data handling
 
-- Parse \`VCALENDAR\` / \`VEVENT\` using the maintained \`icalendar\` library.
-- Use stable \`UID\` as \`Event.social_platform_id\` and group-scoped
-  \`save_source_event()\`, not a date-bearing BuildCities URL slug.
+- Parse `VCALENDAR` / `VEVENT` using the maintained `icalendar` library.
+- Use stable `UID` as `Event.social_platform_id` and group-scoped
+  `save_source_event()`, not a date-bearing BuildCities URL slug.
 - Copy only factual fields: title, start/end, city/venue, public RSVP URL.
   The description is an original short pointer back to Luma, **not** an
   excerpt of the hosted event description. Do not download event images.
 - Check every imported event has a verified public RSVP URL, a physical
   street address explicitly in Coeur d'Alene, Idaho, and a previously
-  authorized link in the matching \`TechGroup\` allowlist.
-- In this snapshot all 254 records have \`STATUS:TENTATIVE\` and the same
-  \`SEQUENCE\`. **Do not infer cancellation, reinstatement or changed
+  authorized link in the matching `TechGroup` allowlist.
+- In this snapshot all 254 records have `STATUS:TENTATIVE` and the same
+  `SEQUENCE`. **Do not infer cancellation, reinstatement or changed
   status from them, or from missing records**. Follow ADR 0002.
-- The iCal file lacks a BuildCities network ID. A host named \`Nick Smoot\`
+- The iCal file lacks a BuildCities network ID. A host named `Nick Smoot`
   is not proof of Idaho AI Agents network membership.
 - Suppress outbound creation/change notifications for this pilot, including
   on transactions that commit. Existing other providers are unaffected.
 
 ## Setup and validation
 
-1. Run existing \`initialize_data\` via the project's standard
-   \`django-extensions runscript\` mechanism. It idempotently seeds the
-   \`Luma\` platform and initial group/links. No Django migration is needed.
+1. Run existing `initialize_data` via the project's standard
+   `django-extensions runscript` mechanism. It idempotently seeds the
+   `Luma` platform and initial group/links. No Django migration is needed.
 2. In a review/test environment, make sure outbound LinkedIn/Discord
    publishing is disabled independently of the importer.
 3. Once the deployment host can retrieve the public feed with a normal HTTPS
