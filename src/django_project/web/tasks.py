@@ -17,6 +17,7 @@ from django.db.models.manager import BaseManager
 from django.utils import timezone
 
 from web.event_ingestion import save_source_event
+from web.event_notifications import suppress_event_notifications
 from web.models import Event, IntegrationCredential, Link, TechGroup
 from web.utilities.dt_utils import convert_to_pacific
 from web.utilities.event_images import eventbrite_image_url
@@ -29,6 +30,12 @@ from web.utilities.scrapers.eventbrite import (
     get_event_record,
     get_events_for_organization,
     get_organization_details,
+)
+from web.utilities.scrapers.luma import (
+    fetch_luma_calendar,
+    is_coeur_dalene_location,
+    normalize_event_url,
+    parse_luma_calendar,
 )
 from web.utilities.scrapers.meetup import (
     get_event_information,
@@ -271,6 +278,45 @@ def launch_group_detail_ingestion() -> str:
                 job = ingest_eventbrite_organization_details.s(group.pk)
                 job.apply_async()
     return f"ingesting details for {TechGroup.objects.filter(enabled=True).count()} tech groups"
+
+
+@shared_task(time_limit=180, max_retries=2, name="web.ingest_future_luma_events")
+def ingest_future_luma_events(group_pk: int) -> str:
+    """Ingest only explicitly approved Luma events from a public calendar.
+
+    A Luma calendar is broader than a BuildCities network: membership in the
+    calendar never implies membership in a SpokaneTech TechGroup.
+    """
+    group = TechGroup.objects.select_related("platform").get(pk=group_pk)
+    if not group.enabled or group.platform.name != "Luma":
+        return f"Luma ingestion not enabled for group {group.pk}"
+    feed_links = group.links.filter(name=f"{group.name} Luma feed")
+    if feed_links.count() != 1:
+        return f"expected exactly one Luma feed for {group.name}"
+    allowed_links = group.links.filter(name=f"{group.name} Luma approved event")
+    allowed = {url for link in allowed_links if (url := normalize_event_url(link.url))}
+    if not allowed:
+        return f"no approved Luma event links for {group.name}"
+
+    # Fail closed: no partial write when retrieval or calendar parsing fails.
+    snapshots = parse_luma_calendar(fetch_luma_calendar(feed_links.first().url))
+    created = 0
+    matched = 0
+    now = timezone.now()
+    for snapshot in snapshots:
+        if snapshot["url"] not in allowed or snapshot["start_datetime"] < now:
+            continue
+        if not snapshot["location_complete"] or not is_coeur_dalene_location(snapshot["location_address"]):
+            logger.warning("Skipping Luma event with unverified Coeur d'Alene venue: %s", snapshot["url"])
+            continue
+        matched += 1
+        payload = {k: v for k, v in snapshot.items() if k != "location_complete"}
+        # New events normally trigger outbound jobs even when posting is off.
+        # Do not queue those jobs during controlled Luma imports.
+        with suppress_event_notifications():
+            _, is_new = save_source_event(group, payload, location_complete=True)
+        created += int(is_new)
+    return f"matched {matched} approved future Luma events for {group.name}; added {created} new events"
 
 
 @shared_task(time_limit=900, max_retries=0, name="web.launch_meetup_event_ingestion")
