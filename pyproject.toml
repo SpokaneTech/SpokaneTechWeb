@@ -9,6 +9,7 @@ dependencies = [
     "django-extensions",
     "django-fernet-encrypted-fields",
     "django-filter==25.1",
+    "icalendar>=6.3,<8",
     "django-handyhelpers",
     "flower",
     "Pillow>=12.3.0",
