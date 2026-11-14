@@ -293,14 +293,24 @@ def ingest_future_luma_events(group_pk: int) -> str:
     matched = 0
     now = timezone.now()
     for snapshot in snapshots:
+        existing_pk = None
         if snapshot["start_datetime"] < now:
-            continue
-        matched += 1
+            existing_pk = (
+                Event.objects.filter(group=group, social_platform_id=snapshot["social_platform_id"])
+                .values_list("pk", flat=True)
+                .first()
+            )
+            if existing_pk is None:
+                continue
+        else:
+            matched += 1
         payload = {k: v for k, v in snapshot.items() if k != "location_complete"}
         # New events normally trigger outbound jobs even when posting is off.
         # Do not queue those jobs during controlled Luma imports.
         with suppress_event_notifications():
-            _, is_new = save_source_event(group, payload, location_complete=snapshot["location_complete"])
+            _, is_new = save_source_event(
+                group, payload, location_complete=snapshot["location_complete"], existing_pk=existing_pk
+            )
         created += int(is_new)
     return f"matched {matched} future Luma events for {group.name}; added {created} new events"
 

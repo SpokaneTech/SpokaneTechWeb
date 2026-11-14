@@ -175,6 +175,8 @@ def create_groups() -> None:
                 name=f"{tech_group.name} {tech_group.platform.name} feed",
                 url=feed_url,
             )
+            stale_feeds = tech_group.links.filter(name=feed.name).exclude(pk=feed.pk)
+            tech_group.links.remove(*stale_feeds)
             tech_group.links.add(feed)
 
 

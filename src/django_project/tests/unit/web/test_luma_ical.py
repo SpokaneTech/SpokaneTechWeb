@@ -100,6 +100,26 @@ class LumaIngestionTests(TestCase):
             "web.Link", name="Idaho AI Agents Luma feed",
             url="https://api.luma.com/ics/get?entity=calendar&id=cal-yFU7dz3kUHXxUDR",
         ))
+    def test_initialization_replaces_stale_feeds_for_only_this_group(self):
+        from web.models import Link
+        from web.scripts.initialize_data import create_groups
+
+        old_feed = self.group.links.get(name="Idaho AI Agents Luma feed")
+        old_feed.url = "https://api.luma.com/ics/get?entity=calendar&id=cal-old"
+        old_feed.save()
+        other_group = baker.make("web.TechGroup", platform=self.group.platform)
+        other_group.links.add(old_feed)
+
+        create_groups()
+        create_groups()
+
+        feeds = self.group.links.filter(name=old_feed.name)
+        self.assertEqual(feeds.count(), 1)
+        self.assertEqual(feeds.get().url,
+                         "https://api.luma.com/ics/get?entity=calendar&id=cal-yFU7dz3kUHXxUDR")
+        self.assertTrue(other_group.links.filter(pk=old_feed.pk).exists())
+        self.assertTrue(Link.objects.filter(pk=old_feed.pk).exists())
+
     def test_imports_all_upcoming_calendar_events_idempotently(self):
         feed = ics_feed(
             ics_event(),
@@ -137,6 +157,27 @@ class LumaIngestionTests(TestCase):
             updated = Event.objects.get(group=self.group)
         self.assertEqual(original.pk, updated.pk)
         self.assertNotEqual(original.start_datetime, updated.start_datetime)
+
+    def test_event_rescheduled_into_past_updates_existing_group_event_only(self):
+        past = timezone.now() - timedelta(days=2)
+        other_group = baker.make("web.TechGroup", platform=self.group.platform)
+        other_event = baker.make(
+            Event, group=other_group, social_platform_id="evt-approved@events.lu.ma",
+            start_datetime=timezone.now() + timedelta(days=10),
+        )
+        original_other_start = other_event.start_datetime
+        with patch("web.tasks.fetch_luma_calendar", side_effect=[
+            ics_feed(ics_event()),
+            ics_feed(ics_event(start=past), ics_event(uid="never-imported", start=past)),
+        ]):
+            ingest_future_luma_events(self.group.pk)
+            original_pk = Event.objects.get(group=self.group).pk
+            self.assertIn("added 0 new events", ingest_future_luma_events(self.group.pk))
+        updated = Event.objects.get(group=self.group)
+        self.assertEqual(updated.pk, original_pk)
+        self.assertEqual(updated.start_datetime, past.replace(microsecond=0))
+        other_event.refresh_from_db()
+        self.assertEqual(other_event.start_datetime, original_other_start)
 
     def test_missing_feed_event_does_not_cancel_or_delete_existing(self):
         with patch("web.tasks.fetch_luma_calendar", side_effect=[ics_feed(ics_event()), ics_feed()]):

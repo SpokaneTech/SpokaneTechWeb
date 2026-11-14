@@ -36,6 +36,6 @@ def get_luma_events() -> None:
 
 
 def run():
-    # get_eventbrite_events()
-    # get_meetup_events()
+    get_eventbrite_events()
+    get_meetup_events()
     get_luma_events()
