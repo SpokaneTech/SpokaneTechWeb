@@ -20,7 +20,11 @@ from model_bakery import baker
 from PIL import Image
 from web.image_tasks import ingest_event_image, queue_event_image
 from web.tasks import ingest_future_eventbrite_events, ingest_future_meetup_events
-from web.utilities.event_images import ImageDownloadError, download_event_image, eventbrite_image_url
+from web.utilities.event_images import (
+    ImageDownloadError,
+    download_event_image,
+    eventbrite_image_url,
+)
 from web.utilities.scrapers.meetup import _get_event_image
 
 URL = "https://secure.meetupstatic.com/photos/event/example.jpeg"
@@ -75,16 +79,26 @@ class ImageDownloadTests(TestCase):
         with self.assertRaises(ImageDownloadError):
             download_event_image(URL)
         get.return_value = self.response(image_bytes())
-        with patch("web.utilities.event_images.MAX_DOWNLOAD_BYTES", 20), self.assertRaises(ImageDownloadError):
+        with (
+            patch("web.utilities.event_images.MAX_DOWNLOAD_BYTES", 20),
+            self.assertRaises(ImageDownloadError),
+        ):
             download_event_image(URL)
         get.return_value = self.response(image_bytes())
-        with patch("web.utilities.event_images.MAX_IMAGE_PIXELS", 20), self.assertRaises(ImageDownloadError):
+        with (
+            patch("web.utilities.event_images.MAX_IMAGE_PIXELS", 20),
+            self.assertRaises(ImageDownloadError),
+        ):
             download_event_image(URL)
 
     def test_provider_metadata_selects_current_event_and_original_image(self):
         payload = {
             "events": [
-                {"__typename": "Event", "id": "999", "featuredEventPhoto": {"source": "wrong"}},
+                {
+                    "__typename": "Event",
+                    "id": "999",
+                    "featuredEventPhoto": {"source": "wrong"},
+                },
                 {
                     "__typename": "Event",
                     "id": "123",
@@ -94,23 +108,43 @@ class ImageDownloadTests(TestCase):
             ]
         }
         soup = BeautifulSoup(f"<script>{json.dumps(payload)}</script>", "html.parser")
-        self.assertEqual(_get_event_image(soup, "https://www.meetup.com/example/events/123/"), URL)
         self.assertEqual(
-            eventbrite_image_url({"logo": {"original": {"url": "original"}, "url": "thumbnail"}}), "original"
+            _get_event_image(soup, "https://www.meetup.com/example/events/123/"), URL
         )
-        self.assertEqual(eventbrite_image_url({"image": {"url": "destination-image"}}), "destination-image")
+        self.assertEqual(
+            eventbrite_image_url(
+                {"logo": {"original": {"url": "original"}, "url": "thumbnail"}}
+            ),
+            "original",
+        )
+        self.assertEqual(
+            eventbrite_image_url({"image": {"url": "destination-image"}}),
+            "destination-image",
+        )
         self.assertEqual(eventbrite_image_url({"logo": None}), "")
 
     def test_meetup_photo_references_and_display_fallback(self):
         payload = {
-            "Event:123": {"__typename": "Event", "id": "123", "featuredEventPhoto": {"__ref": "PhotoInfo:1"}},
+            "Event:123": {
+                "__typename": "Event",
+                "id": "123",
+                "featuredEventPhoto": {"__ref": "PhotoInfo:1"},
+            },
             "PhotoInfo:1": {"__typename": "PhotoInfo", "source": URL},
         }
         soup = BeautifulSoup(f"<script>{json.dumps(payload)}</script>", "html.parser")
-        self.assertEqual(_get_event_image(soup, "https://www.meetup.com/example/events/123/"), URL)
-        payload["Event:123"] = {"__typename": "Event", "id": "123", "displayPhoto": {"source": URL}}
+        self.assertEqual(
+            _get_event_image(soup, "https://www.meetup.com/example/events/123/"), URL
+        )
+        payload["Event:123"] = {
+            "__typename": "Event",
+            "id": "123",
+            "displayPhoto": {"source": URL},
+        }
         soup = BeautifulSoup(f"<script>{json.dumps(payload)}</script>", "html.parser")
-        self.assertEqual(_get_event_image(soup, "https://www.meetup.com/example/events/123/"), URL)
+        self.assertEqual(
+            _get_event_image(soup, "https://www.meetup.com/example/events/123/"), URL
+        )
 
 
 class ManagedImageTests(TestCase):
@@ -156,7 +190,10 @@ class ManagedImageTests(TestCase):
         self.assertEqual(self.event.image.name, name)
         download.assert_not_called()
 
-    @patch("web.image_tasks.download_event_image", side_effect=ImageDownloadError("bad image"))
+    @patch(
+        "web.image_tasks.download_event_image",
+        side_effect=ImageDownloadError("bad image"),
+    )
     def test_invalid_download_retains_previous_image(self, download):
         self.event.image.save("old.jpg", ContentFile(b"old"))
         self.event.image_managed_name = self.event.image.name
@@ -188,9 +225,17 @@ class ManagedImageTests(TestCase):
         delay.assert_not_called()
 
     @patch("web.image_tasks.ingest_event_image.delay")
-    @patch("web.image_tasks.download_event_image", side_effect=requests.Timeout("unavailable"))
-    def test_synchronous_failure_retries_locally_and_reports_failure(self, download, delay):
-        with self.assertLogs("web.image_tasks", level="ERROR"), self.captureOnCommitCallbacks(execute=True):
+    @patch(
+        "web.image_tasks.download_event_image",
+        side_effect=requests.Timeout("unavailable"),
+    )
+    def test_synchronous_failure_retries_locally_and_reports_failure(
+        self, download, delay
+    ):
+        with (
+            self.assertLogs("web.image_tasks", level="ERROR"),
+            self.captureOnCommitCallbacks(execute=True),
+        ):
             queue_event_image(self.event, URL, synchronous=True)
         self.event.refresh_from_db()
         self.assertFalse(self.event.image)
@@ -212,7 +257,10 @@ class ManagedImageTests(TestCase):
             )
             if platform_name == "Meetup":
                 with (
-                    patch("web.tasks.get_event_links", return_value=["https://www.meetup.com/example/events/123/"]),
+                    patch(
+                        "web.tasks.get_event_links",
+                        return_value=["https://www.meetup.com/example/events/123/"],
+                    ),
                     patch(
                         "web.tasks.get_event_information",
                         return_value={
@@ -240,7 +288,12 @@ class ManagedImageTests(TestCase):
             self.assertEqual(queue.call_args.kwargs, {"synchronous": True})
             self.assertEqual(queue.call_args.args[0].group_id, group.pk)
             self.assertEqual(
-                queue.call_args.args[1], URL if platform_name == "Meetup" else "https://img.evbuc.com/example.jpg"
+                queue.call_args.args[1],
+                (
+                    URL
+                    if platform_name == "Meetup"
+                    else "https://img.evbuc.com/example.jpg"
+                ),
             )
 
 
@@ -250,7 +303,11 @@ class IngestionScriptTests(TestCase):
 
         for platform_name, function, task in (
             ("Meetup", ingest_events.get_meetup_events, "ingest_future_meetup_events"),
-            ("Eventbrite", ingest_events.get_eventbright_events, "ingest_future_eventbrite_events"),
+            (
+                "Eventbrite",
+                ingest_events.get_eventbrite_events,
+                "ingest_future_eventbrite_events",
+            ),
         ):
             platform = baker.make("web.SocialPlatform", name=platform_name)
             group = baker.make("web.TechGroup", enabled=True, platform=platform)

@@ -33,24 +33,24 @@ def create_groups() -> None:
             "platform": "Eventbrite",
             "platform page": "https://www.eventbrite.com/o/launchpad-inw-637389713",
         },
-        {
-            "name": "Innovation Collective",
-            "icon": """<i class="fa-regular fa-lightbulb"></i>""",
-            "platform": "Eventbrite",
-            "platform page": "https://www.eventbrite.com/o/innovation-collective-coeur-dalene-id-45018125323",
-        },
+        # {
+        #     "name": "Innovation Collective",
+        #     "icon": """<i class="fa-regular fa-lightbulb"></i>""",
+        #     "platform": "Eventbrite",
+        #     "platform page": "https://www.eventbrite.com/o/innovation-collective-coeur-dalene-id-45018125323",
+        # },
         {
             "name": "SP3NW",
             "icon": """<i class="fa-solid fa-business-time"></i>""",
             "platform": "Eventbrite",
             "platform page": "https://www.eventbrite.com/o/sp3nw-33773699489",
         },
-        {
-            "name": "Spokane Small Business Podcast",
-            "icon": """<i class="fa-solid fa-podcast"></i>""",
-            "platform": "Eventbrite",
-            "platform page": "https://www.eventbrite.com/o/spokane-small-business-podcast-103647763911",
-        },
+        # {
+        #     "name": "Spokane Small Business Podcast",
+        #     "icon": """<i class="fa-solid fa-podcast"></i>""",
+        #     "platform": "Eventbrite",
+        #     "platform page": "https://www.eventbrite.com/o/spokane-small-business-podcast-103647763911",
+        # },
         {
             "name": "FUEL Coworking",
             "icon": """<i class="fa-solid fa-gas-pump"></i>""",
@@ -74,6 +74,17 @@ def create_groups() -> None:
             "icon": """<i class="fa-solid fa-city"></i>""",
             "platform": "Other",
             "platform page": "",
+        },
+        {
+            "name": "Idaho AI Agents",
+            "icon": """<i class="fa-solid fa-robot"></i>""",
+            "platform": "Luma",
+            "description": (
+                "A North Idaho community exploring AI agents through discussion "
+                "and hands-on building."
+            ),
+            "platform page": "https://luma.com/build_CDA",
+            "feed": "https://api.luma.com/ics/get?entity=calendar&id=cal-yFU7dz3kUHXxUDR",
         },
         {
             "name": "DC509",
@@ -106,12 +117,6 @@ def create_groups() -> None:
             "platform page": "https://www.meetup.com/python-spokane/",
         },
         {
-            "name": "Spokane Rust User Group",
-            "icon": """<i class="fa-brands fa-rust"></i>""",
-            "platform": "Meetup",
-            "platform page": "https://www.meetup.com/spokane-rust/",
-        },
-        {
             "name": "Spokane Tech Community",
             "icon": """<i class="fa-solid fa-people-roof"></i>""",
             "platform": "Meetup",
@@ -129,12 +134,12 @@ def create_groups() -> None:
             "platform": "Meetup",
             "platform page": "https://www.meetup.com/what-is-crypto-currency/",
         },
-        {
-            "name": "Spokane WordPress Meetup",
-            "icon": """<i class="fa-brands fa-wordpress"></i>""",
-            "platform": "Meetup",
-            "platform page": "https://www.meetup.com/spokane-wordpress-meetup/",
-        },
+        # {
+        #     "name": "Spokane WordPress Meetup",
+        #     "icon": """<i class="fa-brands fa-wordpress"></i>""",
+        #     "platform": "Meetup",
+        #     "platform page": "https://www.meetup.com/spokane-wordpress-meetup/",
+        # },
         {
             "name": "Coeur d'Alene & Spokane WordPress",
             "icon": """<i class="fa-brands fa-wordpress"></i>""",
@@ -143,9 +148,14 @@ def create_groups() -> None:
         },
     ]
     for data in data_list:
-        data["platform"], _ = SocialPlatform.objects.get_or_create(name=data["platform"])
+        data["platform"], _ = SocialPlatform.objects.get_or_create(
+            name=data["platform"]
+        )
         platform_page = data.pop("platform page")
-        tech_group, _ = TechGroup.objects.update_or_create(name=data["name"], defaults=data)
+        feed_url = data.pop("feed", "")
+        tech_group, _ = TechGroup.objects.update_or_create(
+            name=data["name"], defaults=data
+        )
         if platform_page:
             link_data = {
                 "name": f"""{data["name"]} {data["platform"]} page""",
@@ -154,12 +164,20 @@ def create_groups() -> None:
             }
             link, _ = Link.objects.get_or_create(
                 name=link_data["name"],
-                description=link_data["description"],
                 url=link_data["url"],
                 defaults=link_data,
             )
             if not tech_group.links.filter(name=link.name).exists():
                 tech_group.links.add(link)
+
+        if feed_url:
+            feed, _ = Link.objects.get_or_create(
+                name=f"{tech_group.name} {tech_group.platform.name} feed",
+                url=feed_url,
+            )
+            stale_feeds = tech_group.links.filter(name=feed.name).exclude(pk=feed.pk)
+            tech_group.links.remove(*stale_feeds)
+            tech_group.links.add(feed)
 
 
 def create_social_platforms() -> None:
@@ -187,6 +205,10 @@ def create_social_platforms() -> None:
             "base_url": "www.meetup.com",
         },
         {
+            "name": "Luma",
+            "base_url": "https://luma.com",
+        },
+        {
             "name": "Other",
         },
     ]
@@ -202,7 +224,9 @@ def get_eventbrite_organization_details():
 
 def get_meetup_group_details():
     for group in TechGroup.objects.filter(enabled=True, platform__name="Meetup"):
-        link = group.links.filter(name=f"{group.name} {group.platform.name} page").distinct()[0]
+        link = group.links.filter(
+            name=f"{group.name} {group.platform.name} page"
+        ).distinct()[0]
         job = ingest_meetup_group_details.s(group.pk, link.url)
         job.apply()
 

@@ -6,6 +6,7 @@ from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.utils import timezone
 
+from .event_notifications import event_notifications_suppressed
 from .models import Event
 from .tasks import post_event_to_discord, post_event_to_linkedin, post_event_to_spug_task
 from .utilities.dt_utils import convert_to_pacific
@@ -44,7 +45,7 @@ def capture_event_changes(sender, instance, raw=False, update_fields=None, **kwa
 
 @receiver(post_save, sender=Event)
 def event_post_to_linkedin_signal(sender, instance, created, raw=False, **kwargs) -> None:
-    if raw or (instance.group and not instance.group.enabled):
+    if raw or event_notifications_suppressed() or (instance.group and not instance.group.enabled):
         return
     changes = getattr(instance, "_event_changes", [])
     if not created and not changes:
