@@ -100,30 +100,29 @@ class LumaIngestionTests(TestCase):
             "web.Link", name="Idaho AI Agents Luma feed",
             url="https://api.luma.com/ics/get?entity=calendar&id=cal-yFU7dz3kUHXxUDR",
         ))
-        self.group.links.add(baker.make(
-            "web.Link", name="Idaho AI Agents Luma approved event", url="https://luma.com/build-3wx2"
-        ))
-
-    def test_imports_only_approved_upcoming_coeur_dalene_events_idempotently(self):
+    def test_imports_all_upcoming_calendar_events_idempotently(self):
         feed = ics_feed(
             ics_event(),
             ics_event(uid="evt-unrelated@events.lu.ma", url="https://luma.com/other-event"),
             ics_event(uid="evt-outside@events.lu.ma", url="https://luma.com/build-3wx2",
                       location="123 Main St, Spokane, WA 99201"),
+            ics_event(uid="evt-online", url="https://luma.com/online", location="Online event"),
+            ics_event(uid="evt-past", url="https://luma.com/past", start=timezone.now() - timedelta(days=1)),
         )
         with (patch("web.tasks.fetch_luma_calendar", return_value=feed) as fetch,
               patch("web.signals.post_event_to_linkedin.s") as linkedin,
               patch("web.signals.post_event_to_discord.s") as discord,
               self.captureOnCommitCallbacks(execute=True)):
-            self.assertIn("added 1 new events", ingest_future_luma_events(self.group.pk))
+            self.assertIn("added 4 new events", ingest_future_luma_events(self.group.pk))
             self.assertIn("added 0 new events", ingest_future_luma_events(self.group.pk))
         self.assertEqual(fetch.call_count, 2)
-        self.assertEqual(Event.objects.filter(group=self.group).count(), 1)
-        event = Event.objects.get(group=self.group)
+        self.assertEqual(Event.objects.filter(group=self.group).count(), 4)
+        event = Event.objects.get(group=self.group, social_platform_id="evt-approved@events.lu.ma")
         self.assertEqual(event.social_platform_id, "evt-approved@events.lu.ma")
         self.assertEqual(event.url, "https://luma.com/build-3wx2")
         self.assertEqual(event.location_name, "Innovation Den")
         self.assertFalse(event.description.startswith("Get details at:"))
+        self.assertEqual(Event.objects.get(social_platform_id="evt-online").location_name, "Online event")
         self.assertFalse(event.image_source_url)
         linkedin.assert_not_called()
         discord.assert_not_called()
@@ -146,10 +145,10 @@ class LumaIngestionTests(TestCase):
         event = Event.objects.get(group=self.group)
         self.assertEqual(event.status, Event.Status.ACTIVE)
 
-    def test_no_allowlist_causes_no_fetch(self):
-        self.group.links.filter(name="Idaho AI Agents Luma approved event").delete()
+    def test_missing_feed_causes_no_fetch(self):
+        self.group.links.clear()
         with patch("web.tasks.fetch_luma_calendar") as fetch:
-            self.assertIn("no approved Luma event", ingest_future_luma_events(self.group.pk))
+            self.assertIn("expected exactly one Luma feed", ingest_future_luma_events(self.group.pk))
         fetch.assert_not_called()
 
     def test_unavailable_feed_does_not_change_records(self):

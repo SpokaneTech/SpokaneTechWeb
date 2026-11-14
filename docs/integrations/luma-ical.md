@@ -11,22 +11,10 @@ The **build_cda** feed used for the initial pilot is:
 
 Public Luma page: https://luma.com/build_CDA
 
-The calendar is broader than the BuildCities **Idaho AI Agents** network.
-As of the captured 2026-10-29 snapshots, the four upcoming Luma events
-below were independently confirmed to belong to Idaho AI Agents by comparing
-their exact Luma RSVP URLs against a BuildCities network-scoped GraphQL
-response. Only those URLs are eligible for the initial import:
-
-- https://luma.com/build-3wx2 (Nov 10, 2026)
-- https://luma.com/build-gbf9 (Nov 24, 2026)
-- https://luma.com/build-rnaq (Dec 8, 2026)
-- https://luma.com/build-vdqc (Dec 22, 2026)
-
-**Never import every event from build_cda into Idaho AI Agents.** For future
-events, verify group association first and add each public event permalink as
-a new `Link` with name `Idaho AI Agents Luma approved event`. The
-`Idaho AI Agents Luma feed` Link holds the calendar subscription. This
-allowlist is intentionally conservative, not automatic future discovery.
+All upcoming events in the configured calendar are imported into its TechGroup,
+including online events and events outside Coeur d'Alene. This calendar-wide
+scope is intentional; individual event approval links are no longer required.
+The `Idaho AI Agents Luma feed` Link holds the calendar subscription.
 Additional groups can use the same link naming conventions and parser.
 
 ## Data handling
@@ -37,14 +25,11 @@ Additional groups can use the same link naming conventions and parser.
 - Copy only factual fields: title, start/end, city/venue, public RSVP URL.
   The description is an original short pointer back to Luma, **not** an
   excerpt of the hosted event description. Do not download event images.
-- Check every imported event has a verified public RSVP URL, a physical
-  street address explicitly in Coeur d'Alene, Idaho, and a previously
-  authorized link in the matching `TechGroup` allowlist.
+- Require a public Luma RSVP URL and a valid timezone-aware start time.
+  Missing locations do not prevent import or erase an existing location.
 - In this snapshot all 254 records have `STATUS:TENTATIVE` and the same
   `SEQUENCE`. **Do not infer cancellation, reinstatement or changed
   status from them, or from missing records**. Follow ADR 0002.
-- The iCal file lacks a BuildCities network ID. A host named `Nick Smoot`
-  is not proof of Idaho AI Agents network membership.
 - Suppress outbound creation/change notifications for this pilot, including
   on transactions that commit. Existing other providers are unaffected.
 
@@ -61,11 +46,10 @@ Additional groups can use the same link naming conventions and parser.
        python manage.py shell -c "from web.models import TechGroup; from web.tasks import ingest_future_luma_events; g=TechGroup.objects.get(name='Idaho AI Agents'); print(ingest_future_luma_events(g.pk))"
 
    This is a manual operation, not a recurring Celery Beat schedule.
-4. Verify the four approved UIDs, the corresponding original RSVP links,
-   venue and times; rerun and confirm no duplicates.
+4. Verify upcoming calendar events, their RSVP links, locations and times;
+   rerun and confirm no duplicates.
 5. Approve recurring polling separately, respecting the feed's advertised
-   12-hour refresh interval. New future occurrences need approved event URLs
-   under this conservative network-specific scope.
+   12-hour refresh interval. New future occurrences are discovered automatically.
 
 ## Rights and service reliability
 
@@ -79,5 +63,6 @@ limits response size, uses a finite timeout, and preserves previously saved
 events if the network or parser fails. Empty or missing events are never
 interpreted as cancelled.
 
-The integration is intentionally dormant (no new Beat entry or launcher).
+`web.scripts.ingest_events.run()` includes Luma ingestion. No recurring Beat
+entry is configured by this integration.
 Tests use synthetic .ics samples; no live Luma requests are made by tests.

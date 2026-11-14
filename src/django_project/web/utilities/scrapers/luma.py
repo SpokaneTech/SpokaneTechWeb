@@ -116,7 +116,7 @@ def parse_luma_calendar(content: bytes) -> list[dict[str, Any]]:
             continue
         location = str(component.get("LOCATION", "")).strip()
         venue = location.split(",", maxsplit=1)[0].strip()
-        complete = bool(location and re.search(r"\b\d{1,6}\s+\S+", location) and "," in location)
+        complete = bool(location)
         events.append(
             {
                 "social_platform_id": uid,
