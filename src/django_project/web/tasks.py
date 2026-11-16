@@ -315,6 +315,16 @@ def ingest_future_luma_events(group_pk: int) -> str:
     return f"matched {matched} future Luma events for {group.name}; added {created} new events"
 
 
+@shared_task(time_limit=900, max_retries=0, name="web.launch_luma_event_ingestion")
+def launch_luma_event_ingestion() -> str:
+    """parent task for ingesting future events for tech groups on Luma"""
+    tech_group_list = TechGroup.objects.filter(enabled=True, platform__name="Luma")
+    for group in tech_group_list:
+        job = ingest_future_luma_events.s(group.pk)
+        job.apply_async()
+    return f"ingesting future events for {len(tech_group_list)} tech groups on Luma"
+
+
 @shared_task(time_limit=900, max_retries=0, name="web.launch_meetup_event_ingestion")
 def launch_meetup_event_ingestion() -> str:
     """parent task for ingesting future events for tech groups on Meetup"""

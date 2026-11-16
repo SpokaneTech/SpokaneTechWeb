@@ -63,6 +63,7 @@ limits response size, uses a finite timeout, and preserves previously saved
 events if the network or parser fails. Empty or missing events are never
 interpreted as cancelled.
 
-`web.scripts.ingest_events.run()` includes Luma ingestion. No recurring Beat
-entry is configured by this integration.
+`web.scripts.ingest_events.run()` includes Luma ingestion. The Celery task
+`web.launch_luma_event_ingestion` queues ingestion for every enabled Luma group.
+No recurring Beat entry is configured by this integration.
 Tests use synthetic .ics samples; no live Luma requests are made by tests.
